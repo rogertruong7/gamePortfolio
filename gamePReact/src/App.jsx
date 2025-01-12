@@ -3,14 +3,9 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Text } from "@react-three/drei";
 import * as THREE from "three";
 
-import {Game} from "./Game.jsx
-
-
-
+import { Game } from "./Game.jsx";
 
 const startPosition = [93, -8, -134];
-
-
 
 const Game = () => {
   const characterRef = useRef();

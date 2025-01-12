@@ -89,18 +89,11 @@ function Doorway({
     }
   
   });
-
+  return <></>;
 }
 
-  return (
-    <>
-      <Box3
-      >
-      
-      <Box3/>
-    </>
-  );
-}
+  
+
 
 
 

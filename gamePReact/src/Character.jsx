@@ -5,7 +5,6 @@ import * as THREE from "three";
 
 const SPEED = 0.8;
 
-
 const Character = ({ position }) => {
   const ref = useRef();
   const { scene, animations } = useGLTF("models/cloudme.glb");

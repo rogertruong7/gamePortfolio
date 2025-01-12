@@ -16,10 +16,13 @@ const Floor = () => {
   }, [scene]);
 
   return (
-    <primitive object={scene} scale={[8,6,8]} position={[33, -8, -219]} name={"tree1"}/>
+    <primitive
+      object={scene}
+      scale={[8, 6, 8]}
+      position={[33, -8, -219]}
+      name={"tree1"}
+    />
   );
-  
-
 };
 
 export default Floor;

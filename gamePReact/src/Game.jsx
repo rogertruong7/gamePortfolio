@@ -2,13 +2,13 @@ import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Text } from "@react-three/drei";
 import * as THREE from "three";
-import {Lights} from "./Lighting.jsx";
-import {Camera1} from "./Camera1.jsx";
-import {Character} from "./Character.jsx";
-import {Floor} from "./Floor.jsx";
-import {Buildings} from "./Buildings.jsx";
-import {TextLabels} from "./TextLabels.jsx";
-import {Details} from "./Details";
+import { Lights } from "./Lighting.jsx";
+import { Camera1 } from "./Camera1.jsx";
+import { Character } from "./Character.jsx";
+import { Floor } from "./Floor.jsx";
+import { Buildings } from "./Buildings.jsx";
+import { TextLabels } from "./TextLabels.jsx";
+import { Details } from "./Details";
 
 function Game() {
   const characterRef = useRef();
@@ -37,6 +37,6 @@ function Game() {
       <CameraControls characterRef={characterRef} />
     </Canvas>
   );
-};
+}
 
 export default Game;

@@ -26,8 +26,18 @@ const Buildings = ({setBuildingsLoaded}) => {
   }, [leftBuildings, rightBuildings]);
 
   return (
-    <primitive object={leftBuildings} scale={[0.3, 0.3, 0.3]} position={[0, 0, 0]} />
-    <primitive object={rightBuildings} scale={[0.3, 0.3, 0.3]} position={[0, 0, 0]} />
+    <>
+      <primitive
+        object={leftBuildings}
+        scale={[0.3, 0.3, 0.3]}
+        position={[0, 0, 0]}
+      />
+      <primitive
+        object={rightBuildings}
+        scale={[0.3, 0.3, 0.3]}
+        position={[0, 0, 0]}
+      />
+    </>
   );
 };
 

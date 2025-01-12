@@ -34,6 +34,6 @@ const fontLoader = new FontLoader();
 
     textGeometry.translate(-offsetX, -offsetY, -offsetZ);
     const textMaterial = new THREE.MeshPhongMaterial({ color: 0xe67ae2 });
-
+  });
 
 export default TextLabels;

@@ -2,18 +2,17 @@ import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Text } from "@react-three/drei";
 import * as THREE from "three";
+import {Lights} from "./Lighting.jsx";
+import {Camera1} from "./Camera1.jsx";
+import {Character} from "./Character.jsx";
+import {Floor} from "./Floor.jsx";
+import {Buildings} from "./Buildings.jsx";
+import {TextLabels} from "./TextLabels.jsx";
+import {Details} from "./Details";
 
-import {Game} from "./Game.jsx
-
-
-
-
-const startPosition = [93, -8, -134];
-
-
-
-const Game = () => {
+function Game() {
   const characterRef = useRef();
+  const [currentScene, setCurrentScene] = useState(new THREE.Scene());
   const [labels] = useState([
     { text: "projects", position: [38, 90, -90], fontSize: 10 },
     { text: "about me", position: [38, 70, -164], fontSize: 10 },
@@ -31,26 +30,13 @@ const Game = () => {
     >
       <Lights />
       <Floor />
+      <Buildings />
+      <Details />
       <Character ref={characterRef} position={startPosition} />
       <TextLabels labels={labels} />
       <CameraControls characterRef={characterRef} />
-      <OrbitControls />
     </Canvas>
   );
 };
 
-const App = () => {
-  return (
-    <div style={{ position: "relative", height: "100vh" }}>
-      <Game />
-      <button
-        onClick={() => window.location.reload()}
-        style={{ position: "absolute", top: 10, left: 10 }}
-      >
-        Reset
-      </button>
-    </div>
-  );
-};
-
-export default App;
+export default Game;

@@ -10,10 +10,10 @@ const App = () => {
   return (
     <>
       <Menu />
-      {loading && (
-        <LoadingScreen />
-      )}
-      {currentScene === 0 ? <MainGame setLoading={setLoading}/> : <h1>Hello</h1>}
+      {loading && currentScene === 0 && <LoadingScreen />}
+      {currentScene === 0 && <MainGame setLoading={setLoading} />}
+      {currentScene === 1 && <h1>Bye</h1>}
+      {currentScene === 2 && <h1>Hello</h1>}
     </>
   );
 };

@@ -9,7 +9,7 @@ function Text({ text, position, fontPath, fontSize, color }) {
   const geometry = new TextGeometry(text, {
     font: font,
     size: fontSize,
-    height: 5,
+    depth: 5,
   });
 
   geometry.computeBoundingBox();

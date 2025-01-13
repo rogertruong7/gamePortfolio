@@ -5,8 +5,7 @@ import * as THREE from "three";
 
 const SPEED = 0.8;
 
-const Character = ({ position }) => {
-  const ref = useRef();
+const Character = React.forwardRef(({ position }, ref) => {
   const { scene, animations } = useGLTF("models/cloudme.glb");
   const { clock } = useThree();
   const mixer = new THREE.AnimationMixer(scene);
@@ -34,6 +33,6 @@ const Character = ({ position }) => {
       receiveShadow
     />
   );
-};
+});
 
 export default Character;

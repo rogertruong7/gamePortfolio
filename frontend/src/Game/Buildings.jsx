@@ -1,10 +1,24 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Text } from "@react-three/drei";
-import * as THREE from "three";
+import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
-const Buildings = ({ setBuildingsLoaded }) => {
-  const { scene: leftBuildingsScene } = useGLTF("models/leftBuildingsNew.glb");
+const Buildings = ({ setLoading }) => {
+
+  // Different way of loading
+  const { scene: leftBuildingsScene } = useLoader(
+    GLTFLoader,
+    "models/leftBuildingsNew.glb",
+    (loader) => {
+      loader.setMeshoptDecoder(MeshoptDecoder);
+      loader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+        const progress = Math.round((itemsLoaded / itemsTotal) * 100);
+        console.log(progress);
+      };
+    }
+  );
+
   const { scene: rightBuildingsScene } = useGLTF(
     "models/rightBuildingsNew.glb"
   );
@@ -26,9 +40,10 @@ const Buildings = ({ setBuildingsLoaded }) => {
 
     // Once both scenes are loaded, update the loading state
     if (leftBuildingsScene && rightBuildingsScene) {
-      setBuildingsLoaded(true); // Update loading state
+      console.log("loaded");
+      setLoading(false); // Update loading state
     }
-  }, [leftBuildingsScene, rightBuildingsScene, setBuildingsLoaded]);
+  }, [leftBuildingsScene, rightBuildingsScene, setLoading]);
 
   return (
     <>

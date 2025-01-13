@@ -47,11 +47,10 @@ function RendererSettings() {
   return null;
 }
 
-function Game() {
+function MainGame({setLoading}) {
   const characterRef = useRef();
   const cameraRef = useRef();
 
-  const [currentScene, setCurrentScene] = useState(0);
   const [labels] = useState([
     { text: "projects", position: [38, 90, -90], fontSize: 10 },
     { text: "about me", position: [38, 70, -164], fontSize: 10 },
@@ -61,8 +60,7 @@ function Game() {
 
   return (
     <>
-      {currentScene === 0 ? (
-        <Canvas
+      <Canvas
         shadows
         camera={{
           position: [CAMERA_OFFSET.x, CAMERA_OFFSET.y, CAMERA_OFFSET.z],
@@ -72,8 +70,8 @@ function Game() {
         <RendererSettings />
         <Lights />
         <Floor />
-        {/* <Buildings /> */}
-        {/* <Details /> */}
+        <Buildings setLoading={setLoading}/>
+        <Details />
         <Character ref={characterRef} position={startPosition} />
         {labels.map(({ text, position, fontSize }, index) => (
           <Text
@@ -88,11 +86,8 @@ function Game() {
         {/* <Camera1 characterRef={characterRef} /> */}
         <ResizeHandler />
       </Canvas>
-      ) : (
-        <h1>Hello</h1>
-      )}
     </>
   );
 }
 
-export default Game;
+export default MainGame;

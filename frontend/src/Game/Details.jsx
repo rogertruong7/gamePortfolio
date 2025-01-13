@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Text } from "@react-three/drei";
 import * as THREE from "three";
 
-const Floor = () => {
+const Details = () => {
   const { scene } = useGLTF("models/cherryTree1.glb");
 
   useEffect(() => {
@@ -25,4 +25,4 @@ const Floor = () => {
   );
 };
 
-export default Floor;
+export default Details;

@@ -3,11 +3,10 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
-const SPEED = 0.8;
+const SPEED = 0.6;
 
 let keys = {};
 let targetPosition;
-
 
 function onWindowBlur() {
   keys = {}; // Clear all keys

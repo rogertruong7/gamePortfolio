@@ -101,8 +101,6 @@ function MainGame({ setLoading }) {
         targetPosition.copy(intersects[0].point);
         targetPosition.y = 20; // Match character height
         setClickMoving(true);
-
-        // TODO: createDarkSpot(intersects[0].point);
         setDarkspot(true);
         setDarkspotPos(intersects[0].point)
       }

@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 import Lights from "./Lighting.jsx";
-import Camera1 from "./Camera1.jsx";
+import MainCamera from "./MainCamera.jsx";
 import Character from "./Character.jsx";
 import Floor from "./Floor.jsx";
 import Buildings from "./Buildings.jsx";
@@ -12,11 +12,11 @@ import Text from "./Text.jsx";
 import Details from "./Details.jsx";
 
 export const CAMERA_OFFSET = new THREE.Vector3(160, 120, 160);
+
 let startPosition = [93, -8, -134];
 
 function ResizeHandler() {
   const { gl } = useThree();
-
   useEffect(() => {
     const handleResize = () => {
       gl.setSize(window.innerWidth, window.innerHeight);
@@ -31,7 +31,6 @@ function ResizeHandler() {
 
 function RendererSettings() {
   const { gl } = useThree();
-
   useEffect(() => {
     // Set clear color
     gl.setClearColor(0xfad998, 1);
@@ -57,30 +56,34 @@ function MainGame({setLoading}) {
     { text: "experiences", position: [92, 75, -210], fontSize: 8 },
     { text: "skills", position: [170, 75, -210], fontSize: 10 },
   ]);
+  let startVector = new THREE.Vector3(...startPosition);
+
+  const [cameraPos, setCameraPos] = useState(startVector);
 
   return (
     <>
-      <Canvas
-        shadows
-        camera={{
-          position: [CAMERA_OFFSET.x, CAMERA_OFFSET.y, CAMERA_OFFSET.z],
-          fov: 80,
-        }}
-      >
+      <Canvas shadows>
+        <MainCamera ref={cameraRef} cameraPos={cameraPos} />
         <RendererSettings />
         <Lights />
         <Floor />
-        <Buildings setLoading={setLoading}/>
+        <Buildings setLoading={setLoading} />
         <Details />
-        <Character ref={characterRef} position={startPosition} />
+        <Character
+          ref={characterRef}
+          position={startPosition}
+          cameraRef={cameraRef}
+          setCameraPos={setCameraPos}
+        />
         {labels.map(({ text, position, fontSize }, index) => (
           <Text
             key={index}
             text={text}
-            position={[position.x, position.y, position.z]}
+            position={[position[0], position[1], position[2]]}
             fontPath="fonts/PixelifySans_Regular.json"
             fontSize={fontSize}
-            color="white"
+            color="#e67ae2"
+            cameraRef={cameraRef}
           />
         ))}
         {/* <Camera1 characterRef={characterRef} /> */}

@@ -1,10 +1,11 @@
-import React from "react";
-import { useLoader } from "@react-three/fiber";
+import React, { useRef, useEffect, useState } from "react";
+import { useLoader, useFrame } from "@react-three/fiber";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 
-function Text({ text, position, fontPath, fontSize, color }) {
+function Text({ text, position, fontPath, fontSize, color, cameraRef }) {
   const font = useLoader(FontLoader, fontPath);
+  const meshRef = useRef();
 
   const geometry = new TextGeometry(text, {
     font: font,
@@ -19,8 +20,15 @@ function Text({ text, position, fontPath, fontSize, color }) {
   const offsetZ = (boundingBox.max.z - boundingBox.min.z) / 2;
   geometry.translate(-offsetX, -offsetY, -offsetZ);
 
+  // .current property is used with the useRef hook to access the underlying DOM element
+  useFrame(() => {
+    if (meshRef.current && cameraRef.current) {
+      meshRef.current.lookAt(cameraRef.current.position);
+    }
+  });
+
   return (
-    <mesh geometry={geometry} position={position}>
+    <mesh ref={meshRef} geometry={geometry} position={position}>
       <meshPhongMaterial color={color} />
     </mesh>
   );

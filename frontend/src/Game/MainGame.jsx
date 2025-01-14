@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
-import Lights from "./Lighting.jsx";
+import Lights from "./Lights.jsx";
 import MainCamera from "./MainCamera.jsx";
 import Character from "./Character.jsx";
 import Floor from "./Floor.jsx";
@@ -14,8 +14,12 @@ import Details from "./Details.jsx";
 export const CAMERA_OFFSET = new THREE.Vector3(160, 120, 160);
 
 let startPosition = [93, -8, -134];
+let targetPosition;
+let mouseDownTime = 0; // Time when mouse is pressed down
+const CLICK_THRESHOLD = 150; // Time in milliseconds to consider it a short click (e.g., 300ms)
 
 function ResizeHandler() {
+  // gl is renderer
   const { gl } = useThree();
   useEffect(() => {
     const handleResize = () => {
@@ -46,9 +50,10 @@ function RendererSettings() {
   return null;
 }
 
-function MainGame({setLoading}) {
+function MainGame({ setLoading }) {
   const characterRef = useRef();
   const cameraRef = useRef();
+  const floorRef = useRef();
 
   const [labels] = useState([
     { text: "projects", position: [38, 90, -90], fontSize: 10 },
@@ -59,14 +64,63 @@ function MainGame({setLoading}) {
   let startVector = new THREE.Vector3(...startPosition);
 
   const [cameraPos, setCameraPos] = useState(startVector);
+  const [clickMoving, setClickMoving] = useState(false);
+  const [darkSpot, setDarkspot] = useState(false);
+
+  function onMouseDown() {
+    console.log("clicked on canvas");
+    mouseDownTime = Date.now(); // Record the time when the mouse is pressed
+  }
+
+  function onMouseUp(event) {
+    console.log("clicked off canvas");
+    const clickDuration = Date.now() - mouseDownTime; // Calculate how long the button was held down
+
+    if (clickDuration < CLICK_THRESHOLD) {
+      // If the click was short, set moving to true
+      onMouseClick(event); // Call your click handler function to move the character
+    }
+  }
+
+  function onMouseClick(event) {
+    setDarkspot(false);
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, cameraRef.current);
+
+    const intersects = raycaster.intersectObject(floorRef.current);
+    if (intersects.length > 0 && intersects[0].point.y > -25) {
+      console.log("Mouse clicked on ", intersects[0].point);
+      targetPosition.copy(intersects[0].point);
+      targetPosition.y = 20; // Match character height
+      setClickMoving(true);
+
+      createDarkSpot(intersects[0].point);
+    }
+  }
+
+  useEffect(() => {
+    const canvas = document.querySelector("#gameCanvas");
+    canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("mouseup", onMouseUp);
+
+    return () => {
+      canvas.removeEventListener("mousedown", onMouseDown);
+      canvas.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
 
   return (
     <>
-      <Canvas shadows>
+      <Canvas id="gameCanvas" shadows>
         <MainCamera ref={cameraRef} cameraPos={cameraPos} />
         <RendererSettings />
         <Lights />
-        <Floor />
+        <Floor ref={floorRef} />
         <Buildings setLoading={setLoading} />
         <Details />
         <Character

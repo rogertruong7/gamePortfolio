@@ -3,7 +3,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Text } from "@react-three/drei";
 import * as THREE from "three";
 
-const Floor = () => {
+const Floor = React.forwardRef(({}, ref) => {
   const { scene } = useGLTF("models/floor.glb");
 
   useEffect(() => {
@@ -16,8 +16,13 @@ const Floor = () => {
   }, [scene]);
 
   return (
-    <primitive object={scene} scale={[0.3, 0.3, 0.3]} position={[0, 0, 0]} />
+    <primitive
+      object={scene}
+      scale={[0.3, 0.3, 0.3]}
+      position={[0, 0, 0]}
+      receiveShadow
+    />
   );
-};
+});
 
 export default Floor;

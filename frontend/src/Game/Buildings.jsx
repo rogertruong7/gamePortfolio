@@ -27,13 +27,13 @@ const Buildings = ({ setLoading }) => {
     // Traverse the loaded scenes to set shadow properties for each mesh
     leftBuildingsScene.traverse((node) => {
       if (node.isMesh) {
-        node.castShadow = false;
+        node.castShadow = true;
         node.receiveShadow = true;
       }
     });
     rightBuildingsScene.traverse((node) => {
       if (node.isMesh) {
-        node.castShadow = false;
+        node.castShadow = true;
         node.receiveShadow = true;
       }
     });
@@ -51,11 +51,15 @@ const Buildings = ({ setLoading }) => {
         object={leftBuildingsScene}
         scale={[0.3, 0.3, 0.3]}
         position={[-5, 0, 0]} // Example position, you can adjust as needed
+        castShadow
+        receiveShadow
       />
       <primitive
         object={rightBuildingsScene}
         scale={[0.3, 0.3, 0.3]}
         position={[5, 0, 0]} // Example position, you can adjust as needed
+        castShadow
+        receiveShadow
       />
     </>
   );

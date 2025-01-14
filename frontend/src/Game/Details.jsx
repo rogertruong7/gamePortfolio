@@ -9,7 +9,7 @@ const Details = () => {
   useEffect(() => {
     scene.traverse((node) => {
       if (node.isMesh) {
-        node.castShadow = false;
+        node.castShadow = true;
         node.receiveShadow = true;
       }
     });

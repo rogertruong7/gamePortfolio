@@ -20,8 +20,6 @@ const MainCamera = React.forwardRef(({ cameraPos }, ref) => {
   const near = 0.1; // Near clipping plane
   const far = 1000; // Far clipping plane
 
-
-
   return (
     <>
       <PerspectiveCamera
@@ -35,9 +33,9 @@ const MainCamera = React.forwardRef(({ cameraPos }, ref) => {
       />
       <OrbitControls
         target={cameraPos}
-        enableZoom={false}
+        // enableZoom={false}
         dampingFactor={0.07}
-        rotateSpeed={0.25}
+        rotateSpeed={0.15}
       />
     </>
   );

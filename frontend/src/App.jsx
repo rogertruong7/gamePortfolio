@@ -4,6 +4,8 @@ import LoadingScreen from "./UserInterface/LoadingScreen.jsx";
 import Menu from "./UserInterface/Menu.jsx";
 import "./App.css";
 
+document.body.style.cursor = "grab";
+
 const App = () => {
   const [currentScene, setCurrentScene] = useState(0);
   const [loading, setLoading] = useState(true);

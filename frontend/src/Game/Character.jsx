@@ -85,7 +85,7 @@ const Character = React.forwardRef(
     
         // Calculate the target angle based on the input vector
         const targetAngle = Math.atan2(inputVector.x, inputVector.z) - Math.PI / 2; // Angle in radians
-        // const targetAngle = Math.atan2(inputVector.x, inputVector.z);
+
     
         // Smoothly interpolate the character's current rotation to the target angle
         const currentAngle = ref.current.rotation.y; // Current Y-axis rotation
@@ -105,7 +105,7 @@ const Character = React.forwardRef(
           setDarkspot(false);
           setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
-          console.log('direciton', direction);
+
           direction.y = 0;
           direction = direction.normalize();
           finalDirection.add(direction);
@@ -114,7 +114,7 @@ const Character = React.forwardRef(
           setDarkspot(false);
           setClickMoving(false);
            cameraRef.current.getWorldDirection(direction);
-           console.log("direciton", direction);
+
            direction.y = 0;
            direction = direction.normalize().negate();
            finalDirection.add(direction);
@@ -123,7 +123,7 @@ const Character = React.forwardRef(
           setDarkspot(false);
           setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
-          console.log("direciton", direction);
+
           direction.y = 0;
           direction = new THREE.Vector3(
             direction.z,
@@ -136,7 +136,7 @@ const Character = React.forwardRef(
           setDarkspot(false);
           setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
-          console.log("direciton", direction);
+
           direction.y = 0;
           direction = new THREE.Vector3(
             -direction.z,

@@ -10,6 +10,7 @@ import Floor from "./Floor.jsx";
 import Buildings from "./Buildings.jsx";
 import Text from "./Text.jsx";
 import Details from "./Details.jsx";
+import DarkSpot from "./Darkspot.jsx";
 
 export const CAMERA_OFFSET = new THREE.Vector3(160, 120, 160);
 
@@ -102,6 +103,7 @@ function MainGame({ setLoading }) {
         setClickMoving(true);
 
         // TODO: createDarkSpot(intersects[0].point);
+        setDarkspot(true);
         setDarkspotPos(intersects[0].point)
       }
     }
@@ -148,6 +150,11 @@ function MainGame({ setLoading }) {
             cameraRef={cameraRef}
           />
         ))}
+        {darkSpot && (
+          <>
+            <DarkSpot darkSpotPos={darkSpotPos}/>
+          </>
+        )}
         {/* <Camera1 characterRef={characterRef} /> */}
         <ResizeHandler />
       </Canvas>

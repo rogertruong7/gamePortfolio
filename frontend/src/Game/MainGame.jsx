@@ -14,7 +14,7 @@ import Details from "./Details.jsx";
 export const CAMERA_OFFSET = new THREE.Vector3(160, 120, 160);
 
 let startPosition = [93, -8, -134];
-let targetPosition;
+let targetPosition = new THREE.Vector3;
 let mouseDownTime = 0; // Time when mouse is pressed down
 const CLICK_THRESHOLD = 150; // Time in milliseconds to consider it a short click (e.g., 300ms)
 
@@ -83,23 +83,27 @@ function MainGame({ setLoading }) {
   }
 
   function onMouseClick(event) {
-    setDarkspot(false);
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+    console.log(floorRef.current);
+    if (floorRef.current !== undefined) {
+      setDarkspot(false);
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
 
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    raycaster.setFromCamera(mouse, cameraRef.current);
+      raycaster.setFromCamera(mouse, cameraRef.current);
 
-    const intersects = raycaster.intersectObject(floorRef.current);
-    if (intersects.length > 0 && intersects[0].point.y > -25) {
-      console.log("Mouse clicked on ", intersects[0].point);
-      targetPosition.copy(intersects[0].point);
-      targetPosition.y = 20; // Match character height
-      setClickMoving(true);
+      const intersects = raycaster.intersectObject(floorRef.current);
+      if (intersects.length > 0 && intersects[0].point.y > -25) {
+        console.log("Mouse clicked on ", intersects[0].point);
+        targetPosition.copy(intersects[0].point);
+        targetPosition.y = 20; // Match character height
+        setClickMoving(true);
 
-      createDarkSpot(intersects[0].point);
+        // createDarkSpot(intersects[0].point);
+        // setDarkSpotPos(intersects[0].point)
+      }
     }
   }
 

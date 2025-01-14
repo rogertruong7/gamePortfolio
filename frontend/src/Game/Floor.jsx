@@ -17,6 +17,7 @@ const Floor = React.forwardRef(({}, ref) => {
 
   return (
     <primitive
+      ref={ref}
       object={scene}
       scale={[0.3, 0.3, 0.3]}
       position={[0, 0, 0]}

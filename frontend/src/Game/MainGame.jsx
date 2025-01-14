@@ -14,7 +14,7 @@ import Details from "./Details.jsx";
 export const CAMERA_OFFSET = new THREE.Vector3(160, 120, 160);
 
 let startPosition = [93, -8, -134];
-let targetPosition = new THREE.Vector3;
+let targetPosition = new THREE.Vector3(...startPosition);
 let mouseDownTime = 0; // Time when mouse is pressed down
 const CLICK_THRESHOLD = 150; // Time in milliseconds to consider it a short click (e.g., 300ms)
 
@@ -54,6 +54,8 @@ function MainGame({ setLoading }) {
   const characterRef = useRef();
   const cameraRef = useRef();
   const floorRef = useRef();
+  const leftBuildingRef = useRef();
+  const rightBuildingRef = useRef();
 
   const [labels] = useState([
     { text: "projects", position: [38, 90, -90], fontSize: 10 },
@@ -66,14 +68,13 @@ function MainGame({ setLoading }) {
   const [cameraPos, setCameraPos] = useState(startVector);
   const [clickMoving, setClickMoving] = useState(false);
   const [darkSpot, setDarkspot] = useState(false);
+  const [darkSpotPos, setDarkspotPos] = useState("");
 
   function onMouseDown() {
-    console.log("clicked on canvas");
     mouseDownTime = Date.now(); // Record the time when the mouse is pressed
   }
 
   function onMouseUp(event) {
-    console.log("clicked off canvas");
     const clickDuration = Date.now() - mouseDownTime; // Calculate how long the button was held down
 
     if (clickDuration < CLICK_THRESHOLD) {
@@ -83,7 +84,6 @@ function MainGame({ setLoading }) {
   }
 
   function onMouseClick(event) {
-    console.log(floorRef.current);
     if (floorRef.current !== undefined) {
       setDarkspot(false);
       const raycaster = new THREE.Raycaster();
@@ -101,8 +101,8 @@ function MainGame({ setLoading }) {
         targetPosition.y = 20; // Match character height
         setClickMoving(true);
 
-        // createDarkSpot(intersects[0].point);
-        // setDarkSpotPos(intersects[0].point)
+        // TODO: createDarkSpot(intersects[0].point);
+        setDarkspotPos(intersects[0].point)
       }
     }
   }
@@ -132,6 +132,10 @@ function MainGame({ setLoading }) {
           position={startPosition}
           cameraRef={cameraRef}
           setCameraPos={setCameraPos}
+          setDarkspot={setDarkspot}
+          setClickMoving={setClickMoving}
+          clickMoving={clickMoving}
+          targetPosition={targetPosition}
         />
         {labels.map(({ text, position, fontSize }, index) => (
           <Text

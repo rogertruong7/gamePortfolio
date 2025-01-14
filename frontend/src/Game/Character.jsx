@@ -48,8 +48,7 @@ const Character = React.forwardRef(
     }, []);
 
     function clickToMove() {
-      let clickMoving1 = true;
-      if (clickMoving1 && ref.current !== undefined) {
+      if (clickMoving && ref.current !== undefined) {
         let character = ref.current;
         const movingDirection = targetPosition.clone().sub(character.position);
         movingDirection.y = 0;
@@ -59,6 +58,7 @@ const Character = React.forwardRef(
     
           // Check if the next step leads to a collision
           const newPosition = character.position.clone().add(stepDirection);
+          // TODO
           // const result = isCollision(newPosition); // Check for collision at new position
           const result = false;
           if (!result) {
@@ -66,13 +66,33 @@ const Character = React.forwardRef(
             character.position.add(stepDirection);
             updateRotation(stepDirection);
           } else {
-            // setDarkspot(false);
-            // setClickMoving(false);
+            setDarkspot(false);
+            setClickMoving(false);
           }
         } else {
-          // setDarkspot(false);
-          // setClickMoving(false);
+          setDarkspot(false);
+          setClickMoving(false);
         }
+      }
+    }
+    
+    let lastDirection = new THREE.Vector3(0, 0, 1);
+    function updateRotation(inputVector) {
+      if (inputVector.length() > 0) {
+        // Normalize the input vector and store the last valid direction
+        inputVector.normalize();
+        lastDirection.copy(inputVector);
+    
+        // Calculate the target angle based on the input vector
+        const targetAngle = Math.atan2(inputVector.x, inputVector.z) - Math.PI / 2; // Angle in radians
+        // const targetAngle = Math.atan2(inputVector.x, inputVector.z);
+    
+        // Smoothly interpolate the character's current rotation to the target angle
+        const currentAngle = ref.current.rotation.y; // Current Y-axis rotation
+        const newAngle = THREE.MathUtils.lerp(currentAngle, targetAngle, 1);
+    
+        // Apply the new angle
+        ref.current.rotation.y = newAngle;
       }
     }
 
@@ -82,8 +102,8 @@ const Character = React.forwardRef(
       let finalDirection = new THREE.Vector3();
       if (localStorage.getItem("visited") === "true") {
         if (keys["w"] || keys["arrowup"]) {
-          // setDarkspot(false);
-          // setClickMoving(false);
+          setDarkspot(false);
+          setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
           console.log('direciton', direction);
           direction.y = 0;
@@ -91,8 +111,8 @@ const Character = React.forwardRef(
           finalDirection.add(direction);
         }
         if (keys["s"] || keys["arrowdown"]) {
-          // setDarkspot(false);
-          // setClickMoving(false);
+          setDarkspot(false);
+          setClickMoving(false);
            cameraRef.current.getWorldDirection(direction);
            console.log("direciton", direction);
            direction.y = 0;
@@ -100,8 +120,8 @@ const Character = React.forwardRef(
            finalDirection.add(direction);
         }
         if (keys["a"] || keys["arrowleft"]) {
-          // setDarkspot(false);
-          // setClickMoving(false);
+          setDarkspot(false);
+          setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
           console.log("direciton", direction);
           direction.y = 0;
@@ -113,8 +133,8 @@ const Character = React.forwardRef(
           finalDirection.add(direction);
         }
         if (keys["d"] || keys["arrowright"]) {
-          // setDarkspot(false);
-          // setClickMoving(false);
+          setDarkspot(false);
+          setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
           console.log("direciton", direction);
           direction.y = 0;
@@ -134,7 +154,9 @@ const Character = React.forwardRef(
         let character = ref.current;
         // let newPosition = character.position.clone().add(finalDirection);
 
+        // comment this out later
         character.position.addScaledVector(finalDirection, SPEED);
+        updateRotation(finalDirection);
 
         // const result = isCollision(newPosition);
         // let collisionNormal = null;
@@ -204,7 +226,7 @@ const Character = React.forwardRef(
       }
       let finalDirection = keyboardMovement();
 
-      // clickToMove();
+      clickToMove();
       keyboardMovingSlide(finalDirection);
     });
 

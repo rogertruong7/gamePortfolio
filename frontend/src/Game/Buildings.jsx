@@ -50,14 +50,14 @@ const Buildings = ({ setLoading }) => {
       <primitive
         object={leftBuildingsScene}
         scale={[0.3, 0.3, 0.3]}
-        position={[-5, 0, 0]} // Example position, you can adjust as needed
+        position={[0, 0, 0]}
         castShadow
         receiveShadow
       />
       <primitive
         object={rightBuildingsScene}
         scale={[0.3, 0.3, 0.3]}
-        position={[5, 0, 0]} // Example position, you can adjust as needed
+        position={[-1.6, 0, 0]} 
         castShadow
         receiveShadow
       />

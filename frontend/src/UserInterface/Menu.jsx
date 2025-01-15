@@ -8,11 +8,11 @@ const MenuContainer = styled.div`
   flex-direction: column;
   gap: 5px;
   top: 20px;
-  left: 20px;
+  right: 20px;
   z-index: 101;
 `;
 
-export const DefaultButton = styled.button`
+const DefaultButton = styled.button`
   font-family: "Pixelify Sans", serif;
   background-color: white;
   border: none;
@@ -24,6 +24,8 @@ export const DefaultButton = styled.button`
   color: #666;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+  width: 130px;
+
 
   &:hover {
     background-color: #f0f0f0;
@@ -33,9 +35,23 @@ export const DefaultButton = styled.button`
 const Menu = () => {
   return (
     <MenuContainer>
-      <DefaultButton>github</DefaultButton>
-      <DefaultButton>linkedin</DefaultButton>
-      <DefaultButton>resume</DefaultButton>
+      <a
+        href="https://github.com/rogertruong7?tab=repositories"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <DefaultButton>github</DefaultButton>
+      </a>
+      <a
+        href="https://www.linkedin.com/in/roger-truong/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <DefaultButton>linkedin</DefaultButton>
+      </a>
+      <a href="public/RogerTruongResume.pdf" download="RogerTruongResume.pdf">
+        <DefaultButton>download cv</DefaultButton>
+      </a>
     </MenuContainer>
   );
 };

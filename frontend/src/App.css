@@ -1,7 +1,9 @@
 html,
 #root {
   height: 100%;
-  margin: unset;
+  margin: 0;
+  max-height: 100vh;
+  padding: 0;
 }
 
 body {
@@ -29,3 +31,5 @@ body {
   z-index: 100;
   text-align: center;
 }
+
+

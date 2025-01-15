@@ -3,11 +3,11 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Text } from "@react-three/drei";
 import * as THREE from "three";
 
-function Doorway({
-  characterRef,
+export default function Doorway({
   boxMin,
   boxMax,
   showcaseName,
+  playerPos,
   setEnterPopupVisible,
   setProjectButton,
   setAboutButton,
@@ -15,12 +15,9 @@ function Doorway({
   setSkillsButton,
   setTwoOptionsButton,
   setOneOptionButton,
-  setStandingOn,
-  standingOn
 }) {
-  
-  const box = new THREE.Box3(boxMin, boxMax);
-  
+  // const box = new THREE.Box3(boxMin, boxMax);
+
   function resetPopupText() {
     setEnterPopUpVisible(false);
     setProjectButton(false);
@@ -30,66 +27,57 @@ function Doorway({
     setTwoOptionsButton(false);
     setOneOptionButton(false);
   }
-  
-  
 
-  function turnOptionsOn(showcases, length) {
-    setProjectButton(false);
-    setAboutButton(false);
-    setExperiencesButton(false);
-    setSkillsButton(false);
+  // function turnOptionsOn(showcases, length) {
+  //   setProjectButton(false);
+  //   setAboutButton(false);
+  //   setExperiencesButton(false);
+  //   setSkillsButton(false);
 
+  //   // Showing popup
+  //   setEnterPopUpVisible(true);
+  //   // Showing text
+  //   if (length > 1) {
+  //     setTwoOptionsButton(true);
+  //     setOneOptionButton(false);
+  //   } else {
+  //     setTwoOptionsButton(false);
+  //     setOneOptionButton(true);
+  //   }
 
-    // Showing popup
-    setEnterPopUpVisible(true)
-    // Showing text
-    if (length > 1) {
-      setTwoOptionsButton(true);
-    setOneOptionButton(false);
-    } else {
-      setTwoOptionsButton(false);
-    setOneOptionButton(true);
-    }
-    
-    
-    switch (showcase) {
-      case "projects":
-        setProjectButton(true);
-        break;
-      case "aboutMe":
-        setAboutButton(true);
-        break;
-      case "experience":
-        setExperiencesButton(true);
-        break;
-      case "skills":
-        setSkillsButton(true);
-        break;
-      
-    }
-  }
-  
-  useFrame(() => {
-    
-    let characterPosition = characterRef.position;
-    let newArray = [...standingOn];
-    if (box !== undefined) {
-      
-        if (box.containsPoint(characterPosition)) {
-          
-          newArray.push(showcaseName);
-          setStandingOn(newArray);
-        }
-    }
-    let length = newArray.length;
-    if (length > 0) {
-      turnOptionsOn(newArray, length);
-    } else {
-      resetPopupText();
-    }
-  
-  });
-  return <></>;
+  //   switch (showcase) {
+  //     case "projects":
+  //       setProjectButton(true);
+  //       break;
+  //     case "aboutMe":
+  //       setAboutButton(true);
+  //       break;
+  //     case "experience":
+  //       setExperiencesButton(true);
+  //       break;
+  //     case "skills":
+  //       setSkillsButton(true);
+  //       break;
+  //   }
+  // }
+
+  // useFrame(() => {
+  //   let characterPosition = playerPos;
+  //   let newArray = [...standingOn];
+  //   if (box !== undefined) {
+  //     if (box.containsPoint(characterPosition)) {
+  //       newArray.push(showcaseName);
+  //       setStandingOn(newArray);
+  //     }
+  //   }
+  //   let length = newArray.length;
+  //   if (length > 0) {
+  //     turnOptionsOn(newArray, length);
+  //   } else {
+  //     resetPopupText();
+  //   }
+  // });
+  return null;
 }
 
   
@@ -106,29 +94,29 @@ function moveScene() {
   resetPopupText();
 }
 
-document
-  .getElementById("projects_button")
-  .addEventListener("click", function () {
-    moveScene();
-    currentScene = initProjectsGame();
-  });
+// document
+//   .getElementById("projects_button")
+//   .addEventListener("click", function () {
+//     moveScene();
+//     currentScene = initProjectsGame();
+//   });
 
-document
-  .getElementById("aboutme_button")
-  .addEventListener("click", function () {
-    // Code to run when the "Enter About Me" button is clicked
-    moveScene();
-    currentScene = initProjectsGame();
-  });
+// document
+//   .getElementById("aboutme_button")
+//   .addEventListener("click", function () {
+//     // Code to run when the "Enter About Me" button is clicked
+//     moveScene();
+//     currentScene = initProjectsGame();
+//   });
 
-document
-  .getElementById("experience_button")
-  .addEventListener("click", function () {
-    moveScene();
-    currentScene = initProjectsGame();
-  });
+// document
+//   .getElementById("experience_button")
+//   .addEventListener("click", function () {
+//     moveScene();
+//     currentScene = initProjectsGame();
+//   });
 
-document.getElementById("skills_button").addEventListener("click", function () {
-  moveScene();
-  currentScene = initProjectsGame();
-});
+// document.getElementById("skills_button").addEventListener("click", function () {
+//   moveScene();
+//   currentScene = initProjectsGame();
+// });

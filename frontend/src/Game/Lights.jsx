@@ -1,7 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Text } from "@react-three/drei";
-import * as THREE from "three";
+import React from "react";
 
 function Lights() {
   return (

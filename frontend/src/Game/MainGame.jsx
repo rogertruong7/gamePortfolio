@@ -11,63 +11,98 @@ import Buildings from "./Buildings.jsx";
 import Text from "./Text.jsx";
 import Details from "./Details.jsx";
 import DarkSpot from "./Darkspot.jsx";
+import Doorway from "./Doorway.jsx";
 
 let startPosition = [93, -8, -134];
 let targetPosition = new THREE.Vector3(...startPosition);
 let mouseDownTime = 0; // Time when mouse is pressed down
 const CLICK_THRESHOLD = 150; // Time in milliseconds to consider it a short click (e.g., 300ms)
 
-function ResizeHandler() {
-  // gl is renderer
-  const { gl } = useThree();
-  useEffect(() => {
-    const handleResize = () => {
-      gl.setSize(window.innerWidth, window.innerHeight);
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [gl]);
-
-  return null;
-}
-
-function RendererSettings() {
-  const { gl } = useThree();
-  useEffect(() => {
-    // Set clear color
-    gl.setClearColor(0xfad998, 1);
-
-    // Enable shadows
-    gl.shadowMap.enabled = true;
-    gl.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    // Set pixel ratio for better rendering on high-DPI screens
-    gl.setPixelRatio(window.devicePixelRatio);
-  }, [gl]);
-
-  return null;
-}
-
-function MainGame({ setLoading }) {
+function MainGame({
+  setLoading,
+  setCurrentScene,
+  setEnterPopupVisible,
+  setProjectButton,
+  setAboutButton,
+  setExperiencesButton,
+  setSkillsButton,
+  setTwoOptionsButton,
+  setOneOptionButton,
+}) {
   const characterRef = useRef();
   const cameraRef = useRef();
   const floorRef = useRef();
   const leftBuildingRef = useRef();
   const rightBuildingRef = useRef();
 
-  const [labels] = useState([
+  const labels = [
     { text: "projects", position: [38, 90, -90], fontSize: 10 },
     { text: "about me", position: [38, 70, -164], fontSize: 10 },
     { text: "experiences", position: [92, 75, -210], fontSize: 8 },
     { text: "skills", position: [170, 75, -210], fontSize: 10 },
-  ]);
+  ];
+
+  const showcases = [
+    {
+      showcaseName: "projects",
+      boxMin: new THREE.Vector3(105, -50, 132),
+      boxMax: new THREE.Vector3(188, 50, 408),
+    },
+    {
+      showcaseName: "aboutMe",
+      boxMin: new THREE.Vector3(105, -50, -46),
+      boxMax: new THREE.Vector3(188, 50, 86),
+    },
+    {
+      showcaseName: "experiences",
+      boxMin: new THREE.Vector3(117, -50, -60),
+      boxMax: new THREE.Vector3(292, 50, 20),
+    },
+    {
+      showcaseName: "skills",
+      boxMin: new THREE.Vector3(365, -50, -60),
+      boxMax: new THREE.Vector3(504, 50, 20),
+    },
+  ];
+
   let startVector = new THREE.Vector3(...startPosition);
 
   const [playerPos, setPlayerPos] = useState(startVector);
   const [clickMoving, setClickMoving] = useState(false);
   const [darkSpot, setDarkspot] = useState(false);
   const [darkSpotPos, setDarkspotPos] = useState("");
+
+  function ResizeHandler() {
+    // gl is renderer
+    const { gl } = useThree();
+    useEffect(() => {
+      const handleResize = () => {
+        gl.setSize(window.innerWidth, window.innerHeight);
+      };
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, [gl]);
+
+    return null;
+  }
+
+  function RendererSettings() {
+    const { gl } = useThree();
+    useEffect(() => {
+      // Set clear color
+      gl.setClearColor(0xfad998, 1);
+
+      // Enable shadows
+      gl.shadowMap.enabled = true;
+      gl.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      // Set pixel ratio for better rendering on high-DPI screens
+      gl.setPixelRatio(window.devicePixelRatio);
+    }, [gl]);
+
+    return null;
+  }
 
   function onMouseDown() {
     mouseDownTime = Date.now(); // Record the time when the mouse is pressed
@@ -83,7 +118,7 @@ function MainGame({ setLoading }) {
   }
 
   function onMouseClick(event) {
-    if (floorRef.current !== undefined) {
+    if (floorRef.current) {
       setDarkspot(false);
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2();
@@ -100,7 +135,7 @@ function MainGame({ setLoading }) {
         targetPosition.y = 20; // Match character height
         setClickMoving(true);
         setDarkspot(true);
-        setDarkspotPos(intersects[0].point)
+        setDarkspotPos(intersects[0].point);
       }
     }
   }
@@ -119,8 +154,9 @@ function MainGame({ setLoading }) {
   return (
     <>
       <Canvas id="gameCanvas" shadows>
-        <MainCamera ref={cameraRef} playerPos={playerPos} />
         <RendererSettings />
+        <ResizeHandler />
+        <MainCamera ref={cameraRef} playerPos={playerPos} />
         <Lights />
         <Floor ref={floorRef} />
         <Buildings setLoading={setLoading} />
@@ -146,13 +182,23 @@ function MainGame({ setLoading }) {
             cameraRef={cameraRef}
           />
         ))}
-        {darkSpot && (
-          <>
-            <DarkSpot darkSpotPos={darkSpotPos} />
-          </>
-        )}
-        {/* <Camera1 characterRef={characterRef} /> */}
-        <ResizeHandler />
+        {darkSpot && <DarkSpot darkSpotPos={darkSpotPos} />}
+        {showcases.map(({ showcaseName, boxMin, boxMax }, index) => (
+          <Doorway
+            key={index}
+            boxMin={boxMin}
+            boxMax={boxMax}
+            showcaseName={showcaseName}
+            playerPos={playerPos}
+            setEnterPopupVisible={setEnterPopupVisible}
+            setProjectButton={setProjectButton}
+            setAboutButton={setAboutButton}
+            setExperiencesButton={setExperiencesButton}
+            setSkillsButton={setSkillsButton}
+            setTwoOptionsButton={setTwoOptionsButton}
+            setOneOptionButton={setOneOptionButton}
+          />
+        ))}
       </Canvas>
     </>
   );

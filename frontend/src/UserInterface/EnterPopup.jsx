@@ -27,7 +27,6 @@ const EntrancePopupContainer = styled.div`
 const OptionText = styled.p`
   margin-top: 10px;
   color: white;
-  display: ${(props) => (props.visible ? "block" : "none")};
 `;
 
 const EnterButtonsContainer = styled.div`
@@ -40,7 +39,6 @@ const EnterButtonsContainer = styled.div`
 
 const EnterButton = styled.button`
   border: 4px dashed white;
-  display: ${(props) => (props.visible ? "block" : "none")};
   width: 45%;
   text-align: center;
   font-family: "Pixelify Sans", serif;
@@ -70,47 +68,37 @@ const EnterPopup = ({
   setCurrentScene,
 }) => {
   return (
-    <>
-      <EntrancePopupContainer>
+    <EntrancePopupContainer>
+      {twoOptionsButton && (
         <OptionText id="twoOptions">Where would you like to go?</OptionText>
-        <OptionText
-          visible={oneOptionButton ? "visible" : undefined}
-          id="oneOption"
-        >
-          Go in?
-        </OptionText>
-        <EnterButtonsContainer>
-          <EnterButton
-            visible={aboutButton ? "visible" : undefined}
-            id="aboutme_button"
-            onClick={() => setCurrentScene(1)}
-          >
+      )}
+      {oneOptionButton && <OptionText id="oneOption">Go in?</OptionText>}
+      <EnterButtonsContainer>
+        {aboutButton && (
+          <EnterButton id="aboutme_button" onClick={() => setCurrentScene(1)}>
             Enter About Me
           </EnterButton>
-          <EnterButton
-            visible={projectButton ? "visible" : undefined}
-            id="projects_button"
-            onClick={() => setCurrentScene(2)}
-          >
+        )}
+        {projectButton && (
+          <EnterButton id="projects_button" onClick={() => setCurrentScene(2)}>
             Enter Projects
           </EnterButton>
+        )}
+        {experiencesButton && (
           <EnterButton
-            visible={experiencesButton ? "visible" : undefined}
             id="experience_button"
             onClick={() => setCurrentScene(3)}
           >
             Enter Experiences
           </EnterButton>
-          <EnterButton
-            visible={skillsButton ? "visible" : undefined}
-            id="skills_button"
-            onClick={() => setCurrentScene(4)}
-          >
+        )}
+        {skillsButton && (
+          <EnterButton id="skills_button" onClick={() => setCurrentScene(4)}>
             Enter Skills
           </EnterButton>
-        </EnterButtonsContainer>
-      </EntrancePopupContainer>
-    </>
+        )}
+      </EnterButtonsContainer>
+    </EntrancePopupContainer>
   );
 };
 

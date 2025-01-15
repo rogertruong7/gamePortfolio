@@ -14,13 +14,13 @@ import DarkSpot from "./Darkspot.jsx";
 import Doorway from "./Doorway.jsx";
 
 let startPosition = [93, -8, -134];
+let startVector = new THREE.Vector3(...startPosition);
 let targetPosition = new THREE.Vector3(...startPosition);
 let mouseDownTime = 0; // Time when mouse is pressed down
 const CLICK_THRESHOLD = 150; // Time in milliseconds to consider it a short click (e.g., 300ms)
 
 function MainGame({
   setLoading,
-  setCurrentScene,
   setEnterPopupVisible,
   setProjectButton,
   setAboutButton,
@@ -28,6 +28,8 @@ function MainGame({
   setSkillsButton,
   setTwoOptionsButton,
   setOneOptionButton,
+  reseted,
+  setReseted,
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
@@ -64,8 +66,6 @@ function MainGame({
       boxMax: new THREE.Vector3(504, 50, 20),
     },
   ];
-
-  let startVector = new THREE.Vector3(...startPosition);
 
   const [playerPos, setPlayerPos] = useState(startVector);
   const [clickMoving, setClickMoving] = useState(false);
@@ -150,6 +150,17 @@ function MainGame({
       canvas.removeEventListener("mouseup", onMouseUp);
     };
   }, []);
+
+  useEffect(() => {
+    if (reseted === true) {
+      console.log("resetting");
+      characterRef.current.position.copy(startVector);
+      characterRef.current.rotation.y = -Math.PI / 4;
+      setDarkspot(false);
+      setClickMoving(false);
+    }
+    setReseted(false);
+  }, [reseted]);
 
   return (
     <>

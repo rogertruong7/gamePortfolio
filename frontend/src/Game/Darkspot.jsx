@@ -14,7 +14,7 @@ function DarkSpot({
       position={[darkSpotPos.x, darkSpotPos.y + 1.5, darkSpotPos.z]} // Initial position
     >
       <circleGeometry args={[5, 6]} /> {/* Radius and segments */}
-      <meshBasicMaterial color={0x000000} opacity={0.5} transparent />
+      <meshBasicMaterial color={0xf7ab11} opacity={1} transparent />
     </mesh>
   );
 }

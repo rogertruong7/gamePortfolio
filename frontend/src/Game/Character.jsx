@@ -221,6 +221,7 @@ const Character = React.forwardRef(
       });
     }, [scene, animations]);
 
+
     useFrame(({ clock }) => {
       let delta = clock.getDelta();
       delta = Math.max(delta, 0.005);

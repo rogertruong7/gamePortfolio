@@ -12,8 +12,6 @@ import Text from "./Text.jsx";
 import Details from "./Details.jsx";
 import DarkSpot from "./Darkspot.jsx";
 
-export const CAMERA_OFFSET = new THREE.Vector3(160, 120, 160);
-
 let startPosition = [93, -8, -134];
 let targetPosition = new THREE.Vector3(...startPosition);
 let mouseDownTime = 0; // Time when mouse is pressed down
@@ -66,7 +64,7 @@ function MainGame({ setLoading }) {
   ]);
   let startVector = new THREE.Vector3(...startPosition);
 
-  const [cameraPos, setCameraPos] = useState(startVector);
+  const [playerPos, setPlayerPos] = useState(startVector);
   const [clickMoving, setClickMoving] = useState(false);
   const [darkSpot, setDarkspot] = useState(false);
   const [darkSpotPos, setDarkspotPos] = useState("");
@@ -121,7 +119,7 @@ function MainGame({ setLoading }) {
   return (
     <>
       <Canvas id="gameCanvas" shadows>
-        <MainCamera ref={cameraRef} cameraPos={cameraPos} />
+        <MainCamera ref={cameraRef} playerPos={playerPos} />
         <RendererSettings />
         <Lights />
         <Floor ref={floorRef} />
@@ -131,7 +129,7 @@ function MainGame({ setLoading }) {
           ref={characterRef}
           position={startPosition}
           cameraRef={cameraRef}
-          setCameraPos={setCameraPos}
+          setPlayerPos={setPlayerPos}
           setDarkspot={setDarkspot}
           setClickMoving={setClickMoving}
           clickMoving={clickMoving}
@@ -150,7 +148,7 @@ function MainGame({ setLoading }) {
         ))}
         {darkSpot && (
           <>
-            <DarkSpot darkSpotPos={darkSpotPos}/>
+            <DarkSpot darkSpotPos={darkSpotPos} />
           </>
         )}
         {/* <Camera1 characterRef={characterRef} /> */}

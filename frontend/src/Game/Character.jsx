@@ -6,7 +6,6 @@ import * as THREE from "three";
 const SPEED = 0.6;
 
 let keys = {};
-let targetPosition;
 
 function onWindowBlur() {
   keys = {}; // Clear all keys
@@ -21,14 +20,18 @@ function onKeyUp(event) {
 }
 
 const Character = React.forwardRef(
-  ({ position,
-    cameraRef,
-    setCameraPos,
-    setDarkspot,
-    setClickMoving,
-    clickMoving,
-    targetPosition
-  }, ref) => {
+  (
+    {
+      position,
+      cameraRef,
+      setPlayerPos,
+      setDarkspot,
+      setClickMoving,
+      clickMoving,
+      targetPosition,
+    },
+    ref
+  ) => {
     const { scene, animations } = useGLTF("models/cloudme.glb");
     const mixer = useRef();
 
@@ -53,8 +56,10 @@ const Character = React.forwardRef(
         movingDirection.y = 0;
         // If the distance to target is large enough, move the character
         if (movingDirection.length() > SPEED) {
-          const stepDirection = movingDirection.normalize().multiplyScalar(SPEED); // Step size
-    
+          const stepDirection = movingDirection
+            .normalize()
+            .multiplyScalar(SPEED); // Step size
+
           // Check if the next step leads to a collision
           const newPosition = character.position.clone().add(stepDirection);
           // TODO
@@ -74,22 +79,22 @@ const Character = React.forwardRef(
         }
       }
     }
-    
+
     let lastDirection = new THREE.Vector3(0, 0, 1);
     function updateRotation(inputVector) {
       if (inputVector.length() > 0) {
         // Normalize the input vector and store the last valid direction
         inputVector.normalize();
         lastDirection.copy(inputVector);
-    
-        // Calculate the target angle based on the input vector
-        const targetAngle = Math.atan2(inputVector.x, inputVector.z) - Math.PI / 2; // Angle in radians
 
-    
+        // Calculate the target angle based on the input vector
+        const targetAngle =
+          Math.atan2(inputVector.x, inputVector.z) - Math.PI / 2; // Angle in radians
+
         // Smoothly interpolate the character's current rotation to the target angle
         const currentAngle = ref.current.rotation.y; // Current Y-axis rotation
         const newAngle = THREE.MathUtils.lerp(currentAngle, targetAngle, 1);
-    
+
         // Apply the new angle
         ref.current.rotation.y = newAngle;
       }
@@ -112,11 +117,11 @@ const Character = React.forwardRef(
         if (keys["s"] || keys["arrowdown"]) {
           setDarkspot(false);
           setClickMoving(false);
-           cameraRef.current.getWorldDirection(direction);
+          cameraRef.current.getWorldDirection(direction);
 
-           direction.y = 0;
-           direction = direction.normalize().negate();
-           finalDirection.add(direction);
+          direction.y = 0;
+          direction = direction.normalize().negate();
+          finalDirection.add(direction);
         }
         if (keys["a"] || keys["arrowleft"]) {
           setDarkspot(false);
@@ -216,7 +221,6 @@ const Character = React.forwardRef(
       });
     }, [scene, animations]);
 
-
     useFrame(({ clock }) => {
       let delta = clock.getDelta();
       delta = Math.max(delta, 0.005);
@@ -227,6 +231,9 @@ const Character = React.forwardRef(
 
       clickToMove();
       keyboardMovingSlide(finalDirection);
+      if (ref.current !== undefined) {
+        setPlayerPos(ref.current.position);
+      }
     });
 
     return (

@@ -13,6 +13,7 @@ function Text({ text, position, fontPath, fontSize, color, cameraRef }) {
     depth: 5,
   });
 
+  // center the geometry over position
   geometry.computeBoundingBox();
   const boundingBox = geometry.boundingBox;
   const offsetX = (boundingBox.max.x - boundingBox.min.x) / 2;

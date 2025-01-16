@@ -50,7 +50,7 @@ const Menu = () => {
       >
         <DefaultButton>linkedin</DefaultButton>
       </a>
-      <a href={resume} download="RogerTruongResume.pdf">
+      <a href={resume} target="_blank" download="RogerTruongResume.pdf">
         <DefaultButton>download cv</DefaultButton>
       </a>
     </MenuContainer>

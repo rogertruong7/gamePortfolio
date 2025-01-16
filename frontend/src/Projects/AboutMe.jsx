@@ -83,6 +83,8 @@ const ImageContainer = styled.img`
   object-fit: cover; /* Crop the image to fill the container */
 `;
 
+// CAt cam on bottom right
+
 const AboutMe = () => {
   const [cat1Visible, setCat1Visible] = useState(true);
   const [cat2Visible, setCat2Visible] = useState(false);

@@ -86,30 +86,6 @@ const ImageContainer = styled.img`
 const AboutMe = () => {
   const [cat1Visible, setCat1Visible] = useState(true);
   const [cat2Visible, setCat2Visible] = useState(false);
-  // const [position, setPosition] = useState(0);
-
-  // useEffect(() => {
-  //   let startTime = null;
-
-  //   const animate = (timestamp) => {
-  //     if (!startTime) startTime = timestamp;
-  //     const elapsed = timestamp - startTime;
-
-  //     // Parabolic equation: x = at^2 (quadratic function for parabolic motion)
-  //     const speed = 0.05; // Adjust speed as needed
-  //     const newPosition = -speed * Math.pow(elapsed / 1000, 2) * 500; // Adjust -500px as needed
-
-  //     if (newPosition > -500) {
-  //       setPosition(newPosition);
-  //       requestAnimationFrame(animate);
-  //     } else {
-  //       setPosition(-500); // Stop at -500px
-  //     }
-  //   };
-
-  //   requestAnimationFrame(animate);
-  // }, []);
-
   return (
     <>
       <Door></Door>

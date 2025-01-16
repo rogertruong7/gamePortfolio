@@ -13,8 +13,8 @@ function DarkSpot({
       rotation={[-Math.PI / 2, 0, 0]} // Align with the floor
       position={[darkSpotPos.x, darkSpotPos.y + 1.5, darkSpotPos.z]} // Initial position
     >
-      <circleGeometry args={[5, 6]} /> {/* Radius and segments */}
-      <meshBasicMaterial color={0xf7ab11} opacity={1} transparent />
+      <circleGeometry args={[3, 10]} /> {/* Radius and segments */}
+      <meshBasicMaterial color={0x000000} opacity={0.5} transparent />
     </mesh>
   );
 }

@@ -45,6 +45,7 @@ const Buildings = ({ setLoading }) => {
     }
   }, [leftBuildingsScene, rightBuildingsScene, setLoading]);
 
+  return null;
   return (
     <>
       <primitive

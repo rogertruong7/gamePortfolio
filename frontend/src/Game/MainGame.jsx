@@ -12,6 +12,7 @@ import Text from "./Text.jsx";
 import Details from "./Details.jsx";
 import DarkSpot from "./Darkspot.jsx";
 import Doorway from "./Doorway.jsx";
+import { labels, showcases } from "./Static.jsx";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
@@ -31,38 +32,6 @@ function MainGame({
   const characterRef = useRef();
   const cameraRef = useRef();
   const floorRef = useRef();
-  const leftBuildingRef = useRef();
-  const rightBuildingRef = useRef();
-
-  const labels = [
-    { text: "projects", position: [38, 90, -90], fontSize: 10 },
-    { text: "about me", position: [38, 70, -164], fontSize: 10 },
-    { text: "experiences", position: [92, 75, -210], fontSize: 8 },
-    { text: "skills", position: [170, 75, -210], fontSize: 10 },
-  ];
-
-  const showcases = [
-    {
-      showcaseName: "projects",
-      boxMin: new THREE.Vector3(105, -50, 132),
-      boxMax: new THREE.Vector3(188, 50, 408),
-    },
-    {
-      showcaseName: "aboutMe",
-      boxMin: new THREE.Vector3(105, -50, -46),
-      boxMax: new THREE.Vector3(188, 50, 86),
-    },
-    {
-      showcaseName: "experiences",
-      boxMin: new THREE.Vector3(117, -50, -60),
-      boxMax: new THREE.Vector3(292, 50, 20),
-    },
-    {
-      showcaseName: "skills",
-      boxMin: new THREE.Vector3(365, -50, -60),
-      boxMax: new THREE.Vector3(504, 50, 20),
-    },
-  ];
 
   const [playerPos, setPlayerPos] = useState(startVector);
   const [clickMoving, setClickMoving] = useState(false);
@@ -72,6 +41,7 @@ function MainGame({
   const [targetPosition, setTargetPosition] = useState(
     new THREE.Vector3(...startPosition)
   );
+  const [standingOn, setStandingOn] = useState([]);
 
   function ResizeHandler() {
     // gl is renderer
@@ -188,22 +158,18 @@ function MainGame({
           />
         ))}
         {darkSpot && <DarkSpot darkSpotPos={darkSpotPos} />}
-        {showcases.map(({ showcaseName, boxMin, boxMax }, index) => (
-          <Doorway
-            key={index}
-            boxMin={boxMin}
-            boxMax={boxMax}
-            showcaseName={showcaseName}
-            playerPos={playerPos}
-            setEnterPopupVisible={setEnterPopupVisible}
-            setProjectButton={setProjectButton}
-            setAboutButton={setAboutButton}
-            setExperiencesButton={setExperiencesButton}
-            setSkillsButton={setSkillsButton}
-            setTwoOptionsButton={setTwoOptionsButton}
-            setOneOptionButton={setOneOptionButton}
-          />
-        ))}
+
+        <Doorway
+
+          characterRef={characterRef}
+          setEnterPopupVisible={setEnterPopupVisible}
+          setProjectButton={setProjectButton}
+          setAboutButton={setAboutButton}
+          setExperiencesButton={setExperiencesButton}
+          setSkillsButton={setSkillsButton}
+          setTwoOptionsButton={setTwoOptionsButton}
+          setOneOptionButton={setOneOptionButton}
+        />
       </Canvas>
     </>
   );

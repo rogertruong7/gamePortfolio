@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { invisWalls } from "./BorderWalls";
+import { invisWalls, showcases } from "./Static";
 
 const SPEED = 0.6;
 
@@ -205,11 +205,8 @@ const Character = React.forwardRef(
 
     useEffect(() => {
       if (animations.length > 0) {
-        console.log("Animations:", animations);
-
         mixer.current = new THREE.AnimationMixer(scene);
         const action = mixer.current.clipAction(animations[0]);
-        console.log(mixer.current);
         action.play();
       }
 
@@ -234,6 +231,7 @@ const Character = React.forwardRef(
       if (ref.current !== undefined) {
         setPlayerPos(ref.current.position);
       }
+
     });
 
     return (

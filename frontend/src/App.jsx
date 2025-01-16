@@ -12,11 +12,11 @@ import ResetButton from "./UserInterface/ResetButton.jsx";
 
 const App = () => {
   const [currentScene, setCurrentScene] = useState(0);
-  const [enterPopUpVisible, setEnterPopUpVisible] = useState(true);
+  const [enterPopupVisible, setEnterPopupVisible] = useState(false);
   const [twoOptionsButton, setTwoOptionsButton] = useState(false);
-  const [oneOptionButton, setOneOptionButton] = useState(true);
+  const [oneOptionButton, setOneOptionButton] = useState(false);
   const [projectButton, setProjectButton] = useState(false);
-  const [aboutButton, setAboutButton] = useState(true);
+  const [aboutButton, setAboutButton] = useState(false);
   const [experiencesButton, setExperiencesButton] = useState(false);
   const [skillsButton, setSkillsButton] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,10 @@ const App = () => {
       {loading && currentScene === 0 && <LoadingScreen />}
       {!loading && (
         <>
-          <ResetButton setReseted={setReseted} setCurrentScene={setCurrentScene}></ResetButton>
+          <ResetButton
+            setReseted={setReseted}
+            setCurrentScene={setCurrentScene}
+          ></ResetButton>
         </>
       )}
       <div
@@ -48,7 +51,7 @@ const App = () => {
       >
         <MainGame
           setLoading={setLoading}
-          setEnterPopUpVisible={setEnterPopUpVisible}
+          setEnterPopupVisible={setEnterPopupVisible}
           setProjectButton={setProjectButton}
           setAboutButton={setAboutButton}
           setExperiencesButton={setExperiencesButton}
@@ -59,7 +62,7 @@ const App = () => {
           setReseted={setReseted}
         />
       </div>
-      {enterPopUpVisible && currentScene === 0 && (
+      {enterPopupVisible && currentScene === 0 && (
         <EnterPopup
           twoOptionsButton={twoOptionsButton}
           oneOptionButton={oneOptionButton}

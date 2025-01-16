@@ -2,12 +2,10 @@ import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Text } from "@react-three/drei";
 import * as THREE from "three";
+import { showcases } from "./Static";
 
 export default function Doorway({
-  boxMin,
-  boxMax,
-  showcaseName,
-  playerPos,
+  characterRef,
   setEnterPopupVisible,
   setProjectButton,
   setAboutButton,
@@ -19,7 +17,7 @@ export default function Doorway({
   // const box = new THREE.Box3(boxMin, boxMax);
 
   function resetPopupText() {
-    setEnterPopUpVisible(false);
+    setEnterPopupVisible(false);
     setProjectButton(false);
     setAboutButton(false);
     setExperiencesButton(false);
@@ -28,95 +26,76 @@ export default function Doorway({
     setOneOptionButton(false);
   }
 
-  // function turnOptionsOn(showcases, length) {
-  //   setProjectButton(false);
-  //   setAboutButton(false);
-  //   setExperiencesButton(false);
-  //   setSkillsButton(false);
+  function turnOptionsOn(showcases, length) {
+    // Showing popup
+    setProjectButton(false);
+    setAboutButton(false);
+    setExperiencesButton(false);
+    setSkillsButton(false);
+    setEnterPopupVisible(true);
+    // Showing text
+    if (length > 1) {
+      setTwoOptionsButton(true);
+      setOneOptionButton(false);
+    } else {
+      setTwoOptionsButton(false);
+      setOneOptionButton(true);
+    }
+    showcases.forEach((showcase) => {
+      switch (showcase) {
+        case "projects":
+          setProjectButton(true);
+          break;
+        case "aboutMe":
+          setAboutButton(true);
+          break;
+        case "experiences":
+          setExperiencesButton(true);
+          break;
+        case "skills":
+          setSkillsButton(true);
+          break;
+      }
+    });
+  }
 
-  //   // Showing popup
-  //   setEnterPopUpVisible(true);
-  //   // Showing text
-  //   if (length > 1) {
-  //     setTwoOptionsButton(true);
-  //     setOneOptionButton(false);
-  //   } else {
-  //     setTwoOptionsButton(false);
-  //     setOneOptionButton(true);
-  //   }
+  useFrame(() => {
+    let standingOn = [];
+    if (characterRef.current) {
+      let characterPosition = characterRef.current.position;
 
-  //   switch (showcase) {
-  //     case "projects":
-  //       setProjectButton(true);
-  //       break;
-  //     case "aboutMe":
-  //       setAboutButton(true);
-  //       break;
-  //     case "experience":
-  //       setExperiencesButton(true);
-  //       break;
-  //     case "skills":
-  //       setSkillsButton(true);
-  //       break;
-  //   }
-  // }
+      Object.entries(showcases).forEach(([index, showcase]) => {
+        let box = showcase.box;
+        if (box.containsPoint(characterPosition)) {
+          standingOn.push(showcase.showcaseName);
+        }
+      });
 
-  // useFrame(() => {
-  //   let characterPosition = playerPos;
-  //   let newArray = [...standingOn];
-  //   if (box !== undefined) {
-  //     if (box.containsPoint(characterPosition)) {
-  //       newArray.push(showcaseName);
-  //       setStandingOn(newArray);
-  //     }
-  //   }
-  //   let length = newArray.length;
-  //   if (length > 0) {
-  //     turnOptionsOn(newArray, length);
-  //   } else {
-  //     resetPopupText();
-  //   }
-  // });
-  return null;
+      let length = standingOn.length;
+      if (length > 0) {
+        turnOptionsOn(standingOn, length);
+      } else {
+        resetPopupText();
+      }
+    }
+  });
+
+  // const result = useThree();
+
+  // useEffect(() => {
+  //   const helpers = []; // Array to store helpers
+
+  //   showcases.forEach((showcase) => {
+  //     const helper = new THREE.Box3Helper(showcase.box, 0xff0000); // Red color for the helper
+  //     result.scene.add(helper);
+  //     helpers.push(helper); // Store the helper
+  //   });
+
+  //   return () => {
+  //     // Clean up helpers on unmount
+  //     helpers.forEach((helper) => {
+  //       result.scene.remove(helper); // Remove each helper
+  //     });
+  //   };
+  // }, [result.scene]);
 }
-
-  
-
-
-
-
-// For below create a moveScene Button jsx
-function moveScene() {
-  clickMoving = false;
-  keys = {};
-  scene.remove(darkSpot);
-  mainScene = scene;
-  resetPopupText();
-}
-
-// document
-//   .getElementById("projects_button")
-//   .addEventListener("click", function () {
-//     moveScene();
-//     currentScene = initProjectsGame();
-//   });
-
-// document
-//   .getElementById("aboutme_button")
-//   .addEventListener("click", function () {
-//     // Code to run when the "Enter About Me" button is clicked
-//     moveScene();
-//     currentScene = initProjectsGame();
-//   });
-
-// document
-//   .getElementById("experience_button")
-//   .addEventListener("click", function () {
-//     moveScene();
-//     currentScene = initProjectsGame();
-//   });
-
-// document.getElementById("skills_button").addEventListener("click", function () {
-//   moveScene();
-//   currentScene = initProjectsGame();
-// });

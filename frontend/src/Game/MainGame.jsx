@@ -15,9 +15,6 @@ import Doorway from "./Doorway.jsx";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
-let targetPosition = new THREE.Vector3(...startPosition);
-let mouseDownTime = 0; // Time when mouse is pressed down
-const CLICK_THRESHOLD = 150; // Time in milliseconds to consider it a short click (e.g., 300ms)
 
 function MainGame({
   setLoading,
@@ -72,6 +69,9 @@ function MainGame({
   const [darkSpot, setDarkspot] = useState(false);
   const [darkSpotPos, setDarkspotPos] = useState("");
   const [keys, setKeys] = useState({});
+  const [targetPosition, setTargetPosition] = useState(
+    new THREE.Vector3(...startPosition)
+  );
 
   function ResizeHandler() {
     // gl is renderer
@@ -105,42 +105,6 @@ function MainGame({
     return null;
   }
 
-  function onMouseDown() {
-    mouseDownTime = Date.now(); // Record the time when the mouse is pressed
-  }
-
-  function onMouseUp(event) {
-    const clickDuration = Date.now() - mouseDownTime; // Calculate how long the button was held down
-
-    if (clickDuration < CLICK_THRESHOLD) {
-      // If the click was short, set moving to true
-      onMouseClick(event); // Call your click handler function to move the character
-    }
-  }
-
-  function onMouseClick(event) {
-    if (floorRef.current) {
-      setDarkspot(false);
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-      raycaster.setFromCamera(mouse, cameraRef.current);
-
-      const intersects = raycaster.intersectObject(floorRef.current);
-      if (intersects.length > 0 && intersects[0].point.y > -25) {
-        console.log("Mouse clicked on ", intersects[0].point);
-        targetPosition.copy(intersects[0].point);
-        targetPosition.y = 20; // Match character height
-        setClickMoving(true);
-        setDarkspot(true);
-        setDarkspotPos(intersects[0].point);
-      }
-    }
-  }
-
   function onWindowBlur() {
     setKeys({}); // Clear all keys
   }
@@ -161,16 +125,11 @@ function MainGame({
   }
 
   useEffect(() => {
-    const canvas = document.querySelector("#gameCanvas");
-    canvas.addEventListener("mousedown", onMouseDown);
-    canvas.addEventListener("mouseup", onMouseUp);
     window.addEventListener("blur", onWindowBlur);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
 
     return () => {
-      canvas.removeEventListener("mousedown", onMouseDown);
-      canvas.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("blur", onWindowBlur);
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
@@ -196,7 +155,14 @@ function MainGame({
         <ResizeHandler />
         <MainCamera ref={cameraRef} playerPos={playerPos} />
         <Lights />
-        <Floor ref={floorRef} />
+        <Floor
+          ref={floorRef}
+          setDarkspot={setDarkspot}
+          setClickMoving={setClickMoving}
+          setDarkspotPos={setDarkspotPos}
+          setTargetPosition={setTargetPosition}
+          cameraRef={cameraRef}
+        />
         <Buildings setLoading={setLoading} />
         <Details />
         <Character

@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { invisWalls, showcases } from "./Static";
+import { invisWalls } from "./Static";
 
 const SPEED = 0.6;
 

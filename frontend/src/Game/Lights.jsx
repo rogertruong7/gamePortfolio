@@ -15,7 +15,7 @@ function Lights() {
         shadow-camera-top={400}
         shadow-camera-bottom={-400}
       />
-      <ambientLight color={0xffffff} intensity={1.4} />
+      <ambientLight color={0xffffff} intensity={1.2} />
     </>
   );
 }

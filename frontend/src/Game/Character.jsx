@@ -21,6 +21,7 @@ const Character = React.forwardRef(
     ref
   ) => {
     const { scene, animations } = useGLTF("models/cloudme.glb");
+    const [arrowMoving, setArrowMoving] = useState(false);
     const mixer = useRef();
 
     function isCollision(newPosition, ignoreWall = null) {
@@ -127,6 +128,13 @@ const Character = React.forwardRef(
       }
     }
 
+    useEffect(() => {
+      if (Object.values(keys).every(key => key === false)) {
+        setArrowMoving(false);
+        console.log('not arrow moving');
+      }
+    }, [keys]);
+
     function keyboardMovement() {
       let direction = new THREE.Vector3();
       let finalDirection = new THREE.Vector3();
@@ -135,7 +143,7 @@ const Character = React.forwardRef(
           setDarkspot(false);
           setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
-
+          setArrowMoving(true);
           direction.y = 0;
           direction = direction.normalize();
           finalDirection.add(direction);
@@ -144,7 +152,7 @@ const Character = React.forwardRef(
           setDarkspot(false);
           setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
-
+          setArrowMoving(true);
           direction.y = 0;
           direction = direction.normalize().negate();
           finalDirection.add(direction);
@@ -153,7 +161,7 @@ const Character = React.forwardRef(
           setDarkspot(false);
           setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
-
+          setArrowMoving(true);
           direction.y = 0;
           direction = new THREE.Vector3(
             direction.z,
@@ -166,7 +174,7 @@ const Character = React.forwardRef(
           setDarkspot(false);
           setClickMoving(false);
           cameraRef.current.getWorldDirection(direction);
-
+          setArrowMoving(true);
           direction.y = 0;
           direction = new THREE.Vector3(
             -direction.z,
@@ -239,7 +247,12 @@ const Character = React.forwardRef(
 
     useFrame(({ clock }) => {
       let delta = clock.getDelta();
-      delta = Math.max(delta, 0.01);
+      delta = Math.max(delta, 0.001);
+      console.log(keys);
+      if (clickMoving || arrowMoving) {
+        
+        delta = Math.max(delta, 0.015);
+      }
       if (mixer.current) {
         mixer.current.update(delta);
       }

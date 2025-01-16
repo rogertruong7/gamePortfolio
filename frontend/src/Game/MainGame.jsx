@@ -112,7 +112,6 @@ function MainGame({
       setClickMoving(false);
       characterRef.current.position.copy(startVector);
       characterRef.current.rotation.y = -Math.PI / 4;
-      sd
       setKeys({});
     }
     setReseted(false);

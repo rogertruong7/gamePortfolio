@@ -27,7 +27,7 @@ export const Door = styled.div`
       transform: translateX(0);
     }
     100% {
-      transform: translateX(-2000px); /* Adjust as needed */
+      transform: translateX(-100%); /* Adjust as needed */
     }
   }
 `;

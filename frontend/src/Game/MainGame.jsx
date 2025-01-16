@@ -71,6 +71,7 @@ function MainGame({
   const [clickMoving, setClickMoving] = useState(false);
   const [darkSpot, setDarkspot] = useState(false);
   const [darkSpotPos, setDarkspotPos] = useState("");
+  const [keys, setKeys] = useState({});
 
   function ResizeHandler() {
     // gl is renderer
@@ -140,14 +141,39 @@ function MainGame({
     }
   }
 
+  function onWindowBlur() {
+    setKeys({}); // Clear all keys
+  }
+
+  function onKeyDown(event) {
+    setKeys((prevKeys) => ({
+      ...prevKeys,
+      [event.key.toLowerCase()]: true, // Track key press
+    }));
+  }
+
+  // Handler for key up event
+  function onKeyUp(event) {
+    setKeys((prevKeys) => ({
+      ...prevKeys,
+      [event.key.toLowerCase()]: false, // Track key release
+    }));
+  }
+
   useEffect(() => {
     const canvas = document.querySelector("#gameCanvas");
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("blur", onWindowBlur);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
 
     return () => {
       canvas.removeEventListener("mousedown", onMouseDown);
       canvas.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("blur", onWindowBlur);
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("keyup", onKeyUp);
     };
   }, []);
 
@@ -158,6 +184,7 @@ function MainGame({
       characterRef.current.rotation.y = -Math.PI / 4;
       setDarkspot(false);
       setClickMoving(false);
+      setKeys({});
     }
     setReseted(false);
   }, [reseted]);
@@ -181,6 +208,7 @@ function MainGame({
           setClickMoving={setClickMoving}
           clickMoving={clickMoving}
           targetPosition={targetPosition}
+          keys={keys}
         />
         {labels.map(({ text, position, fontSize }, index) => (
           <Text

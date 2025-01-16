@@ -2,22 +2,9 @@ import React, { useRef, useEffect, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import { invisWalls } from "./BorderWalls";
 
 const SPEED = 0.6;
-
-let keys = {};
-
-function onWindowBlur() {
-  keys = {}; // Clear all keys
-}
-
-function onKeyDown(event, scene) {
-  keys[event.key.toLowerCase()] = true; // Track key press
-}
-
-function onKeyUp(event) {
-  keys[event.key.toLowerCase()] = false; // Track key release
-}
 
 const Character = React.forwardRef(
   (
@@ -29,25 +16,47 @@ const Character = React.forwardRef(
       setClickMoving,
       clickMoving,
       targetPosition,
+      keys,
     },
     ref
   ) => {
     const { scene, animations } = useGLTF("models/cloudme.glb");
     const mixer = useRef();
+   
+    function isCollision(newPosition, ignoreWall = null) {
+      // Define character as a sphere for collision purposes
+      const characterRadius = 5; // Approximate radius of the character
+      const characterHitbox = new THREE.Sphere(newPosition, characterRadius);
+      let collisionNormal = null;
+      let collidingWall = null;
 
-    useEffect(() => {
-      // Add event listeners
-      window.addEventListener("blur", onWindowBlur);
-      document.addEventListener("keydown", onKeyDown);
-      document.addEventListener("keyup", onKeyUp);
+      invisWalls.forEach((wall) => {
+        // Skip the wall that is passed as ignoreWall
+        if (wall === ignoreWall) return;
 
-      // Clean up event listeners on component unmount
-      return () => {
-        window.removeEventListener("blur", onWindowBlur);
-        document.removeEventListener("keydown", onKeyDown);
-        document.removeEventListener("keyup", onKeyUp);
-      };
-    }, []);
+        if (wall.intersectsSphere(characterHitbox)) {
+          // Calculate the closest point on the current wall's bounding box to the character
+          const closestPoint = new THREE.Vector3(
+            Math.max(wall.min.x, Math.min(newPosition.x, wall.max.x)),
+            Math.max(wall.min.y, Math.min(newPosition.y, wall.max.y)),
+            Math.max(wall.min.z, Math.min(newPosition.z, wall.max.z))
+          );
+          // Calculate collision normal
+          collisionNormal = new THREE.Vector3()
+            .subVectors(newPosition, closestPoint)
+            .normalize();
+
+          collisionNormal.y = 0; // Flatten the normal to the XZ plane
+          collidingWall = wall;
+        }
+      });
+
+      if (collisionNormal) {
+        return { collisionNormal, collidingWall };
+      }
+
+      return null;
+    }
 
     function clickToMove() {
       if (clickMoving && ref.current !== undefined) {
@@ -62,9 +71,7 @@ const Character = React.forwardRef(
 
           // Check if the next step leads to a collision
           const newPosition = character.position.clone().add(stepDirection);
-          // TODO
-          // const result = isCollision(newPosition); // Check for collision at new position
-          const result = false;
+          const result = isCollision(newPosition);
           if (!result) {
             // No collision, move the character
             character.position.add(stepDirection);
@@ -156,50 +163,43 @@ const Character = React.forwardRef(
     function keyboardMovingSlide(finalDirection) {
       if (ref.current !== undefined) {
         let character = ref.current;
-        // let newPosition = character.position.clone().add(finalDirection);
+        let collisionNormal = null;
+        let wall = null;
+        let newPosition = character.position.clone().add(finalDirection);
+        const result = isCollision(newPosition);
 
-        // comment this out later
-        character.position.addScaledVector(finalDirection, SPEED);
+        if (result) {
+          collisionNormal = result.collisionNormal;
+          wall = result.collidingWall;
+        }
+
         updateRotation(finalDirection);
+        if (!collisionNormal) {
+          character.position.addScaledVector(finalDirection, SPEED);
+        } else {
+          // Slide along the wall using the collision normal
+          const slideDirection = finalDirection
+            .clone()
+            .projectOnPlane(collisionNormal);
 
-        // const result = isCollision(newPosition);
-        // let collisionNormal = null;
-        // let wall = null;
+          if (slideDirection.length() > 0) {
+            slideDirection.normalize();
+            let slidingPosition = character.position
+              .clone()
+              .addScaledVector(slideDirection, SPEED);
 
-        // if (result) {
-        //   collisionNormal = result.collisionNormal;
-        //   wall = result.collidingWall;
-        // }
+            // Check if the new sliding position causes a collision, excluding the current sliding wall
+            const collisionNormalAfterSlide = isCollision(
+              slidingPosition,
+              wall
+            );
 
-        // updateRotation(finalDirection);
-        // if (!collisionNormal) {
-        //   // No collision: move the character in the intended direction
-
-        //   character.position.addScaledVector(finalDirection, SPEED);
-        // } else {
-        //   // Slide along the wall using the collision normal
-        //   const slideDirection = finalDirection
-        //     .clone()
-        //     .projectOnPlane(collisionNormal);
-
-        //   if (slideDirection.length() > 0) {
-        //     slideDirection.normalize();
-        //     let slidingPosition = character.position
-        //       .clone()
-        //       .addScaledVector(slideDirection, SPEED);
-
-        //     // Check if the new sliding position causes a collision, excluding the current sliding wall
-        //     const collisionNormalAfterSlide = isCollision(
-        //       slidingPosition,
-        //       wall
-        //     );
-
-        //     if (!collisionNormalAfterSlide) {
-        //       // If no collision, perform the slide movement
-        //       character.position.addScaledVector(slideDirection, SPEED);
-        //     }
-        //   }
-        // }
+            if (!collisionNormalAfterSlide) {
+              // If no collision, perform the slide movement
+              character.position.addScaledVector(slideDirection, SPEED);
+            }
+          }
+        }
       }
     }
 
@@ -220,7 +220,6 @@ const Character = React.forwardRef(
         }
       });
     }, [scene, animations]);
-
 
     useFrame(({ clock }) => {
       let delta = clock.getDelta();

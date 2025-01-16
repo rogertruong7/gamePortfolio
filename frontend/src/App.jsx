@@ -8,7 +8,10 @@ import BackButton from "./UserInterface/BackButton.jsx";
 import Projects from "./Projects/Projects.jsx";
 import ResetButton from "./UserInterface/ResetButton.jsx";
 import Popup from "./UserInterface/TutorialPopup.jsx";
-
+import HelpButton from "./UserInterface/HelpButton.jsx";
+import AboutMe from "./Projects/AboutMe.jsx";
+import Skills from "./Projects/Skills.jsx";
+import Experiences from "./Projects/Experiences.jsx";
 
 const App = () => {
   const [currentScene, setCurrentScene] = useState(0);
@@ -42,6 +45,7 @@ const App = () => {
             setReseted={setReseted}
             setCurrentScene={setCurrentScene}
           ></ResetButton>
+          <HelpButton></HelpButton>
           {localStorage.getItem("visited") !== "true" && showPopup && (
             <Popup setShowPopup={setShowPopup}></Popup>
           )}
@@ -82,10 +86,10 @@ const App = () => {
       {currentScene !== 0 && (
         <BackButton setCurrentScene={setCurrentScene}></BackButton>
       )}
-      {currentScene === 1 && <Projects></Projects>}
-      {currentScene === 2 && <h1>PROJECTSSSSSSSSSSSS</h1>}
-      {currentScene === 3 && <h1>EXPERIENCESSSSSSSSS</h1>}
-      {currentScene === 4 && <h1>SKILLSSSSSSSSSSSSSS</h1>}
+      {currentScene === 1 && <AboutMe></AboutMe>}
+      {currentScene === 2 && <Projects></Projects>}
+      {currentScene === 3 && <Experiences></Experiences>}
+      {currentScene === 4 && <Skills></Skills>}
     </>
   );
 };

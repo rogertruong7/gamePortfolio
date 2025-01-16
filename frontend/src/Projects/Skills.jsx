@@ -9,7 +9,7 @@ const Title = styled.h1`
   font-size: 2rem; /* You can adjust the font size as needed */
 `;
 
-const Projects = () => {
+const Skills = () => {
   return (
     <Container>
       <Title>ABOUT MEEEEEEEEEEEEEE</Title>
@@ -17,4 +17,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default Skills;

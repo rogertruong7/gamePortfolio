@@ -22,7 +22,7 @@ const Character = React.forwardRef(
   ) => {
     const { scene, animations } = useGLTF("models/cloudme.glb");
     const mixer = useRef();
-   
+
     function isCollision(newPosition, ignoreWall = null) {
       // Define character as a sphere for collision purposes
       const characterRadius = 5; // Approximate radius of the character
@@ -95,15 +95,40 @@ const Character = React.forwardRef(
         lastDirection.copy(inputVector);
 
         // Calculate the target angle based on the input vector
-        const targetAngle =
-          Math.atan2(inputVector.x, inputVector.z) - Math.PI / 2; // Angle in radians
+        let targetAngle =
+          Math.atan2(inputVector.x, inputVector.z) - Math.PI / 2;
+        // Correct for your custom orientation
+        targetAngle += Math.PI / 4; // Offset adjustment for custom direction setup
+
+        // Get the current angle of rotation and adjust for custom orientation
+        let currentAngle = ref.current.rotation.y + Math.PI / 4;
+
+        // Normalize both angles to the range [-PI, PI]
+        targetAngle =
+          THREE.MathUtils.euclideanModulo(targetAngle + Math.PI, 2 * Math.PI) -
+          Math.PI;
+        currentAngle =
+          THREE.MathUtils.euclideanModulo(currentAngle + Math.PI, 2 * Math.PI) -
+          Math.PI;
+
+        // Calculate the shortest angle difference
+        let angleDifference = targetAngle - currentAngle;
+        if (angleDifference > Math.PI) {
+          angleDifference -= 2 * Math.PI;
+        } else if (angleDifference < -Math.PI) {
+          angleDifference += 2 * Math.PI;
+        }
 
         // Smoothly interpolate the character's current rotation to the target angle
-        const currentAngle = ref.current.rotation.y; // Current Y-axis rotation
-        const newAngle = THREE.MathUtils.lerp(currentAngle, targetAngle, 1);
+        const smoothFactor = 0.1; // Adjust this value for rotation speed
+        const newAngle = currentAngle + angleDifference * smoothFactor;
 
-        // Apply the new angle
-        ref.current.rotation.y = newAngle;
+        // Apply the new angle back, removing the offset adjustment
+        ref.current.rotation.y = newAngle - Math.PI / 4;
+
+        // Debugging outputs
+        console.log("Target Angle (degrees):", targetAngle * (180 / Math.PI));
+        console.log("Current Angle (degrees):", currentAngle * (180 / Math.PI));
       }
     }
 
@@ -219,7 +244,7 @@ const Character = React.forwardRef(
 
     useFrame(({ clock }) => {
       let delta = clock.getDelta();
-      delta = Math.max(delta, 0.005);
+      delta = Math.max(delta, 0.01);
       if (mixer.current) {
         mixer.current.update(delta);
       }
@@ -230,7 +255,6 @@ const Character = React.forwardRef(
       if (ref.current !== undefined) {
         setPlayerPos(ref.current.position);
       }
-
     });
 
     return (

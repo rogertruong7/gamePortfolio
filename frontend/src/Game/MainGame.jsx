@@ -12,7 +12,7 @@ import Text from "./Text.jsx";
 import Details from "./Details.jsx";
 import DarkSpot from "./Darkspot.jsx";
 import Doorway from "./Doorway.jsx";
-import { labels, showcases } from "./Static.jsx";
+import { labels } from "./Static.jsx";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
@@ -41,7 +41,6 @@ function MainGame({
   const [targetPosition, setTargetPosition] = useState(
     new THREE.Vector3(...startPosition)
   );
-  const [standingOn, setStandingOn] = useState([]);
 
   function ResizeHandler() {
     // gl is renderer
@@ -62,7 +61,7 @@ function MainGame({
     const { gl } = useThree();
     useEffect(() => {
       // Set clear color
-      gl.setClearColor(0xfad998, 1);
+      gl.setClearColor(0xffd8d1, ); //0xfad998 0xffd9d9 0xffd8d1 0xe3fcff
 
       // Enable shadows
       gl.shadowMap.enabled = true;
@@ -109,10 +108,11 @@ function MainGame({
   useEffect(() => {
     if (reseted === true) {
       console.log("resetting");
-      characterRef.current.position.copy(startVector);
-      characterRef.current.rotation.y = -Math.PI / 4;
       setDarkspot(false);
       setClickMoving(false);
+      characterRef.current.position.copy(startVector);
+      characterRef.current.rotation.y = -Math.PI / 4;
+      sd
       setKeys({});
     }
     setReseted(false);

@@ -14,7 +14,7 @@ const Button = styled.button`
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   position: absolute;
-  bottom: 20px;
+  bottom: 70px;
   right: 20px;
   z-index: 103;
   width: 80px;
@@ -24,16 +24,15 @@ const Button = styled.button`
   }
 `;
 
-const ResetButton = ({ setReseted, setCurrentScene }) => {
-  const handleReset = () => {
-    setReseted(true);
-    setCurrentScene(0);
+const HelpButton = ({  }) => {
+  const showHelp = () => {
+    console.log("showing help");
   };
   return (
     <>
-      <Button onClick={handleReset}>reset</Button>
+      <Button onClick={showHelp}>?</Button>
     </>
   );
 };
 
-export default ResetButton;
+export default HelpButton;

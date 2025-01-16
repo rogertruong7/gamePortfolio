@@ -12,6 +12,26 @@ export const Container = styled.div`
   justify-content: center;
 `;
 
+export const Door = styled.div`
+  margin: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  animation: parabolicMove 1s ease-in-out forwards;
+  position: absolute;
+
+  @keyframes parabolicMove {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-2000px); /* Adjust as needed */
+    }
+  }
+`;
+
 const TextContainer = styled.div`
   padding: 50px;
   padding: 0;
@@ -20,6 +40,10 @@ const TextContainer = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+
+  @media (max-width: 1108px) {
+    width: 95%;
+  }
 `;
 
 const SelectionContainer = styled.div`
@@ -29,7 +53,8 @@ const SelectionContainer = styled.div`
   height: 45%;
   border: 10px solid white;
   box-sizing: border-box;
-`
+  background-color: black;
+`;
 
 const Title = styled.h1`
   margin: 0;
@@ -37,31 +62,73 @@ const Title = styled.h1`
   font-size: 2rem; /* You can adjust the font size as needed */
 `;
 
-const ImageContainer = styled.img`
+const ImageWrapper = styled.div`
   height: 50%;
+  overflow: hidden; /* Hide the cropped part of the image */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media (max-width: 1108px) {
+    width: 100%;
+    height: 50%;
+  }
+`;
+
+const ImageContainer = styled.img`
+  height: 100%;
   image-rendering: pixelated; /* Preserves pixel art style */
   margin: 0;
   padding: 0;
+  object-fit: cover; /* Crop the image to fill the container */
 `;
 
 const AboutMe = () => {
   const [cat1Visible, setCat1Visible] = useState(true);
   const [cat2Visible, setCat2Visible] = useState(false);
+  // const [position, setPosition] = useState(0);
+
+  // useEffect(() => {
+  //   let startTime = null;
+
+  //   const animate = (timestamp) => {
+  //     if (!startTime) startTime = timestamp;
+  //     const elapsed = timestamp - startTime;
+
+  //     // Parabolic equation: x = at^2 (quadratic function for parabolic motion)
+  //     const speed = 0.05; // Adjust speed as needed
+  //     const newPosition = -speed * Math.pow(elapsed / 1000, 2) * 500; // Adjust -500px as needed
+
+  //     if (newPosition > -500) {
+  //       setPosition(newPosition);
+  //       requestAnimationFrame(animate);
+  //     } else {
+  //       setPosition(-500); // Stop at -500px
+  //     }
+  //   };
+
+  //   requestAnimationFrame(animate);
+  // }, []);
 
   return (
-    <Container>
-      <TextContainer>
-        {cat1Visible && (
-          <ImageContainer src={cat1} alt="aboutMeCat1"></ImageContainer>
-        )}
-        {cat2Visible && (
-          <ImageContainer src={cat2} alt="aboutMeCat2"></ImageContainer>
-        )}
-        <SelectionContainer>
-          <h1>Hello</h1>
-        </SelectionContainer>
-      </TextContainer>
-    </Container>
+    <>
+      <Door></Door>
+      <Container>
+        <TextContainer>
+          <ImageWrapper>
+            {cat1Visible && (
+              <ImageContainer src={cat1} alt="aboutMeCat1"></ImageContainer>
+            )}
+            {cat2Visible && (
+              <ImageContainer src={cat2} alt="aboutMeCat2"></ImageContainer>
+            )}
+          </ImageWrapper>
+          <SelectionContainer>
+            <h1>Hello</h1>
+          </SelectionContainer>
+        </TextContainer>
+      </Container>
+    </>
   );
 };
 

@@ -248,7 +248,7 @@ const Character = React.forwardRef(
     useFrame(({ clock }) => {
       let delta = clock.getDelta();
       delta = Math.max(delta, 0.001);
-      console.log(keys);
+
       if (clickMoving || arrowMoving) {
         
         delta = Math.max(delta, 0.015);

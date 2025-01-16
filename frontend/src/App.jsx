@@ -7,7 +7,7 @@ import "./App.css";
 import BackButton from "./UserInterface/BackButton.jsx";
 import Projects from "./Projects/Projects.jsx";
 import ResetButton from "./UserInterface/ResetButton.jsx";
-
+import Popup from "./UserInterface/TutorialPopup.jsx";
 
 
 const App = () => {
@@ -21,6 +21,7 @@ const App = () => {
   const [skillsButton, setSkillsButton] = useState(false);
   const [loading, setLoading] = useState(true);
   const [reseted, setReseted] = useState(false);
+  const [showPopup, setShowPopup] = useState(true);
 
   useEffect(() => {
     if (currentScene === 0) {
@@ -29,6 +30,7 @@ const App = () => {
       document.body.style.cursor = "default";
     }
   }, [currentScene]);
+
 
   return (
     <>
@@ -40,8 +42,12 @@ const App = () => {
             setReseted={setReseted}
             setCurrentScene={setCurrentScene}
           ></ResetButton>
+          {localStorage.getItem("visited") !== "true" && showPopup && (
+            <Popup setShowPopup={setShowPopup}></Popup>
+          )}
         </>
       )}
+
       <div
         style={{
           height: "100%",

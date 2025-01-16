@@ -108,7 +108,6 @@ const Character = React.forwardRef(
     }
 
     function keyboardMovement() {
-      localStorage.setItem("visited", true);
       let direction = new THREE.Vector3();
       let finalDirection = new THREE.Vector3();
       if (localStorage.getItem("visited") === "true") {

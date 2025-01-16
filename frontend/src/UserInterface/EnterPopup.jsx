@@ -16,7 +16,7 @@ const EntrancePopupContainer = styled.div`
   flex-direction: column;
   width: 300px;
   height: 120px;
-  z-index: 103;
+  z-index: 102;
   border-radius: 10px;
   justify-content: center;
   align-items: center;

@@ -68,7 +68,7 @@ function MainGame({
       gl.shadowMap.type = THREE.PCFSoftShadowMap;
 
       // Set pixel ratio for better rendering on high-DPI screens
-      gl.setPixelRatio(window.devicePixelRatio);
+      gl.setPixelRatio(1);
     }, [gl]);
 
     return null;

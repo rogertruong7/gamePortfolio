@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import resume from "../assets/RogerTruongResume.pdf"
 
 // Styled components for Menu and Button
 const MenuContainer = styled.div`
@@ -49,7 +50,7 @@ const Menu = () => {
       >
         <DefaultButton>linkedin</DefaultButton>
       </a>
-      <a href="public/RogerTruongResume.pdf" download="RogerTruongResume.pdf">
+      <a href={resume} download="RogerTruongResume.pdf">
         <DefaultButton>download cv</DefaultButton>
       </a>
     </MenuContainer>

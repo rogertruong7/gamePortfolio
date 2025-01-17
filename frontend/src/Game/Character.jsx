@@ -245,16 +245,16 @@ const Character = React.forwardRef(
       });
     }, [scene, animations]);
 
-    useFrame(({ clock }) => {
-      let delta = clock.getDelta();
-      delta = Math.max(delta, 0.001);
+    useFrame(({ clock }, delta) => {
+      let clockDelta = clock.getDelta();
+      clockDelta = Math.max(clockDelta, 0.001);
 
       if (clickMoving || arrowMoving) {
         
-        delta = Math.max(delta, 0.015);
+        clockDelta = Math.max(clockDelta, 0.015);
       }
       if (mixer.current) {
-        mixer.current.update(delta);
+        mixer.current.update(clockDelta);
       }
       let finalDirection = keyboardMovement();
 

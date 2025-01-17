@@ -4,7 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { invisWalls } from "./Static";
 
-const SPEED = 0.6;
+const SPEED = 35;
 
 const Character = React.forwardRef(
   (
@@ -59,16 +59,16 @@ const Character = React.forwardRef(
       return null;
     }
 
-    function clickToMove() {
+    function clickToMove(delta) {
       if (clickMoving && ref.current !== undefined) {
         let character = ref.current;
         const movingDirection = targetPosition.clone().sub(character.position);
         movingDirection.y = 0;
         // If the distance to target is large enough, move the character
-        if (movingDirection.length() > SPEED) {
+        if (movingDirection.length() > delta * SPEED) {
           const stepDirection = movingDirection
             .normalize()
-            .multiplyScalar(SPEED); // Step size
+            .multiplyScalar(delta * SPEED); // Step size
 
           // Check if the next step leads to a collision
           const newPosition = character.position.clone().add(stepDirection);
@@ -187,7 +187,7 @@ const Character = React.forwardRef(
       return finalDirection;
     }
 
-    function keyboardMovingSlide(finalDirection) {
+    function keyboardMovingSlide(finalDirection, delta) {
       if (ref.current !== undefined) {
         let character = ref.current;
         let collisionNormal = null;
@@ -202,7 +202,7 @@ const Character = React.forwardRef(
 
         updateRotation(finalDirection);
         if (!collisionNormal) {
-          character.position.addScaledVector(finalDirection, SPEED);
+          character.position.addScaledVector(finalDirection, delta * SPEED);
         } else {
           // Slide along the wall using the collision normal
           const slideDirection = finalDirection
@@ -213,7 +213,7 @@ const Character = React.forwardRef(
             slideDirection.normalize();
             let slidingPosition = character.position
               .clone()
-              .addScaledVector(slideDirection, SPEED);
+              .addScaledVector(slideDirection, delta * SPEED);
 
             // Check if the new sliding position causes a collision, excluding the current sliding wall
             const collisionNormalAfterSlide = isCollision(
@@ -223,7 +223,7 @@ const Character = React.forwardRef(
 
             if (!collisionNormalAfterSlide) {
               // If no collision, perform the slide movement
-              character.position.addScaledVector(slideDirection, SPEED);
+              character.position.addScaledVector(slideDirection, delta * SPEED);
             }
           }
         }
@@ -258,8 +258,8 @@ const Character = React.forwardRef(
       }
       let finalDirection = keyboardMovement();
 
-      clickToMove();
-      keyboardMovingSlide(finalDirection);
+      clickToMove(delta);
+      keyboardMovingSlide(finalDirection, delta);
       if (ref.current !== undefined) {
         setPlayerPos(ref.current.position);
       }

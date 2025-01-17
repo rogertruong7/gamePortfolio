@@ -4,7 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { invisWalls } from "./Static";
 
-const SPEED = 35;
+const SPEED = 100;
 
 const Character = React.forwardRef(
   (

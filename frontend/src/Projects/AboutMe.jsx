@@ -1,7 +1,96 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/aboutMeCat1.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
+import arrowDown from "../assets/arrowDown.gif"
+
+// CAt cam on bottom right
+
+const AboutMe = () => {
+  const [cat1Visible, setCat1Visible] = useState(true);
+  const [cat2Visible, setCat2Visible] = useState(false);
+  const [optionCount, setOptionCount] = useState(-1);
+
+  const onNextText = () => {
+    console.log('clicked');
+    setOptionCount((prevCount) => prevCount + 1);
+    setCat2Visible((prev) => !prev);
+    setCat1Visible((prev) => !prev);
+  }
+
+  useEffect(() => {
+    const selectionContainer = document.getElementById("selectionContainer");
+    selectionContainer.addEventListener("click", onNextText);
+
+    const timeout = setTimeout(() => {
+      setOptionCount(0);
+    }, 900);
+
+    
+
+    return (() => {
+      clearTimeout(timeout);
+
+      selectionContainer.removeEventListener("click", onNextText);
+      
+    });
+  }, []);
+
+  useEffect(() => {
+    console.log(optionCount)
+  }, [optionCount])
+ 
+  return (
+    <>
+      <Door></Door>
+      <Container>
+        <GameContainer>
+          <ImageWrapper>
+            {cat1Visible && (
+              <ImageContainer src={cat1} alt="aboutMeCat1"></ImageContainer>
+            )}
+            {cat2Visible && (
+              <ImageContainer src={cat2} alt="aboutMeCat2"></ImageContainer>
+            )}
+          </ImageWrapper>
+          <SelectionContainer id="selectionContainer">
+            {optionCount === 0 && (
+              <>
+                <TextContainer>
+                  <Text> Hello! You must be looking for Roger!</Text>
+                  <img src={arrowDown}/>
+                </TextContainer>
+              </>
+            )}
+            {optionCount === 1 && <Text>▶ Bye</Text>}
+            {optionCount === 2 && <Text>▶ whA</Text>}
+            {optionCount === 3 && <Text>▶ lol</Text>}
+            {optionCount >= 4 && optionCount < 9 && (
+              <Text>▶ What are you waiting for...</Text>
+            )}
+            {optionCount >= 9 && (
+              <Text>▶ Stop playing with my tongue &gt;:(</Text>
+            )}
+          </SelectionContainer>
+        </GameContainer>
+      </Container>
+    </>
+  );
+};
+
+const TextContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 0;
+`;
+
+const Text = styled.h1`
+  margin: 0;
+  color: white;
+  font-size: 3rem; /* You can adjust the font size as needed */
+  padding-right: 0px;
+`;
 
 // Create the styled components
 export const Container = styled.div`
@@ -32,7 +121,7 @@ export const Door = styled.div`
   }
 `;
 
-const TextContainer = styled.div`
+const GameContainer = styled.div`
   padding: 50px;
   padding: 0;
   margin: 0;
@@ -48,18 +137,13 @@ const TextContainer = styled.div`
 
 const SelectionContainer = styled.div`
   width: 100%;
-  padding: 0;
   margin: 0;
   height: 45%;
   border: 10px solid white;
   box-sizing: border-box;
   background-color: black;
-`;
-
-const Title = styled.h1`
-  margin: 0;
-  color: white;
-  font-size: 2rem; /* You can adjust the font size as needed */
+  cursor: pointer;
+  padding: 50px;
 `;
 
 const ImageWrapper = styled.div`
@@ -82,32 +166,5 @@ const ImageContainer = styled.img`
   padding: 0;
   object-fit: cover; /* Crop the image to fill the container */
 `;
-
-// CAt cam on bottom right
-
-const AboutMe = () => {
-  const [cat1Visible, setCat1Visible] = useState(true);
-  const [cat2Visible, setCat2Visible] = useState(false);
-  return (
-    <>
-      <Door></Door>
-      <Container>
-        <TextContainer>
-          <ImageWrapper>
-            {cat1Visible && (
-              <ImageContainer src={cat1} alt="aboutMeCat1"></ImageContainer>
-            )}
-            {cat2Visible && (
-              <ImageContainer src={cat2} alt="aboutMeCat2"></ImageContainer>
-            )}
-          </ImageWrapper>
-          <SelectionContainer>
-            <h1>Hello</h1>
-          </SelectionContainer>
-        </TextContainer>
-      </Container>
-    </>
-  );
-};
 
 export default AboutMe;

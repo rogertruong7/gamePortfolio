@@ -11,24 +11,20 @@ const AboutMe = ({ setCurrentScene }) => {
   const [cat2Visible, setCat2Visible] = useState(false);
   const [optionCount, setOptionCount] = useState(-1);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [nextText, setNextText] = useState(false);
   const [canClick, setCanClick] = useState(false);
+  const [endOfText, setEndOfText] = useState(false);
 
-  useEffect(() => {
-    if (nextText) {
-      setOptionCount((prevCount) => prevCount + 1);
-      setCat2Visible((prev) => !prev);
-      setCat1Visible((prev) => !prev);
-    } else {
-      console.log("hvnt finsihed");
-    }
-    setNextText(false);
-  }, [nextText]);
+  const onNextText = () => {
+    setOptionCount((prevCount) => prevCount + 1);
+    // setCat2Visible((prev) => !prev);
+    // setCat1Visible((prev) => !prev);
+    setCanClick(false);
+  }
 
   useEffect(() => {
     const handleClick = (event) => {
       if (canClick) {
-        setNextText(true);
+        onNextText();
       }
     };
 
@@ -38,9 +34,7 @@ const AboutMe = ({ setCurrentScene }) => {
 
     const handleKeyDown = (event) => {
       if (["Space", "Enter"].includes(event.code) && canClick) {
-        setNextText(true);
-      } else {
-        console.log("hvnt finsihed");
+        onNextText();
       }
     };
 
@@ -69,15 +63,13 @@ const AboutMe = ({ setCurrentScene }) => {
     <Typewriter
       onInit={(typewriter) => {
         typewriter
-          .callFunction(() => {
-            setCanClick(false);
-            console.log('starting typing')
-          })
           .changeDelay(10)
           .typeString(aboutMeScript[index])
           .callFunction(() => {
             setCanClick(true);
-            console.log("finished typing");
+            if (index === 4) {
+              setEndOfText(true);
+            }
           })
           .start();
       }}
@@ -102,9 +94,11 @@ const AboutMe = ({ setCurrentScene }) => {
               {optionCount === 2 && renderText(2)}
               {optionCount === 3 && renderText(3)}
               {optionCount >= 4 && renderText(4)}
-              {optionCount < 4 && <img style={arrowStyle} src={arrowdown} />}
+              {optionCount < 4 && canClick && (
+                <img style={arrowStyle} src={arrowdown} />
+              )}
             </TextContainer>
-            {optionCount >= 4 && (
+            {optionCount >= 4 && endOfText && (
               <ExitButton onClick={() => setCurrentScene(0)}>Exit</ExitButton>
             )}
           </SelectionContainer>
@@ -114,7 +108,7 @@ const AboutMe = ({ setCurrentScene }) => {
   );
 };
 
-const arrowStyle = { width: "30px", height: "50px", bottom: "0" };
+const arrowStyle = { width: "30px", height: "50px", bottom: "10px", position: "absolute", right: "0" };
 
 const ExitButton = styled.button`
   font-family: "Pixelify Sans", serif;
@@ -140,6 +134,7 @@ const TextContainer = styled.div`
   display: flex;
   gap: 20px;
   margin: 0;
+  position: relative;
 `;
 
 const Text = styled.h1`

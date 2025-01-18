@@ -5,17 +5,23 @@ function Lights() {
     <>
       <directionalLight
         color={0xf5d1ab}
-        intensity={1}
+        intensity={2}
         position={[-100, 300, 200]}
         castShadow
         shadow-camera-near={0.5}
         shadow-camera-far={1200}
-        shadow-camera-left={-400}
-        shadow-camera-right={400}
-        shadow-camera-top={400}
-        shadow-camera-bottom={-400}
+        shadow-camera-left={-200}
+        shadow-camera-right={200}
+        shadow-camera-top={300}
+        shadow-camera-bottom={-100}
       />
-      <ambientLight color={0xffffff} intensity={1.8} />
+      <ambientLight color={0xffffff} intensity={1} />
+      <rectAreaLight
+        color={0xffffff}
+        intensity={5}
+        position={[59, 17, -65]}
+        width={60}
+      />
     </>
   );
 }

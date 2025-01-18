@@ -4,7 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
-const Buildings = ({ setLoading }) => {
+const Buildings = ({ setLoading, setProgress }) => {
 
   // Different way of loading
   const { scene: leftBuildingsScene } = useLoader(
@@ -15,6 +15,7 @@ const Buildings = ({ setLoading }) => {
       loader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
         const progress = Math.round((itemsLoaded / itemsTotal) * 100);
         console.log(progress);
+        setProgress(progress);
       };
     }
   );

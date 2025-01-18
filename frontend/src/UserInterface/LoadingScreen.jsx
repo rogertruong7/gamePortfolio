@@ -23,52 +23,39 @@ const Vinyl = styled.div`
   /* Add specific styles for the vinyl element if needed */
 `;
 
-const LoadingBar = styled.div`
+const LoadingBarContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   margin-top: 20px;
+  gap: 5px; /* Space between the bars */
 `;
 
-const PulseDiv = styled.div`
-  width: 20px;
+const Bar = styled.div`
+  width: 40px; /* Width of each bar */
   height: 20px;
-  margin: 0 5px;
-  background-color: white;
-  border: 1px solid #ccc;
-  animation: pulse 1.2s infinite ease-in-out;
-
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-
-  &:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-
-  @keyframes pulse {
-    0%,
-    100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(1.2);
-      opacity: 0.6;
-    }
-  }
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 `;
 
-const LoadingScreen = () => {
+const LoadingScreen = ({ progress }) => {
+  // Calculate the number of active bars based on progress
+  const activeBars = Math.min(Math.ceil(progress / 20), 5); // Maximum 5 bars
+
   return (
     <LoadingContainer id="loading_screen">
       <h1>Loading...</h1>
       <Vinyl />
-      <LoadingBar>
-        <PulseDiv />
-        <PulseDiv />
-        <PulseDiv />
-      </LoadingBar>
+      <LoadingBarContainer>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Bar
+            key={index}
+            style={{
+              backgroundColor: index < activeBars ? "white" : "#ccc",
+              border: `1px solid ${index < activeBars ? "#fff" : "#999"}`,
+            }}
+          />
+        ))}
+      </LoadingBarContainer>
     </LoadingContainer>
   );
 };

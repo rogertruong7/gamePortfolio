@@ -84,4 +84,8 @@ const Details = () => {
   );
 };
 
+useGLTF.preload("models/cherryTree1.glb");
+useGLTF.preload("models/cherryTree2.glb");
+useGLTF.preload("models/cherryTree3.glb");
+
 export default Details;

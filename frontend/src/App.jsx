@@ -25,6 +25,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [reseted, setReseted] = useState(false);
   const [showPopup, setShowPopup] = useState(true);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     if (currentScene === 0) {
@@ -38,7 +39,7 @@ const App = () => {
   return (
     <>
       <Menu />
-      {loading && currentScene === 0 && <LoadingScreen />}
+      {loading && currentScene === 0 && <LoadingScreen progress={progress}/>}
       {!loading && (
         <>
           <ResetButton
@@ -70,6 +71,7 @@ const App = () => {
           setOneOptionButton={setOneOptionButton}
           reseted={reseted}
           setReseted={setReseted}
+          setProgress={setProgress}
         />
       </div>
       {enterPopupVisible && currentScene === 0 && (

@@ -2,7 +2,7 @@
 
 # List of model names
 # models=("cherryTree1" "cloudme" "floor" "leftBuildingsNew" "rightBuildingsNew")
-models=("floor")
+models=("floor" "cherryTree2" "cherryTree3" "cherryTree1")
 
 # Loop through each model and run the gltf-transform optimize command
 for model in "${models[@]}"; do

@@ -28,6 +28,7 @@ function MainGame({
   setOneOptionButton,
   reseted,
   setReseted,
+  setProgress
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
@@ -132,7 +133,7 @@ function MainGame({
           setTargetPosition={setTargetPosition}
           cameraRef={cameraRef}
         />
-        <Buildings setLoading={setLoading} />
+        <Buildings setLoading={setLoading} setProgress={setProgress}/>
         <Details />
         <Character
           ref={characterRef}

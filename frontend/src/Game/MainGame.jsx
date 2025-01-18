@@ -133,7 +133,7 @@ function MainGame({
           setTargetPosition={setTargetPosition}
           cameraRef={cameraRef}
         />
-        <Buildings setLoading={setLoading} setProgress={setProgress}/>
+        <Buildings setLoading={setLoading} setProgress={setProgress} />
         <Details />
         <Character
           ref={characterRef}
@@ -160,7 +160,6 @@ function MainGame({
         {darkSpot && <DarkSpot darkSpotPos={darkSpotPos} />}
 
         <Doorway
-
           characterRef={characterRef}
           setEnterPopupVisible={setEnterPopupVisible}
           setProjectButton={setProjectButton}

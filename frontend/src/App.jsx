@@ -35,6 +35,9 @@ const App = () => {
     }
   }, [currentScene]);
 
+  useEffect(() => {
+    console.log("Current progress:", progress);
+  }, [progress]);
 
   return (
     <>

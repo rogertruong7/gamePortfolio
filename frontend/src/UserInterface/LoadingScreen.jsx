@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import styled from "styled-components";
 
 // Define the styled-components
@@ -19,45 +19,41 @@ const LoadingContainer = styled.div`
   text-align: center;
 `;
 
-const Vinyl = styled.div`
-  /* Add specific styles for the vinyl element if needed */
-`;
-
 const LoadingBarContainer = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: center;
   margin-top: 20px;
   gap: 5px; /* Space between the bars */
+  width: 220px;
+  height: 64px;
+  border: 4px solid white;
 `;
 
 const Bar = styled.div`
   width: 40px; /* Width of each bar */
-  height: 20px;
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  height: 60px;
+  background-color: white;
 `;
 
 const LoadingScreen = ({ progress }) => {
-  // Calculate the number of active bars based on progress
-  const activeBars = Math.min(Math.ceil(progress / 20), 5); // Maximum 5 bars
+  // Calculate the number of bars based on progress (progress divided by 20)
+  const barCount = Math.max(Math.floor(progress / 20), 1); // At least 1 bar
+
+  console.log("progress", progress);
+  console.log("barCount", barCount);
+  // Generate an array of bars to render
+  const bars = Array.from({ length: barCount }, (_, index) => (
+    <Bar key={index}></Bar>
+  ));
 
   return (
     <LoadingContainer id="loading_screen">
       <h1>Loading...</h1>
-      <Vinyl />
-      <LoadingBarContainer>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <Bar
-            key={index}
-            style={{
-              backgroundColor: index < activeBars ? "white" : "#ccc",
-              border: `1px solid ${index < activeBars ? "#fff" : "#999"}`,
-            }}
-          />
-        ))}
-      </LoadingBarContainer>
+      <LoadingBarContainer>{bars}</LoadingBarContainer>
     </LoadingContainer>
   );
 };
+
 
 export default LoadingScreen;

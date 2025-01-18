@@ -86,7 +86,9 @@ const App = () => {
       {currentScene !== 0 && (
         <BackButton setCurrentScene={setCurrentScene}></BackButton>
       )}
-      {currentScene === 1 && <AboutMe></AboutMe>}
+      {currentScene === 1 && (
+        <AboutMe setCurrentScene={setCurrentScene}></AboutMe>
+      )}
       {currentScene === 2 && <Projects></Projects>}
       {currentScene === 3 && <Experiences></Experiences>}
       {currentScene === 4 && <Skills></Skills>}

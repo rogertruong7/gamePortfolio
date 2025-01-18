@@ -37,19 +37,24 @@ const Bar = styled.div`
 `;
 
 const LoadingScreen = ({ progress }) => {
+  const [visible, setVisible] = useState(false);
   // Calculate the number of bars based on progress (progress divided by 20)
   const barCount = Math.max(Math.floor(progress / 20), 1); // At least 1 bar
-
+  
   console.log("progress", progress);
   console.log("barCount", barCount);
   // Generate an array of bars to render
+  
   const bars = Array.from({ length: barCount }, (_, index) => (
     <Bar key={index}></Bar>
   ));
 
+
+
   return (
     <LoadingContainer id="loading_screen">
       <h1>Loading...</h1>
+      {progress > 20 && <h1>Hello world</h1>}
       <LoadingBarContainer>{bars}</LoadingBarContainer>
     </LoadingContainer>
   );

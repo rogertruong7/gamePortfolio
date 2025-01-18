@@ -42,7 +42,7 @@ const App = () => {
   return (
     <>
       <Menu />
-      {loading && currentScene === 0 && <LoadingScreen progress={progress}/>}
+      {loading && currentScene === 0 && <LoadingScreen progress={progress} />}
       {!loading && (
         <>
           <ResetButton
@@ -75,6 +75,7 @@ const App = () => {
           reseted={reseted}
           setReseted={setReseted}
           setProgress={setProgress}
+ 
         />
       </div>
       {enterPopupVisible && currentScene === 0 && (

@@ -5,17 +5,16 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
 const Buildings = ({ setLoading, setProgress }) => {
-
+  
   // Different way of loading
   const { scene: leftBuildingsScene } = useLoader(
     GLTFLoader,
     "models/leftBuildingsNew.glb",
     (loader) => {
       loader.setMeshoptDecoder(MeshoptDecoder);
+
       loader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
         const progress = Math.round((itemsLoaded / itemsTotal) * 100);
-        console.log(progress);
-        setProgress(progress);
       };
     }
   );
@@ -23,6 +22,10 @@ const Buildings = ({ setLoading, setProgress }) => {
   const { scene: rightBuildingsScene } = useGLTF(
     "models/rightBuildingsNew.glb"
   );
+
+  useEffect(() => {
+    setProgress(60);
+  }, []);
 
   useEffect(() => {
     // Traverse the loaded scenes to set shadow properties for each mesh

@@ -14,24 +14,26 @@ const Details = () => {
     "models/cherryTree3.glb"
   );
 
-  const mixer = useRef();
+  const mixer1 = useRef();
+  const mixer2 = useRef();
+  const mixer3 = useRef();
 
   useEffect(() => {
     // Set up animations for each tree
     [tree1Scene, tree2Scene, tree3Scene].forEach((scene, index) => {
       if (index === 0 && tree1Animations.length > 0) {
-        mixer.current = new THREE.AnimationMixer(scene);
-        const action = mixer.current.clipAction(tree1Animations[0]);
+        mixer1.current = new THREE.AnimationMixer(scene);
+        const action = mixer1.current.clipAction(tree1Animations[0]);
         action.play();
       }
       if (index === 1 && tree2Animations.length > 0) {
-        mixer.current = new THREE.AnimationMixer(scene);
-        const action = mixer.current.clipAction(tree2Animations[0]);
+        mixer2.current = new THREE.AnimationMixer(scene);
+        const action = mixer2.current.clipAction(tree2Animations[0]);
         action.play();
       }
       if (index === 2 && tree3Animations.length > 0) {
-        mixer.current = new THREE.AnimationMixer(scene);
-        const action = mixer.current.clipAction(tree3Animations[0]);
+        mixer3.current = new THREE.AnimationMixer(scene);
+        const action = mixer3.current.clipAction(tree3Animations[0]);
         action.play();
       }
 
@@ -46,11 +48,17 @@ const Details = () => {
 
   useFrame(({ clock }) => {
     let delta = clock.getDelta();
-    delta = Math.max(delta, 0.002);
+    delta = Math.max(delta, 0.004);
 
     // Update all mixers for animation playback
-    if (mixer.current) {
-      mixer.current.update(delta);
+    if (mixer1.current) {
+      mixer1.current.update(delta);
+    }
+    if (mixer2.current) {
+      mixer2.current.update(delta);
+    }
+    if (mixer3.current) {
+      mixer3.current.update(delta);
     }
   });
 
@@ -59,7 +67,7 @@ const Details = () => {
       {/* First tree */}
       <primitive
         object={tree1Scene}
-        scale={[8, 6, 8]}
+        scale={[8, 5, 8]}
         position={[33, -8, -219]}
         name={"tree1"}
       />

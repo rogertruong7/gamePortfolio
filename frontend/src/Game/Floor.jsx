@@ -12,7 +12,7 @@ const Floor = React.forwardRef(({
 }, ref) => {
   const { scene } = useGLTF("models/floor.glb");
   let mouseDownTime = 0; 
-  const CLICK_THRESHOLD = 150; 
+  const CLICK_THRESHOLD = 100; 
 
   useEffect(() => {
     scene.traverse((node) => {

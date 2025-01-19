@@ -4,15 +4,51 @@ import cat1 from "../assets/roomArt/aboutMeCat1.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
-import { projectsScript } from "./Lines";
-import PageWithOptions from "./OptionSelector";
-
+import { projectsScript } from "./ShowcaseStatic";
+import OptionSelector from "./OptionSelector";
+import TributaryPage from "./ProjectPages/TributaryPage";
+import QuizPage from "./ProjectPages/QuizPage";
 
 const Projects = ({ setCurrentScene }) => {
+
+  const pages = {
+    1: <TributaryPage />,
+    2: <QuizPage />,
+    3: <TributaryPage />,
+    4: <TributaryPage />,
+    5: <TributaryPage />,
+    6: <TributaryPage />,
+    7: <TributaryPage />,
+  };
+
   const [cat1Visible, setCat1Visible] = useState(true);
   const [optionCount, setOptionCount] = useState(-1);
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [fontSize, setFontSize] = useState(3);
+  const [pageToShow, setPageToShow] = useState(null);
+  const [cameFromBack, setCameFromBack] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1700px)");
+    const handleResize = (e) => setIsVisible(e.matches);
+
+    // Check on initial load
+    setIsVisible(mediaQuery.matches);
+
+    // Add listener
+    mediaQuery.addEventListener("change", handleResize);
+
+    // Cleanup listener on unmount
+    return () => mediaQuery.removeEventListener("change", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (pageToShow) {
+      console.log("pageToshow", pageToShow);
+    }
+    
+  }, [pageToShow]);
 
   useEffect(() => {
     const timeout = setTimeout(() => setOptionCount(0), 500);
@@ -45,13 +81,33 @@ const Projects = ({ setCurrentScene }) => {
     <>
       <Door />
       <Container>
-        <GameContainer>
+        {pageToShow && (
+          <>
+            {pages[pageToShow]}
+            {!isVisible && (
+              <button
+                style={{ height: "50px" }}
+                onClick={() => {
+                  setPageToShow(null);
+                  setCameFromBack(true);
+                }}
+              >
+                Back
+              </button>
+            )}
+          </>
+        )}
+        <GameContainer
+          style={{
+            display: isVisible ? "block" : "none",
+          }}
+        >
           <ImageWrapper>
             {cat1Visible && <ImageContainer src={cat1} alt="aboutMeCat1" />}
           </ImageWrapper>
           <SelectionContainer id="selectionContainer">
             <TextContainer>
-              {optionCount === 0 && (
+              {optionCount === 0 && !cameFromBack && (
                 <Typewriter
                   onInit={(typewriter) => {
                     typewriter
@@ -64,12 +120,21 @@ const Projects = ({ setCurrentScene }) => {
                   }}
                 />
               )}
+              {optionCount === 0 && cameFromBack && (
+                <h1
+                  style={{
+                    marginTop: 0,
+                    color: "white",
+                    fontSize: `${fontSize}rem`,
+                    paddingRight: "0px",
+                  }}
+                >
+                  {projectsScript[0]}
+                </h1>
+              )}
               {optionCount === 1 && <Text>Hello world</Text>}
-              {/* {optionCount < 4 && canClick && (
-                <img style={arrowStyle} src={arrowdown} />
-              )} */}
             </TextContainer>
-            {optionsVisible && <PageWithOptions />}
+            {optionsVisible && <OptionSelector setPageToShow={setPageToShow} />}
           </SelectionContainer>
         </GameContainer>
       </Container>

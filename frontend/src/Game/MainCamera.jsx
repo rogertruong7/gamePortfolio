@@ -79,19 +79,20 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
       // Update the previous mouse position for the next move
       previousMousePosition.current = { x: event.clientX, y: event.clientY };
     };
-
+    
+    const canvas = document.getElementById('gameCanvas');
     // Attach event listeners for mouse actions
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("mouseup", onMouseUp);
-    document.addEventListener("mouseleave", onMouseLeave);
-    document.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mousedown", onMouseDown);
+    canvas.addEventListener("mouseup", onMouseUp);
+    canvas.addEventListener("mouseleave", onMouseLeave);
+    canvas.addEventListener("mousemove", onMouseMove);
 
     // Cleanup event listeners when the component unmounts
     return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("mouseup", onMouseUp);
-      document.removeEventListener("mouseleave", onMouseLeave);
-      document.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("mousedown", onMouseDown);
+      canvas.removeEventListener("mouseup", onMouseUp);
+      canvas.removeEventListener("mouseleave", onMouseLeave);
+      canvas.removeEventListener("mousemove", onMouseMove);
     };
   }, [isDragging]);
 

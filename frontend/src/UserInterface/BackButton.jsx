@@ -26,7 +26,7 @@ const Button = styled.button`
 const BackButton = ({ setCurrentScene }) => {
   return (
     <>
-      <Button onClick={() => setCurrentScene(0)}>back</Button>
+      <Button onClick={() => setCurrentScene(0)}>home</Button>
     </>
   );
 };

@@ -1,28 +1,19 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import arrow from "../assets/TriangleRight.svg";
+import { projects } from "./ShowcaseStatic";
 
-const data = [
-  [
-    "Event-Driven Architecture Java API",
-    "Quiz Website w/ RESTful API (TypeScript)",
-    "Presto - Slido Clone (React.js)",
-    "TikTok Playback Speed Chrome Extension (JavaScript)",
-  ],
-  ["Forum Website (HTML/CSS/JavaScript)", "Discord Economy Bot (JavaScript)", "This Portfolio!"],
-];
 
-const PageWithOptions = () => {
+const OptionSelector = ({ setPageToShow }) => {
   const [currentPage, setCurrentPage] = useState(0); // Current page index
   const [selectedIndex, setSelectedIndex] = useState(0); // Default: Top Left
 
-  const currentOptions = data[currentPage];
+  const currentOptions = projects[currentPage];
 
   const handleKeyDown = (e) => {
     if (e.key === "ArrowRight") {
       if (selectedIndex + 1 === currentOptions.length && selectedIndex !== 3) {
         console.log("last option");
-      } else if (selectedIndex === 3 && currentPage < data.length - 1) {
+      } else if (selectedIndex === 3 && currentPage < projects.length - 1) {
         setCurrentPage((prev) => prev + 1);
         setSelectedIndex(0);
       } else if (selectedIndex < 3) {
@@ -43,6 +34,8 @@ const PageWithOptions = () => {
       if (selectedIndex === 0 || selectedIndex === 1) {
         setSelectedIndex((prev) => prev + 2);
       }
+    } else if (e.key === "Enter") {
+      handleClickOption(selectedIndex);
     }
   };
 
@@ -58,12 +51,16 @@ const PageWithOptions = () => {
     }
   };
 
-  const goToNextPage = () => {
-    if (currentPage < data.length - 1) {
+  const goToNextPage = ({ setPageToShow }) => {
+    if (currentPage < projects.length - 1) {
       setCurrentPage((prev) => prev + 1);
       setSelectedIndex(0); // Default to first option of the next page
     }
   };
+
+  const handleClickOption = (index) => {
+    setPageToShow((currentPage * 4) + (index + 1));
+  }
 
   return (
     <Container>
@@ -73,7 +70,7 @@ const PageWithOptions = () => {
           &#9664; {/* Left Arrow */}
         </LeftArrowButton>
       )}
-      {currentPage < data.length - 1 && (
+      {currentPage < projects.length - 1 && (
         <RightArrowButton onClick={goToNextPage}>
           &#9654; {/* Right Arrow */}
         </RightArrowButton>
@@ -85,7 +82,7 @@ const PageWithOptions = () => {
           <Option
             key={index}
             onMouseEnter={() => setSelectedIndex(index)}
-            onClick={() => alert(`${option} clicked!`)}
+            onClick={() => handleClickOption(index)}
           >
             <ArrowText selected={selectedIndex === index}>&#9654;</ArrowText>
             <Text selected={selectedIndex === index}>{option}</Text>
@@ -108,7 +105,7 @@ const Text = styled.div`
   display: flex;
   justify-content: left;
   align-items: center;
-  border: ${({ selected }) => (selected ? "2px dashed white" : "none")};
+  border: ${({ selected }) => (selected ? "2px dashed white" : "2px solid transparent")};
 `;
 
 const ArrowText = styled.h1`
@@ -170,8 +167,8 @@ const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 10px;
-  padding: 20px;
+  gap: 5px;
+
   flex: 1;
 `;
 
@@ -179,7 +176,7 @@ const Option = styled.div`
   display: flex;
   align-items: center;
   justify-content: left;
-  padding: 10px;
+
   height: 60px;
 
   cursor: pointer;
@@ -187,4 +184,4 @@ const Option = styled.div`
   gap: 20px;
 `;
 
-export default PageWithOptions;
+export default OptionSelector;

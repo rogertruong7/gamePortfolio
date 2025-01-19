@@ -4,7 +4,7 @@ import cat1 from "../assets/roomArt/aboutMeCat1.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
-import { aboutMeScript } from "./Lines";
+import { aboutMeScript } from "./ShowcaseStatic";
 
 const Skills = ({ setCurrentScene }) => {
   const [cat1Visible, setCat1Visible] = useState(true);

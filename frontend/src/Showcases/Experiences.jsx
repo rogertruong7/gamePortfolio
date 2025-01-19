@@ -4,59 +4,22 @@ import cat1 from "../assets/roomArt/aboutMeCat1.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
-import { aboutMeScript } from "./Lines";
+import { projectsScript } from "./ShowcaseStatic";
+import OptionSelector from "./OptionSelector";
 
 const Experiences = ({ setCurrentScene }) => {
   const [cat1Visible, setCat1Visible] = useState(true);
-  const [cat2Visible, setCat2Visible] = useState(false);
   const [optionCount, setOptionCount] = useState(-1);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [canClick, setCanClick] = useState(false);
-  const [endOfText, setEndOfText] = useState(false);
+  const [optionsVisible, setOptionsVisible] = useState(false);
   const [fontSize, setFontSize] = useState(3);
 
-  const onNextText = () => {
-    setOptionCount((prevCount) => prevCount + 1);
-    // setCat2Visible((prev) => !prev);
-    // setCat1Visible((prev) => !prev);
-    setCanClick(false);
-  };
-
   useEffect(() => {
-    const handleClick = (event) => {
-      if (canClick) {
-        onNextText();
-      }
-    };
-
-    const selectionContainer = document.getElementById("selectionContainer");
-    selectionContainer.addEventListener("click", handleClick);
-
-    const handleKeyDown = (event) => {
-      if (["Space", "Enter"].includes(event.code) && canClick) {
-        onNextText();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      selectionContainer.removeEventListener("click", handleClick);
-    };
-  }, [canClick]);
-
-  useEffect(() => {
-    const img = new Image();
-    img.src = cat2;
-    img.onload = () => setIsLoaded(true);
-
     const timeout = setTimeout(() => setOptionCount(0), 500);
     const handleResize = () => {
       if (window.innerWidth > 800) {
-        setFontSize(3);
-      } else if (window.innerWidth <= 800) {
         setFontSize(2);
+      } else if (window.innerWidth <= 800) {
+        setFontSize(1.5);
       } else if (window.innerWidth <= 600) {
         setFontSize(1);
       } else if (window.innerWidth <= 400) {
@@ -73,24 +36,9 @@ const Experiences = ({ setCurrentScene }) => {
     };
   }, []);
 
-  const renderText = (index) => (
-    <Typewriter
-      onInit={(typewriter) => {
-        typewriter
-          .changeDelay(10)
-          .typeString(
-            `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${aboutMeScript[index]}</h1>`
-          )
-          .callFunction(() => {
-            setCanClick(true);
-            if (index === 4) {
-              setEndOfText(true);
-            }
-          })
-          .start();
-      }}
-    />
-  );
+  const showOptions = () => {
+    setOptionsVisible(true);
+  };
 
   return (
     <>
@@ -99,24 +47,25 @@ const Experiences = ({ setCurrentScene }) => {
         <GameContainer>
           <ImageWrapper>
             {cat1Visible && <ImageContainer src={cat1} alt="aboutMeCat1" />}
-            {cat2Visible && isLoaded && (
-              <ImageContainer src={cat2} alt="aboutMeCat2" />
-            )}
           </ImageWrapper>
           <SelectionContainer id="selectionContainer">
             <TextContainer>
-              {optionCount === 0 && renderText(0)}
-              {optionCount === 1 && renderText(1)}
-              {optionCount === 2 && renderText(2)}
-              {optionCount === 3 && renderText(3)}
-              {optionCount >= 4 && renderText(4)}
-              {optionCount < 4 && canClick && (
-                <img style={arrowStyle} src={arrowdown} />
+              {optionCount === 0 && (
+                <Typewriter
+                  onInit={(typewriter) => {
+                    typewriter
+                      .changeDelay(10)
+                      .typeString(
+                        `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${projectsScript[0]}</h1>`
+                      )
+                      .callFunction(showOptions)
+                      .start();
+                  }}
+                />
               )}
+              {optionCount === 1 && <Text>Hello world</Text>}
             </TextContainer>
-            {optionCount >= 4 && endOfText && (
-              <ExitButton onClick={() => setCurrentScene(0)}>Exit</ExitButton>
-            )}
+            {optionsVisible && <OptionSelector />}
           </SelectionContainer>
         </GameContainer>
       </Container>
@@ -216,7 +165,7 @@ const SelectionContainer = styled.div`
   background-color: black;
   padding: 50px;
   position: relative;
-  cursor: pointer;
+
   box-sizing: border-box;
   overflow: auto;
 

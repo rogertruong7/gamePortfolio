@@ -89,7 +89,7 @@ const EnterPopup = ({
             id="experience_button"
             onClick={() => setCurrentScene(3)}
           >
-            Enter Experiences
+            Enter Experience
           </EnterButton>
         )}
         {skillsButton && (

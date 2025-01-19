@@ -22,7 +22,7 @@ export const invisWalls = [
 export const labels = [
   { text: "projects", position: [38, 90, -90], fontSize: 10 },
   { text: "about me", position: [38, 70, -164], fontSize: 10 },
-  { text: "experiences", position: [92, 75, -210], fontSize: 8 },
+  { text: "experience", position: [92, 75, -210], fontSize: 8 },
   { text: "skills", position: [170, 75, -210], fontSize: 10 },
 ];
 

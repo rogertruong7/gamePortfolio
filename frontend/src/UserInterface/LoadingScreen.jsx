@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useProgress } from "@react-three/drei";
 
@@ -26,22 +26,36 @@ const LoadingBarContainer = styled.div`
   align-items: center;
   margin-top: 20px;
   gap: 5px; /* Space between the bars */
-  width: 220px;
-  height: 60px;
+  width: 245px;
+  height: 40px;
   padding: 5px;
   border: 4px solid white;
 `;
 
 const Bar = styled.div`
-  width: 40px; /* Width of each bar */
-  height: 60px;
+  width: 20px; /* Width of each bar */
+  height: 40px;
   background-color: white;
 `;
 
 const LoadingScreen = () => {
   // Calculate the number of bars based on progress (progress divided by 20)
   const { progress } = useProgress();
-  const barCount = Math.max(Math.floor(progress / 20)); // At least 1 bar
+  const previousProgress = useRef(progress); // Store the previous progress value
+
+  // Update the previous progress on every render
+
+  console.log("previous", previousProgress);
+  console.log("current", progress);
+
+  let barCount = 0;
+  if (progress >= previousProgress.current) {
+    barCount = Math.max(Math.floor(progress / 10));
+    previousProgress.current = progress;
+  } else {
+    barCount = Math.max(Math.floor(previousProgress.current / 10));
+  }
+  // At least 1 bar
 
   const bars = Array.from({ length: barCount }, (_, index) => (
     <Bar key={index}></Bar>
@@ -54,6 +68,5 @@ const LoadingScreen = () => {
     </LoadingContainer>
   );
 };
-
 
 export default LoadingScreen;

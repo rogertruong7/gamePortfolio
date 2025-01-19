@@ -76,7 +76,7 @@ const Character = React.forwardRef(
           if (!result) {
             // No collision, move the character
             character.position.add(stepDirection);
-            updateRotation(stepDirection);
+            updateRotation(stepDirection, delta);
           } else {
             setDarkspot(false);
             setClickMoving(false);
@@ -89,7 +89,7 @@ const Character = React.forwardRef(
     }
 
     let lastDirection = new THREE.Vector3(0, 0, 1);
-    function updateRotation(inputVector) {
+    function updateRotation(inputVector, delta) {
       if (inputVector.length() > 0) {
         // Normalize the input vector and store the last valid direction
         inputVector.normalize();
@@ -121,7 +121,7 @@ const Character = React.forwardRef(
         }
 
         // Smoothly interpolate the character's current rotation to the target angle
-        const smoothFactor = 0.1; // Adjust this value for rotation speed
+        const smoothFactor = 20 * delta; // Adjust this value for rotation speed
         const newAngle = currentAngle + angleDifference * smoothFactor;
         // Apply the new angle back, removing the offset adjustment
         ref.current.rotation.y = newAngle - Math.PI / 4;
@@ -200,7 +200,7 @@ const Character = React.forwardRef(
           wall = result.collidingWall;
         }
 
-        updateRotation(finalDirection);
+        updateRotation(finalDirection, delta);
         if (!collisionNormal) {
           character.position.addScaledVector(finalDirection, delta * SPEED);
         } else {

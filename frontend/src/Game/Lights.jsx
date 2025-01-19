@@ -5,7 +5,7 @@ function Lights() {
     <>
       <directionalLight
         color={0xf5d1ab}
-        intensity={2}
+        intensity={1.5}
         position={[-100, 300, 200]}
         castShadow
         shadow-camera-near={0.5}
@@ -18,9 +18,10 @@ function Lights() {
       <ambientLight color={0xffffff} intensity={1} />
       <rectAreaLight
         color={0xffffff}
-        intensity={5}
-        position={[59, 17, -65]}
-        width={60}
+        intensity={4}
+        position={[59, 15, -58]}
+        width={20}
+        height={15}
       />
     </>
   );

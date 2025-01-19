@@ -11,7 +11,7 @@ const EntrancePopupContainer = styled.div`
   padding: 30px;
   padding-bottom: 50px;
   margin: auto;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   width: 300px;
@@ -43,7 +43,7 @@ const EnterButton = styled.button`
   text-align: center;
   font-family: "Pixelify Sans", serif;
   z-index: 102;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.5);
   border: none;
   border-radius: 20px;
   padding: 10px 15px;
@@ -54,7 +54,7 @@ const EnterButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.9);
   }
 `;
 

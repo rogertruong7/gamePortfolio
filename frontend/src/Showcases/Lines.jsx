@@ -5,3 +5,8 @@ export const aboutMeScript = [
   "Roger’s on the lookout for opportunities to show what he’s got, put his skills to good use, and work on projects that really matter.",
   "I hope you get to talk to him one day!",
 ];
+
+
+export const projectsScript = [
+  "Welcome to Roger's Project Library. Which project would you like to see?",
+];

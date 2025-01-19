@@ -45,8 +45,6 @@ const LoadingScreen = () => {
 
   // Update the previous progress on every render
 
-  console.log("previous", previousProgress);
-  console.log("current", progress);
 
   let barCount = 0;
   if (progress >= previousProgress.current) {

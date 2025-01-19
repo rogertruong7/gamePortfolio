@@ -250,7 +250,7 @@ const Character = React.forwardRef(
 
       if (clickMoving || arrowMoving) {
         // Set a minimum delta value when certain conditions are met
-        adjustedDelta = Math.max(delta, 0.02);
+        adjustedDelta = Math.max(delta, 0.015);
       }
 
       // Update the animation mixer if it exists

@@ -5,13 +5,13 @@ import Menu from "./UserInterface/Menu.jsx";
 import EnterPopup from "./UserInterface/EnterPopup.jsx";
 import "./App.css";
 import BackButton from "./UserInterface/BackButton.jsx";
-import Projects from "./Projects/Projects.jsx";
+import Projects from "./Showcases/Projects.jsx";
 import ResetButton from "./UserInterface/ResetButton.jsx";
 import Popup from "./UserInterface/TutorialPopup.jsx";
 import HelpButton from "./UserInterface/HelpButton.jsx";
-import AboutMe from "./Projects/AboutMe.jsx";
-import Skills from "./Projects/Skills.jsx";
-import Experiences from "./Projects/Experiences.jsx";
+import AboutMe from "./Showcases/AboutMe.jsx";
+import Skills from "./Showcases/Skills.jsx";
+import Experiences from "./Showcases/Experiences.jsx";
 
 const App = () => {
   const [currentScene, setCurrentScene] = useState(0);

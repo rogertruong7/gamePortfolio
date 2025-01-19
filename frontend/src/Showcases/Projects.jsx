@@ -8,8 +8,9 @@ import { projectsScript } from "./ShowcaseStatic";
 import OptionSelector from "./OptionSelector";
 import TributaryPage from "./ProjectPages/TributaryPage";
 import QuizPage from "./ProjectPages/QuizPage";
+import { projects } from "./ShowcaseStatic";
 
-const Projects = ({ setCurrentScene }) => {
+const Projects = () => {
 
   const pages = {
     1: <TributaryPage />,
@@ -30,7 +31,7 @@ const Projects = ({ setCurrentScene }) => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 1700px)");
+    const mediaQuery = window.matchMedia("(max-width: 1700px)");
     const handleResize = (e) => setIsVisible(e.matches);
 
     // Check on initial load
@@ -99,7 +100,7 @@ const Projects = ({ setCurrentScene }) => {
         )}
         <GameContainer
           style={{
-            display: isVisible ? "block" : "none",
+            display: (isVisible && pageToShow) ? "none" : "block",
           }}
         >
           <ImageWrapper>
@@ -134,7 +135,7 @@ const Projects = ({ setCurrentScene }) => {
               )}
               {optionCount === 1 && <Text>Hello world</Text>}
             </TextContainer>
-            {optionsVisible && <OptionSelector setPageToShow={setPageToShow} />}
+            {optionsVisible && <OptionSelector setPageToShow={setPageToShow} data={projects} />}
           </SelectionContainer>
         </GameContainer>
       </Container>

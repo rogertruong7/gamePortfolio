@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { projects } from "./ShowcaseStatic";
 
-
-const OptionSelector = ({ setPageToShow }) => {
+// Data is an array of strings
+const OptionSelector = ({ setPageToShow, data }) => {
   const [currentPage, setCurrentPage] = useState(0); // Current page index
   const [selectedIndex, setSelectedIndex] = useState(0); // Default: Top Left
 
-  const currentOptions = projects[currentPage];
+  const currentOptions = data[currentPage];
 
   const handleKeyDown = (e) => {
     if (e.key === "ArrowRight") {
       if (selectedIndex + 1 === currentOptions.length && selectedIndex !== 3) {
         console.log("last option");
-      } else if (selectedIndex === 3 && currentPage < projects.length - 1) {
+      } else if (selectedIndex === 3 && currentPage < data.length - 1) {
         setCurrentPage((prev) => prev + 1);
         setSelectedIndex(0);
       } else if (selectedIndex < 3) {
@@ -52,7 +51,7 @@ const OptionSelector = ({ setPageToShow }) => {
   };
 
   const goToNextPage = ({ setPageToShow }) => {
-    if (currentPage < projects.length - 1) {
+    if (currentPage < data.length - 1) {
       setCurrentPage((prev) => prev + 1);
       setSelectedIndex(0); // Default to first option of the next page
     }
@@ -70,7 +69,7 @@ const OptionSelector = ({ setPageToShow }) => {
           &#9664; {/* Left Arrow */}
         </LeftArrowButton>
       )}
-      {currentPage < projects.length - 1 && (
+      {currentPage < data.length - 1 && (
         <RightArrowButton onClick={goToNextPage}>
           &#9654; {/* Right Arrow */}
         </RightArrowButton>

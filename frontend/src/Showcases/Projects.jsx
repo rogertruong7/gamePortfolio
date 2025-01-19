@@ -28,14 +28,14 @@ const Projects = () => {
   const [fontSize, setFontSize] = useState(3);
   const [pageToShow, setPageToShow] = useState(null);
   const [cameFromBack, setCameFromBack] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [lessThan1700, setLessThan1700] = useState(true);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 1700px)");
-    const handleResize = (e) => setIsVisible(e.matches);
+    const handleResize = (e) => setLessThan1700(e.matches);
 
     // Check on initial load
-    setIsVisible(mediaQuery.matches);
+    setLessThan1700(mediaQuery.matches);
 
     // Add listener
     mediaQuery.addEventListener("change", handleResize);
@@ -85,7 +85,7 @@ const Projects = () => {
         {pageToShow && (
           <>
             {pages[pageToShow]}
-            {!isVisible && (
+            {lessThan1700 && (
               <button
                 style={{ height: "50px" }}
                 onClick={() => {
@@ -100,7 +100,7 @@ const Projects = () => {
         )}
         <GameContainer
           style={{
-            display: (isVisible && pageToShow) ? "none" : "block",
+            display: (lessThan1700 && pageToShow) ? "none" : "block",
           }}
         >
           <ImageWrapper>

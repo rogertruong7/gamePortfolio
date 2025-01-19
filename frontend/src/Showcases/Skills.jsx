@@ -4,59 +4,58 @@ import cat1 from "../assets/roomArt/aboutMeCat1.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
-import { aboutMeScript } from "./ShowcaseStatic";
+import { projectsScript } from "./ShowcaseStatic";
+import OptionSelector from "./OptionSelector";
+import TributaryPage from "./ProjectPages/TributaryPage";
+import QuizPage from "./ProjectPages/QuizPage";
+import { projects } from "./ShowcaseStatic";
 
-const Skills = ({ setCurrentScene }) => {
-  const [cat1Visible, setCat1Visible] = useState(true);
-  const [cat2Visible, setCat2Visible] = useState(false);
-  const [optionCount, setOptionCount] = useState(-1);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [canClick, setCanClick] = useState(false);
-  const [endOfText, setEndOfText] = useState(false);
-  const [fontSize, setFontSize] = useState(3);
-
-  const onNextText = () => {
-    setOptionCount((prevCount) => prevCount + 1);
-    // setCat2Visible((prev) => !prev);
-    // setCat1Visible((prev) => !prev);
-    setCanClick(false);
+const Skills = () => {
+  const pages = {
+    1: <TributaryPage />,
+    2: <QuizPage />,
+    3: <TributaryPage />,
+    4: <TributaryPage />,
+    5: <TributaryPage />,
+    6: <TributaryPage />,
+    7: <TributaryPage />,
   };
 
-  useEffect(() => {
-    const handleClick = (event) => {
-      if (canClick) {
-        onNextText();
-      }
-    };
-
-    const selectionContainer = document.getElementById("selectionContainer");
-    selectionContainer.addEventListener("click", handleClick);
-
-    const handleKeyDown = (event) => {
-      if (["Space", "Enter"].includes(event.code) && canClick) {
-        onNextText();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      selectionContainer.removeEventListener("click", handleClick);
-    };
-  }, [canClick]);
+  const [cat1Visible, setCat1Visible] = useState(true);
+  const [optionCount, setOptionCount] = useState(-1);
+  const [optionsVisible, setOptionsVisible] = useState(false);
+  const [fontSize, setFontSize] = useState(3);
+  const [pageToShow, setPageToShow] = useState(null);
+  const [cameFromBack, setCameFromBack] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const img = new Image();
-    img.src = cat2;
-    img.onload = () => setIsLoaded(true);
+    const mediaQuery = window.matchMedia("(max-width: 1700px)");
+    const handleResize = (e) => setIsVisible(e.matches);
 
+    // Check on initial load
+    setIsVisible(mediaQuery.matches);
+
+    // Add listener
+    mediaQuery.addEventListener("change", handleResize);
+
+    // Cleanup listener on unmount
+    return () => mediaQuery.removeEventListener("change", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (pageToShow) {
+      console.log("pageToshow", pageToShow);
+    }
+  }, [pageToShow]);
+
+  useEffect(() => {
     const timeout = setTimeout(() => setOptionCount(0), 500);
     const handleResize = () => {
       if (window.innerWidth > 800) {
-        setFontSize(3);
-      } else if (window.innerWidth <= 800) {
         setFontSize(2);
+      } else if (window.innerWidth <= 800) {
+        setFontSize(1.5);
       } else if (window.innerWidth <= 600) {
         setFontSize(1);
       } else if (window.innerWidth <= 400) {
@@ -73,49 +72,69 @@ const Skills = ({ setCurrentScene }) => {
     };
   }, []);
 
-  const renderText = (index) => (
-    <Typewriter
-      onInit={(typewriter) => {
-        typewriter
-          .changeDelay(10)
-          .typeString(
-            `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${aboutMeScript[index]}</h1>`
-          )
-          .callFunction(() => {
-            setCanClick(true);
-            if (index === 4) {
-              setEndOfText(true);
-            }
-          })
-          .start();
-      }}
-    />
-  );
+  const showOptions = () => {
+    setOptionsVisible(true);
+  };
 
   return (
     <>
       <Door />
       <Container>
-        <GameContainer>
+        {pageToShow && (
+          <>
+            {pages[pageToShow]}
+            {!isVisible && (
+              <button
+                style={{ height: "50px" }}
+                onClick={() => {
+                  setPageToShow(null);
+                  setCameFromBack(true);
+                }}
+              >
+                Back
+              </button>
+            )}
+          </>
+        )}
+        <GameContainer
+          style={{
+            display: isVisible && pageToShow ? "none" : "block",
+          }}
+        >
           <ImageWrapper>
             {cat1Visible && <ImageContainer src={cat1} alt="aboutMeCat1" />}
-            {cat2Visible && isLoaded && (
-              <ImageContainer src={cat2} alt="aboutMeCat2" />
-            )}
           </ImageWrapper>
           <SelectionContainer id="selectionContainer">
             <TextContainer>
-              {optionCount === 0 && renderText(0)}
-              {optionCount === 1 && renderText(1)}
-              {optionCount === 2 && renderText(2)}
-              {optionCount === 3 && renderText(3)}
-              {optionCount >= 4 && renderText(4)}
-              {optionCount < 4 && canClick && (
-                <img style={arrowStyle} src={arrowdown} />
+              {optionCount === 0 && !cameFromBack && (
+                <Typewriter
+                  onInit={(typewriter) => {
+                    typewriter
+                      .changeDelay(10)
+                      .typeString(
+                        `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${projectsScript[0]}</h1>`
+                      )
+                      .callFunction(showOptions)
+                      .start();
+                  }}
+                />
               )}
+              {optionCount === 0 && cameFromBack && (
+                <h1
+                  style={{
+                    marginTop: 0,
+                    color: "white",
+                    fontSize: `${fontSize}rem`,
+                    paddingRight: "0px",
+                  }}
+                >
+                  {projectsScript[0]}
+                </h1>
+              )}
+              {optionCount === 1 && <Text>Hello world</Text>}
             </TextContainer>
-            {optionCount >= 4 && endOfText && (
-              <ExitButton onClick={() => setCurrentScene(0)}>Exit</ExitButton>
+            {optionsVisible && (
+              <OptionSelector setPageToShow={setPageToShow} data={projects} />
             )}
           </SelectionContainer>
         </GameContainer>
@@ -216,7 +235,7 @@ const SelectionContainer = styled.div`
   background-color: black;
   padding: 50px;
   position: relative;
-  cursor: pointer;
+
   box-sizing: border-box;
   overflow: auto;
 

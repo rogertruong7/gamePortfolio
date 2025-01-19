@@ -13,6 +13,7 @@ const AboutMe = ({ setCurrentScene }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [canClick, setCanClick] = useState(false);
   const [endOfText, setEndOfText] = useState(false);
+  const [fontSize, setFontSize] = useState(3);
 
   const onNextText = () => {
     setOptionCount((prevCount) => prevCount + 1);
@@ -53,9 +54,24 @@ const AboutMe = ({ setCurrentScene }) => {
     img.onload = () => setIsLoaded(true);
 
     const timeout = setTimeout(() => setOptionCount(0), 500);
+    const handleResize = () => {
+     if (window.innerWidth > 800) {
+       setFontSize(3);
+     } else if (window.innerWidth <= 800) {
+       setFontSize(2);
+     } else if (window.innerWidth <= 600) {
+       setFontSize(1);
+     } else if (window.innerWidth <= 400) {
+       setFontSize(0.4);
+     }
+    };
+
+     handleResize();
+     window.addEventListener("resize", handleResize);
 
     return () => {
       clearTimeout(timeout);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -64,7 +80,9 @@ const AboutMe = ({ setCurrentScene }) => {
       onInit={(typewriter) => {
         typewriter
           .changeDelay(10)
-          .typeString(aboutMeScript[index])
+          .typeString(
+            `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${aboutMeScript[index]}</h1>`
+          )
           .callFunction(() => {
             setCanClick(true);
             if (index === 4) {
@@ -108,7 +126,7 @@ const AboutMe = ({ setCurrentScene }) => {
   );
 };
 
-const arrowStyle = { width: "30px", height: "50px", bottom: "10px", position: "absolute", right: "0" };
+const arrowStyle = { width: "30px", height: "50px", position: "absolute", right: "0", bottom: "0" };
 
 const ExitButton = styled.button`
   font-family: "Pixelify Sans", serif;
@@ -132,6 +150,7 @@ const ExitButton = styled.button`
 
 const TextContainer = styled.div`
   display: flex;
+  flex-direction: column;
   gap: 20px;
   margin: 0;
   position: relative;
@@ -195,6 +214,7 @@ const SelectionContainer = styled.div`
   position: relative;
   cursor: pointer;
   box-sizing: border-box;
+  overflow: auto;
 
   @media (max-width: 1108px) {
     width: 95%;

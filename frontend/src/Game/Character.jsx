@@ -121,7 +121,7 @@ const Character = React.forwardRef(
         }
 
         // Smoothly interpolate the character's current rotation to the target angle
-        const smoothFactor = 20 * delta; // Adjust this value for rotation speed
+        const smoothFactor = 13 * delta; // Adjust this value for rotation speed
         const newAngle = currentAngle + angleDifference * smoothFactor;
         // Apply the new angle back, removing the offset adjustment
         ref.current.rotation.y = newAngle - Math.PI / 4;

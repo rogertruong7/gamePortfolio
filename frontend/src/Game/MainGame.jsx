@@ -43,8 +43,6 @@ function MainGame({
     new THREE.Vector3(...startPosition)
   );
 
-  
-
   function ResizeHandler() {
     // gl is renderer
     const { gl } = useThree();
@@ -64,7 +62,7 @@ function MainGame({
     const { gl } = useThree();
     useEffect(() => {
       // Set clear color
-      gl.setClearColor(0xffd8d1); //0xfad998 0xffd9d9 0xffd8d1 0xe3fcff
+      gl.setClearColor(0xe3fcff); //0xfad998 0xffd9d9 0xffd8d1 0xe3fcff
 
       // Enable shadows
       gl.shadowMap.enabled = true;
@@ -100,7 +98,6 @@ function MainGame({
     window.addEventListener("blur", onWindowBlur);
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
-    setProgress(30);
     return () => {
       window.removeEventListener("blur", onWindowBlur);
       document.removeEventListener("keydown", onKeyDown);

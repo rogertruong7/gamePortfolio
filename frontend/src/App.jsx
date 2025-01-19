@@ -27,6 +27,8 @@ const App = () => {
   const [showPopup, setShowPopup] = useState(true);
   const [progress, setProgress] = useState(0);
 
+  
+
   useEffect(() => {
     if (currentScene === 0) {
       document.body.style.cursor = "grab";

@@ -251,7 +251,7 @@ const Character = React.forwardRef(
 
       if (clickMoving || arrowMoving) {
         
-        clockDelta = Math.max(clockDelta, 0.015);
+        clockDelta = Math.max(clockDelta, 0.02);
       }
       if (mixer.current) {
         mixer.current.update(clockDelta);

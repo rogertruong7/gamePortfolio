@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react";
 import styled from "styled-components";
+import { useProgress } from "@react-three/drei";
 
 // Define the styled-components
 const LoadingContainer = styled.div`
@@ -26,7 +27,8 @@ const LoadingBarContainer = styled.div`
   margin-top: 20px;
   gap: 5px; /* Space between the bars */
   width: 220px;
-  height: 64px;
+  height: 60px;
+  padding: 5px;
   border: 4px solid white;
 `;
 
@@ -36,25 +38,18 @@ const Bar = styled.div`
   background-color: white;
 `;
 
-const LoadingScreen = ({ progress }) => {
-  const [visible, setVisible] = useState(false);
+const LoadingScreen = () => {
   // Calculate the number of bars based on progress (progress divided by 20)
-  const barCount = Math.max(Math.floor(progress / 20), 1); // At least 1 bar
-  
-  console.log("progress", progress);
-  console.log("barCount", barCount);
-  // Generate an array of bars to render
-  
+  const { progress } = useProgress();
+  const barCount = Math.max(Math.floor(progress / 20)); // At least 1 bar
+
   const bars = Array.from({ length: barCount }, (_, index) => (
     <Bar key={index}></Bar>
   ));
 
-
-
   return (
     <LoadingContainer id="loading_screen">
       <h1>Loading...</h1>
-      {progress > 20 && <h1>Hello world</h1>}
       <LoadingBarContainer>{bars}</LoadingBarContainer>
     </LoadingContainer>
   );

@@ -62,14 +62,14 @@ function MainGame({
     const { gl } = useThree();
     useEffect(() => {
       // Set clear color
-      gl.setClearColor(0xe3fcff); //0xfad998 0xffd9d9 0xffd8d1 0xe3fcff
+      gl.setClearColor(0x87ceeb); //0xfad998 0xffd9d9 0xffd8d1 0xe3fcff
 
       // Enable shadows
       gl.shadowMap.enabled = true;
       gl.shadowMap.type = THREE.PCFSoftShadowMap;
 
       // Set pixel ratio for better rendering on high-DPI screens
-      gl.setPixelRatio(1);
+      gl.setPixelRatio(devicePixelRatio);
     }, [gl]);
 
     return null;
@@ -152,7 +152,7 @@ function MainGame({
             position={[position[0], position[1], position[2]]}
             fontPath="fonts/PixelifySans_Regular.json"
             fontSize={fontSize}
-            color="#e67ae2"
+            color="#ff8080"
             cameraRef={cameraRef}
           />
         ))}

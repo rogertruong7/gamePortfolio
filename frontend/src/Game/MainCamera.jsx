@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 // Define a constant for the camera's offset from the player position
-const CAMERA_OFFSET = new THREE.Vector3(150, 100, 150);
+const CAMERA_OFFSET = new THREE.Vector3(140, 90, 140);
 // Define a constant for controlling the camera's rotation speed
 const CAMERA_ROTATION_SPEED = 0.0012;
 

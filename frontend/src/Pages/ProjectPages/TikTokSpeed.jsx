@@ -17,14 +17,14 @@ import {
   ButtonsContainer,
 } from "../PageComponents";
 
-const QuizPage = () => {
+const TikTokSpeed = () => {
   const openInNewTab = () => {
-    window.open(`/projects/quizwebsite`, "_blank");
+    window.open(`/projects/tiktokextension`, "_blank");
   };
 
   return (
     <PageContainer>
-      <Title>Quiz Website w/ RESTful API</Title>
+      <Title>TikTok Hold for 2x Speed Chrome Extension</Title>
       <ButtonsContainer>
         <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
           <Button>View Repo</Button>
@@ -399,4 +399,4 @@ const QuizPage = () => {
   );
 };
 
-export default QuizPage;
+export default TikTokSpeed;

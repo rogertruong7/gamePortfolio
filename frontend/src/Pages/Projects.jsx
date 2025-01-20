@@ -7,18 +7,22 @@ import { projectsScript } from "./ShowcaseStatic";
 import OptionSelector from "./OptionSelector";
 import TributaryPage from "./ProjectPages/TributaryPage";
 import QuizPage from "./ProjectPages/QuizPage";
+import Presto from "./ProjectPages/Presto";
+import TikTokSpeed from "./ProjectPages/TikTokSpeed";
+import ForumPage from "./ProjectPages/ForumPage";
+import DiscordBot from "./ProjectPages/DiscordBot";
+import Portfolio from "./ProjectPages/Portfolio";
 import { projects } from "./ShowcaseStatic";
-import { useNavigate } from "react-router-dom";
 
 const Projects = () => {
   const pages = {
     1: <TributaryPage />,
     2: <QuizPage />,
-    3: <TributaryPage />,
-    4: <TributaryPage />,
-    5: <TributaryPage />,
-    6: <TributaryPage />,
-    7: <TributaryPage />,
+    3: <Presto />,
+    4: <TikTokSpeed />,
+    5: <ForumPage />,
+    6: <DiscordBot />,
+    7: <Portfolio />,
   };
 
   const [cat1Visible, setCat1Visible] = useState(true);
@@ -140,8 +144,8 @@ const Projects = () => {
 
 const Button = styled.button`
   position: absolute;
-  top: 70px;
-  left: 20px;
+  top: 20px;
+  left: 95px;
 
   font-family: "Pixelify Sans", serif;
   background-color: white;

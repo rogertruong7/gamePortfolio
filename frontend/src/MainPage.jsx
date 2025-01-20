@@ -35,10 +35,6 @@ const MainPage = () => {
     }
   }, [currentScene]);
 
-  useEffect(() => {
-    console.log("Current progress:", progress);
-  }, [progress]);
-
   return (
     <>
       <Menu />

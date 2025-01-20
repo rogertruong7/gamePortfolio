@@ -17,14 +17,14 @@ import {
   ButtonsContainer,
 } from "../PageComponents";
 
-const QuizPage = () => {
+const ForumPage = () => {
   const openInNewTab = () => {
-    window.open(`/projects/quizwebsite`, "_blank");
+    window.open(`/projects/forumsite`, "_blank");
   };
 
   return (
     <PageContainer>
-      <Title>Quiz Website w/ RESTful API</Title>
+      <Title>DOM Manipulation Forum Page</Title>
       <ButtonsContainer>
         <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
           <Button>View Repo</Button>
@@ -399,4 +399,4 @@ const QuizPage = () => {
   );
 };
 
-export default QuizPage;
+export default ForumPage;

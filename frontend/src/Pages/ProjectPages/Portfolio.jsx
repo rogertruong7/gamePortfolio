@@ -17,14 +17,14 @@ import {
   ButtonsContainer,
 } from "../PageComponents";
 
-const QuizPage = () => {
+const Portfolio = () => {
   const openInNewTab = () => {
-    window.open(`/projects/quizwebsite`, "_blank");
+    window.open(`/projects/portfolio`, "_blank");
   };
 
   return (
     <PageContainer>
-      <Title>Quiz Website w/ RESTful API</Title>
+      <Title>React Three Fiber Portfolio</Title>
       <ButtonsContainer>
         <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
           <Button>View Repo</Button>
@@ -399,4 +399,4 @@ const QuizPage = () => {
   );
 };
 
-export default QuizPage;
+export default Portfolio;

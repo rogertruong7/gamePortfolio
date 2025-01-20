@@ -17,14 +17,14 @@ import {
   ButtonsContainer,
 } from "../PageComponents";
 
-const QuizPage = () => {
+const Presto = () => {
   const openInNewTab = () => {
-    window.open(`/projects/quizwebsite`, "_blank");
+    window.open(`/projects/presto`, "_blank");
   };
 
   return (
     <PageContainer>
-      <Title>Quiz Website w/ RESTful API</Title>
+      <Title>Presto</Title>
       <ButtonsContainer>
         <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
           <Button>View Repo</Button>
@@ -399,4 +399,4 @@ const QuizPage = () => {
   );
 };
 
-export default QuizPage;
+export default Presto;

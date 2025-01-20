@@ -6,11 +6,10 @@ import resume from "../assets/RogerTruongResume.pdf";
 const MenuContainer = styled.div`
   position: absolute;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
-  top: 20px;
+
+  top: 10px;
   right: 20px;
-  z-index: 101;
+  z-index: 106;
 `;
 const SmallMenuContainer = styled.div`
   position: absolute;
@@ -19,8 +18,11 @@ const SmallMenuContainer = styled.div`
   gap: 5px;
   top: 70px;
   right: 20px;
-
-  z-index: 101;
+  background-color: white;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.2);
+  padding: 5px;
+  border-radius: 10px;
+  z-index: 106;
 `;
 
 const DefaultButton = styled.button`

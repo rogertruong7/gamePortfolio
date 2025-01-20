@@ -13,6 +13,8 @@ import {
   StyledTable,
   StyledTh,
   StyledTd,
+  Button,
+  ButtonsContainer,
 } from "../PageComponents";
 
 const TributaryAPIPage = () => {
@@ -24,8 +26,12 @@ const TributaryAPIPage = () => {
   return (
     <PageContainer>
       <Title>Tributary API Project</Title>
-      <button>View Repo</button>
-      <button onClick={openInNewTab}>Open link in new tab</button>
+      <ButtonsContainer>
+        <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
+          <Button>View Repo</Button>
+        </a>
+        <Button onClick={openInNewTab}>Open in new tab</Button>
+      </ButtonsContainer>
       <Section>
         <Subtitle>Overview</Subtitle>
         <Paragraph>

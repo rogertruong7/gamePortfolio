@@ -46,7 +46,7 @@ const HamburgerMenuButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  padding: 10px;
+  padding: 5px;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -56,6 +56,13 @@ const HamburgerMenuButton = styled.button`
   top: 20px;
   right: 20px;
   z-index: 140;
+  border-radius: 10px;
+  border: 2px solid rgb(255, 255, 255);
+  background-color: white;
+
+  &:hover {
+    background-color: #f2f2f2;
+  }
 
   /* Lines for the hamburger menu */
   &::before,
@@ -64,13 +71,15 @@ const HamburgerMenuButton = styled.button`
     content: "";
     width: 25px;
     height: 5px;
-    background-color: white;
+    background-color: rgb(153, 153, 153);
     border-radius: 3px;
   }
 
   /* Center line style */
   div {
     width: 25px;
+    height: 5px;
+    background-color: rgb(153, 153, 153);
   }
 
   /* Show the hamburger menu only on smaller screens */

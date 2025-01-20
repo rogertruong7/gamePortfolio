@@ -239,7 +239,7 @@ const SelectionContainer = styled.div`
   margin: 0;
   border: 10px solid white;
   background-color: black;
-  padding: 50px;
+  padding: 5%;
   position: relative;
 
   box-sizing: border-box;

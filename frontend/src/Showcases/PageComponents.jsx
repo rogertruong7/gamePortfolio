@@ -31,6 +31,7 @@ export const PageContainer = styled.div`
   @media (max-width: 700px) {
     padding-left: 40px;
     padding-right: 40px;
+    margin: 0;
   }
 `;
 

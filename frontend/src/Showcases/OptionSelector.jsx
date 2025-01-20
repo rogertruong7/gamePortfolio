@@ -156,6 +156,10 @@ const ArrowText = styled.h1`
   color: ${({ selected }) => (selected ? "white" : "black")};
   font-size: 1.3rem;
   padding: 0px;
+
+  @media (max-width: 800px) {
+    font-size: 0.8rem;
+  }
 `;
 
 // Styled components

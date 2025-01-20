@@ -133,7 +133,7 @@ const Projects = () => {
                   setCameFromBack(true);
                 }}
               >
-                Back
+                &lt;&lt;
               </Button>
             )}
           </>

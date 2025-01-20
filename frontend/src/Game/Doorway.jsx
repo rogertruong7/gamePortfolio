@@ -1,7 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Text } from "@react-three/drei";
-import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 import { showcases } from "./Static";
 
 export default function Doorway({
@@ -14,8 +11,6 @@ export default function Doorway({
   setTwoOptionsButton,
   setOneOptionButton,
 }) {
-  // const box = new THREE.Box3(boxMin, boxMax);
-
   function resetPopupText() {
     setEnterPopupVisible(false);
     setProjectButton(false);
@@ -80,22 +75,5 @@ export default function Doorway({
     }
   });
 
-  // const result = useThree();
-
-  // useEffect(() => {
-  //   const helpers = []; // Array to store helpers
-
-  //   showcases.forEach((showcase) => {
-  //     const helper = new THREE.Box3Helper(showcase.box, 0xff0000); // Red color for the helper
-  //     result.scene.add(helper);
-  //     helpers.push(helper); // Store the helper
-  //   });
-
-  //   return () => {
-  //     // Clean up helpers on unmount
-  //     helpers.forEach((helper) => {
-  //       result.scene.remove(helper); // Remove each helper
-  //     });
-  //   };
-  // }, [result.scene]);
+  return null;
 }

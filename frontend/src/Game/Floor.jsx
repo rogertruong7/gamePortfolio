@@ -1,6 +1,5 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Text } from "@react-three/drei";
+import React, { useEffect } from "react";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 const Floor = React.forwardRef(({
@@ -12,7 +11,7 @@ const Floor = React.forwardRef(({
 }, ref) => {
   const { scene } = useGLTF("models/floor.glb");
   let mouseDownTime = 0; 
-  const CLICK_THRESHOLD = 100; 
+  const CLICK_THRESHOLD = 150; 
 
   useEffect(() => {
     scene.traverse((node) => {

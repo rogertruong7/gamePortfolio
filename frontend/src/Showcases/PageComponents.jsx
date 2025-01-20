@@ -71,7 +71,7 @@ export const ListItem = styled.li`
 `;
 
 export const StyledTable = styled.table`
-  width: 100%;
+
   border: 1px solid black;
   border-collapse: collapse;
   margin-bottom: 2rem;

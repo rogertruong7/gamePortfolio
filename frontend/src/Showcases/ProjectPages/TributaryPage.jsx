@@ -100,7 +100,6 @@ const TributaryAPIPage = () => {
           The TributaryCLI provides a command-line interface for interacting
           with the Tributary system. Some key commands include:
         </Paragraph>
-        <List>
           <StyledTable>
             <tr>
               <StyledTh>
@@ -392,7 +391,6 @@ const TributaryAPIPage = () => {
               </StyledTd>
             </tr>
           </StyledTable>
-        </List>
       </Section>
     </PageContainer>
   );

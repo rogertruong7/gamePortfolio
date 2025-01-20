@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import cat1 from "../assets/roomArt/aboutMeCat1.png";
-import cat2 from "../assets/roomArt/aboutMeCat2.png";
+import cat1 from "../assets/roomArt/projectsCat.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
 import { projectsScript } from "./ShowcaseStatic";

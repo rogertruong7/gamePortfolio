@@ -2,13 +2,14 @@ import styled from "styled-components";
 
 export const PageContainer = styled.div`
   width: 100%;
-  max-width: 900px;
+
   padding: 20px;
   background-color: rgb(255, 255, 255);
   overflow: auto;
   padding-left: 100px;
   padding-right: 100px;
   font-family: "Roboto", serif;
+  box-sizing: border-box;
 
   &::-webkit-scrollbar {
     width: 8px; /* Skinny scrollbar */

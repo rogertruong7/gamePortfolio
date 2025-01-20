@@ -5,16 +5,16 @@ import * as THREE from "three";
 
 const Details = () => {
   const { scene: tree1Scene, animations: tree1Animations } = useGLTF(
-    "models/cherryTree1.glb"
+    "/models/cherryTree1.glb"
   );
   const { scene: tree2Scene, animations: tree2Animations } = useGLTF(
-    "models/cherryTree2.glb"
+    "/models/cherryTree2.glb"
   );
   const { scene: tree3Scene, animations: tree3Animations } = useGLTF(
-    "models/cherryTree3.glb"
+    "/models/cherryTree3.glb"
   );
   const { scene: floorDetails, animations: floorDetailsAnimations } = useGLTF(
-    "models/floorDetails.glb"
+    "/models/floorDetails.glb"
   );
 
   const mixer1 = useRef();
@@ -102,9 +102,5 @@ const Details = () => {
     </>
   );
 };
-
-useGLTF.preload("models/cherryTree1.glb");
-useGLTF.preload("models/cherryTree2.glb");
-useGLTF.preload("models/cherryTree3.glb");
 
 export default Details;

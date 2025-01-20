@@ -8,9 +8,9 @@ import OptionSelector from "./OptionSelector";
 import TributaryPage from "./ProjectPages/TributaryPage";
 import QuizPage from "./ProjectPages/QuizPage";
 import { projects } from "./ShowcaseStatic";
+import { useNavigate } from "react-router-dom";
 
 const Projects = () => {
-
   const pages = {
     1: <TributaryPage />,
     2: <QuizPage />,
@@ -43,12 +43,7 @@ const Projects = () => {
     return () => mediaQuery.removeEventListener("change", handleResize);
   }, []);
 
-  useEffect(() => {
-    if (pageToShow) {
-      console.log("pageToshow", pageToShow);
-    }
-    
-  }, [pageToShow]);
+  
 
   useEffect(() => {
     const timeout = setTimeout(() => setOptionCount(0), 500);
@@ -244,7 +239,6 @@ const SelectionContainer = styled.div`
 
   box-sizing: border-box;
   overflow: auto;
-
 
   @media (max-width: 1108px) {
     width: 100%;

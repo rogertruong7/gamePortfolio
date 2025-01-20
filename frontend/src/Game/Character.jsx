@@ -20,7 +20,7 @@ const Character = React.forwardRef(
     },
     ref
   ) => {
-    const { scene, animations } = useGLTF("models/cloudme.glb");
+    const { scene, animations } = useGLTF("/models/cloudme.glb");
     const [arrowMoving, setArrowMoving] = useState(false);
     const mixer = useRef();
 

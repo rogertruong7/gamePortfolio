@@ -7,11 +7,11 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 const Buildings = ({ setLoading, setProgress }) => {
   // Different way of loading
   const { scene: leftBuildingsScene } = useGLTF(
-    "models/leftBuildingsNew.glb"
+    "/models/leftBuildingsNew.glb"
   );
 
   const { scene: rightBuildingsScene } = useGLTF(
-    "models/rightBuildingsNew.glb"
+    "/models/rightBuildingsNew.glb"
   );
 
   useEffect(() => {
@@ -56,7 +56,5 @@ const Buildings = ({ setLoading, setProgress }) => {
   );
 };
 
-useGLTF.preload("models/leftBuildingsNew.glb");
-useGLTF.preload("models/rightBuildingsNew.glb");
 
 export default Buildings;

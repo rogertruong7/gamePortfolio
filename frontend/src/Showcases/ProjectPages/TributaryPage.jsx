@@ -1,77 +1,25 @@
 import React from "react";
 import styled from "styled-components";
-import "@fontsource/roboto"
 
-const PageContainer = styled.div`
-  width: 100%;
-  max-width: 900px;
-  padding: 20px;
-  background-color: white;
-  overflow: auto;
-  padding-left: 100px;
-  padding-right: 100px;
-  font-family: "Roboto", serif;
-`;
-
-const Title = styled.h1`
-  font-size: 2.5rem;
-  color: #333;
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-const Section = styled.div`
-  margin-bottom: 20px;
-`;
-
-const Subtitle = styled.h2`
-  font-size: 1.8rem;
-  color: #555;
-  margin-bottom: 10px;
-`;
-
-const Paragraph = styled.p`
-  font-size: 1rem;
-  color: #444;
-  line-height: 1.6;
-  margin-bottom: 10px;
-`;
-
-const List = styled.ul`
-  margin-left: 20px;
-  list-style: disc;
-`;
-
-const ListItem = styled.li`
-  font-size: 1rem;
-  color: #444;
-  margin-bottom: 5px;
-`;
-
-const StyledTable = styled.table`
-  width: 100%;
-  border: 1px solid #dddddd;
-  border-collapse: collapse;
-  margin-bottom: 2rem;
-`;
-
-const StyledTh = styled.th`
-  border: 1px solid #dddddd;
-  padding: 12px;
-  background-color: #f2f2f2;
-  font-size: 1.1rem;
-`;
-
-const StyledTd = styled.td`
-  border: 1px solid #dddddd;
-  padding: 12px;
-`;
+import "@fontsource/roboto";
+import {
+  PageContainer,
+  Title,
+  Section,
+  Subtitle,
+  Paragraph,
+  List,
+  ListItem,
+  StyledTable,
+  StyledTh,
+  StyledTd,
+} from "../PageComponents";
 
 const TributaryAPIPage = () => {
   return (
     <PageContainer>
       <Title>Tributary API Project</Title>
-        <button>View Repo</button>
+      <button>View Repo</button>
       <Section>
         <Subtitle>Overview</Subtitle>
         <Paragraph>

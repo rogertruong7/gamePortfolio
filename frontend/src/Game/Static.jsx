@@ -28,17 +28,17 @@ export const labels = [
 
 export const showcases = [
   {
-    showcaseName: "projects",
-    box: new THREE.Box3(
-      new THREE.Vector3(50, -50, -100),
-      new THREE.Vector3(100, 50, -23)
-    ),
-  },
-  {
     showcaseName: "aboutMe",
     box: new THREE.Box3(
       new THREE.Vector3(50, -50, -190),
-      new THREE.Vector3(100, 50, -142)
+      new THREE.Vector3(100, 50, -136)
+    ),
+  },
+  {
+    showcaseName: "projects",
+    box: new THREE.Box3(
+      new THREE.Vector3(50, -50, -120),
+      new THREE.Vector3(100, 50, -13)
     ),
   },
   {

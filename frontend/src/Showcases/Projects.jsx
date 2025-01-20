@@ -57,11 +57,11 @@ const Projects = () => {
       if (window.innerWidth > 800) {
         setFontSize(2);
       } else if (window.innerWidth <= 800) {
-        setFontSize(1.5);
-      } else if (window.innerWidth <= 600) {
         setFontSize(1);
+      } else if (window.innerWidth <= 600) {
+        setFontSize(0.5);
       } else if (window.innerWidth <= 400) {
-        setFontSize(0.4);
+        setFontSize(0.2);
       }
     };
 
@@ -82,25 +82,9 @@ const Projects = () => {
     <>
       <Door />
       <Container>
-        {pageToShow && (
-          <>
-            {pages[pageToShow]}
-            {lessThan1700 && (
-              <button
-                style={{ height: "50px" }}
-                onClick={() => {
-                  setPageToShow(null);
-                  setCameFromBack(true);
-                }}
-              >
-                Back
-              </button>
-            )}
-          </>
-        )}
         <GameContainer
           style={{
-            display: (lessThan1700 && pageToShow) ? "none" : "block",
+            display: lessThan1700 && pageToShow ? "none" : "block",
           }}
         >
           <ImageWrapper>
@@ -135,15 +119,54 @@ const Projects = () => {
               )}
               {optionCount === 1 && <Text>Hello world</Text>}
             </TextContainer>
-            {optionsVisible && <OptionSelector setPageToShow={setPageToShow} data={projects} />}
+            {optionsVisible && (
+              <OptionSelector setPageToShow={setPageToShow} data={projects} />
+            )}
           </SelectionContainer>
         </GameContainer>
+        {pageToShow && (
+          <>
+            {pages[pageToShow]}
+            {lessThan1700 && (
+              <Button
+                onClick={() => {
+                  setPageToShow(null);
+                  setCameFromBack(true);
+                }}
+              >
+                Back
+              </Button>
+            )}
+          </>
+        )}
       </Container>
     </>
   );
 };
 
+const Button = styled.button`
+  position: absolute;
+  top: 70px;
+  left: 20px;
 
+  font-family: "Pixelify Sans", serif;
+  background-color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  margin: 0 5px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #666;
+  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  width: 70px;
+  text-align: center;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+`;
 
 const arrowStyle = {
   width: "30px",
@@ -153,30 +176,11 @@ const arrowStyle = {
   bottom: "0",
 };
 
-const ExitButton = styled.button`
-  font-family: "Pixelify Sans", serif;
-  background-color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 15px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #666;
-  cursor: pointer;
-  width: 100px;
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-
-  &:hover {
-    background-color: rgb(171, 171, 171);
-  }
-`;
-
 const TextContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+  height: 20%;
   margin: 0;
   position: relative;
 `;
@@ -194,6 +198,7 @@ export const Container = styled.div`
   background-color: black;
   display: flex;
   justify-content: center;
+  gap: 20px;
 `;
 
 const Door = styled.div`
@@ -231,7 +236,7 @@ const GameContainer = styled.div`
 
 const SelectionContainer = styled.div`
   width: 1100px;
-  height: 45%;
+  height: 50%;
   margin: 0;
   border: 10px solid white;
   background-color: black;
@@ -243,7 +248,7 @@ const SelectionContainer = styled.div`
 
 
   @media (max-width: 1108px) {
-    width: 95%;
+    width: 100%;
     height: 50%;
   }
 `;
@@ -257,7 +262,7 @@ const ImageWrapper = styled.div`
   align-items: center;
 
   @media (max-width: 1108px) {
-    width: 95%;
+    width: 100%;
     height: 50%;
   }
 `;

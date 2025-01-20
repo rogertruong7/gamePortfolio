@@ -18,5 +18,5 @@ export const projects = [
     "Presto - Slido Clone (React.js)",
     "TikTok Playback Speed Chrome Extension (JavaScript)",
   ],
-  ["Forum Website (HTML/CSS/JavaScript)", "Discord Economy Bot (JavaScript)", "This Portfolio!"],
+  ["Forum Website (Vanilla JS)", "Discord Economy Bot (JavaScript)", "This Portfolio!"],
 ];

@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import "@fontsource/roboto"
 
 const PageContainer = styled.div`
   width: 100%;
@@ -9,7 +10,7 @@ const PageContainer = styled.div`
   overflow: auto;
   padding-left: 100px;
   padding-right: 100px;
-  font-family: "Arial", sans-serif;
+  font-family: "Roboto", serif;
 `;
 
 const Title = styled.h1`

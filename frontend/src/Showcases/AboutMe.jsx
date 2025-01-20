@@ -61,8 +61,8 @@ const AboutMe = ({ setCurrentScene }) => {
        setFontSize(2);
      } else if (window.innerWidth <= 600) {
        setFontSize(1);
-     } else if (window.innerWidth <= 400) {
-       setFontSize(0.4);
+     } else if (window.innerWidth <= 500) {
+       setFontSize(0.5);
      }
     };
 

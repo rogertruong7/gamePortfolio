@@ -6,26 +6,25 @@ const OptionSelector = ({ setPageToShow, data }) => {
   const [currentPage, setCurrentPage] = useState(0); // Current page index
   const [selectedIndex, setSelectedIndex] = useState(0); // Default: Top Left
 
-
   const currentOptions = data[currentPage];
 
-   const [isMobileView, setIsMobileView] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
 
-   useEffect(() => {
-     const mediaQuery = window.matchMedia("(max-width: 650px)");
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 650px)");
 
-     // Function to update state based on media query
-     const handleMediaChange = (e) => {
-       setIsMobileView(e.matches); // `e.matches` is `true` if media query matches
-     };
+    // Function to update state based on media query
+    const handleMediaChange = (e) => {
+      setIsMobileView(e.matches); // `e.matches` is `true` if media query matches
+    };
 
-     // Initial check and add listener
-     handleMediaChange(mediaQuery);
-     mediaQuery.addEventListener("change", handleMediaChange);
+    // Initial check and add listener
+    handleMediaChange(mediaQuery);
+    mediaQuery.addEventListener("change", handleMediaChange);
 
-     // Cleanup listener on component unmount
-     return () => mediaQuery.removeEventListener("change", handleMediaChange);
-   }, []);
+    // Cleanup listener on component unmount
+    return () => mediaQuery.removeEventListener("change", handleMediaChange);
+  }, []);
 
   const handleKeyDown = (e) => {
     if (e.key === "ArrowRight") {
@@ -49,11 +48,10 @@ const OptionSelector = ({ setPageToShow, data }) => {
         if (selectedIndex === 0 && currentPage > 0) {
           setCurrentPage((prev) => prev - 1);
           setSelectedIndex(3);
-        }else if (selectedIndex > 0) {
+        } else if (selectedIndex > 0) {
           setSelectedIndex((prev) => prev - 1);
         }
-      }
-      else if (selectedIndex === 2 || selectedIndex === 3) {
+      } else if (selectedIndex === 2 || selectedIndex === 3) {
         setSelectedIndex((prev) => prev - 2);
       }
     } else if (e.key === "ArrowDown") {
@@ -97,8 +95,8 @@ const OptionSelector = ({ setPageToShow, data }) => {
   };
 
   const handleClickOption = (index) => {
-    setPageToShow((currentPage * 4) + (index + 1));
-  }
+    setPageToShow(currentPage * 4 + (index + 1));
+  };
 
   return (
     <Container>
@@ -143,8 +141,8 @@ const Text = styled.div`
   display: flex;
   justify-content: left;
   align-items: center;
-  border: ${({ selected }) => (selected ? "2px dashed white" : "2px solid transparent")};
-  
+  border: ${({ selected }) =>
+    selected ? "2px dashed white" : "2px solid transparent"};
 
   @media (max-width: 800px) {
     font-size: 0.8rem;

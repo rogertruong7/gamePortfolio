@@ -6,17 +6,32 @@ export const aboutMeScript = [
   "I hope you get to talk to him one day! In the meantime, why don't you check out some of his projects!",
 ];
 
-
 export const projectsScript = [
   "Welcome to Roger's Project Library. Which project would you like to see?",
 ];
 
+export const experiencesScript = [
+  "Let's find out what experiences Roger has.",
+];
+
 export const projects = [
   [
+    "Datespot: Spring Boot Project WIP",
+    "Bridges - DevSoc Projects",
     "Event-Driven Architecture Java API",
+    "Countries Visited Python API w/ PostgreSQL database",
+  ],
+  [
+    "House price and type predictor (Python Scikit ML)",
+    "Balatro Clone (Rust)",
+    "Simple Math Spreadsheet w/ Thread Concurrency (Rust)",
     "Quiz Website w/ RESTful API (TypeScript)",
-    "Presto - Slido Clone (React.js)",
+  ],
+  [
+    "Google Slides Frontend Site (React)",
+    "Discord Economy Bot (JavaScript)",
+    "This Portfolio!",
     "TikTok Playback Speed Chrome Extension (JavaScript)",
   ],
-  ["Forum Website (Vanilla JS)", "Discord Economy Bot (JavaScript)", "This Portfolio!"],
+  ["Forum Website (Vanilla JS)"],
 ];

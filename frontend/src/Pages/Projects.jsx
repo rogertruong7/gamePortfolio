@@ -4,25 +4,39 @@ import cat1 from "../assets/roomArt/projectsCat.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
 import { projectsScript } from "./ShowcaseStatic";
+import { projects } from "./ShowcaseStatic";
 import OptionSelector from "./OptionSelector";
-import TributaryPage from "./ProjectPages/TributaryPage";
 import QuizPage from "./ProjectPages/QuizPage";
 import Presto from "./ProjectPages/Presto";
 import TikTokSpeed from "./ProjectPages/TikTokSpeed";
 import ForumPage from "./ProjectPages/ForumPage";
 import DiscordBot from "./ProjectPages/DiscordBot";
 import Portfolio from "./ProjectPages/Portfolio";
-import { projects } from "./ShowcaseStatic";
+import Datespot from "./ProjectPages/Datespot";
+import TributaryAPIPage from "./ProjectPages/TributaryPage";
+import Bridges from "./ProjectPages/Bridges";
+import HousePricePredictor from "./ProjectPages/HousePricePredictor";
+import BalatroClone from "./ProjectPages/BalatroClone";
+import CountryApi from "./ProjectPages/CountryAPI";
+import RustSpreadsheet from "./ProjectPages/RustSpreadsheet";
 
 const Projects = () => {
+  // To add more pages, add to this object and also to ShowcaseStatic.jsx
+  // Order is based on below
   const pages = {
-    1: <TributaryPage />,
-    2: <QuizPage />,
-    3: <Presto />,
-    4: <TikTokSpeed />,
-    5: <ForumPage />,
-    6: <DiscordBot />,
-    7: <Portfolio />,
+    1: <Datespot />,
+    2: <Bridges />,
+    3: <TributaryAPIPage />,
+    4: <CountryApi />,
+    5: <HousePricePredictor />,
+    6: <BalatroClone />,
+    7: <RustSpreadsheet />,
+    8: <QuizPage />,
+    9: <Presto />,
+    10: <DiscordBot />,
+    11: <Portfolio />,
+    12: <TikTokSpeed />,
+    13: <ForumPage />,
   };
 
   const [cat1Visible, setCat1Visible] = useState(true);
@@ -46,8 +60,6 @@ const Projects = () => {
     // Cleanup listener on unmount
     return () => mediaQuery.removeEventListener("change", handleResize);
   }, []);
-
-  
 
   useEffect(() => {
     const timeout = setTimeout(() => setOptionCount(0), 500);
@@ -73,7 +85,9 @@ const Projects = () => {
   }, []);
 
   const showOptions = () => {
-    setOptionsVisible(true);
+    setTimeout(() => {
+      setOptionsVisible(true);
+    }, 200);
   };
 
   return (

@@ -17,14 +17,15 @@ import {
   ButtonsContainer,
 } from "../PageComponents";
 
-const Presto = () => {
+const CountryApi = () => {
+
   const openInNewTab = () => {
-    window.open(`/projects/presto`, "_blank");
-  };
+    window.open(`/projects/tributary`, "_blank");
+  }
 
   return (
     <PageContainer>
-      <Title>Presto: SlidesGo Clone</Title>
+      <Title>Countries Visited Python API w/ PostgreSQL database</Title>
       <ButtonsContainer>
         <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
           <Button>View Repo</Button>
@@ -399,4 +400,4 @@ const Presto = () => {
   );
 };
 
-export default Presto;
+export default CountryApi;

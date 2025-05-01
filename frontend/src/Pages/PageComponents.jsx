@@ -30,7 +30,6 @@ export const ButtonsContainer = styled.div`
 
 export const PageContainer = styled.div`
   width: 100%;
-
   padding: 20px;
   padding-top: 40px;
   background-color: rgb(36, 36, 36);

@@ -20,7 +20,7 @@ const AboutMe = ({ setCurrentScene }) => {
     // setCat2Visible((prev) => !prev);
     // setCat1Visible((prev) => !prev);
     setCanClick(false);
-  }
+  };
 
   useEffect(() => {
     const handleClick = (event) => {
@@ -31,7 +31,6 @@ const AboutMe = ({ setCurrentScene }) => {
 
     const selectionContainer = document.getElementById("selectionContainer");
     selectionContainer.addEventListener("click", handleClick);
-
 
     const handleKeyDown = (event) => {
       if (["Space", "Enter"].includes(event.code) && canClick) {
@@ -45,8 +44,7 @@ const AboutMe = ({ setCurrentScene }) => {
       window.removeEventListener("keydown", handleKeyDown);
       selectionContainer.removeEventListener("click", handleClick);
     };
-  }, [canClick])
-
+  }, [canClick]);
 
   useEffect(() => {
     const img = new Image();
@@ -55,19 +53,19 @@ const AboutMe = ({ setCurrentScene }) => {
 
     const timeout = setTimeout(() => setOptionCount(0), 500);
     const handleResize = () => {
-     if (window.innerWidth > 800) {
-       setFontSize(3);
-     } else if (window.innerWidth <= 800) {
-       setFontSize(2);
-     } else if (window.innerWidth <= 600) {
-       setFontSize(1);
-     } else if (window.innerWidth <= 500) {
-       setFontSize(0.5);
-     }
+      if (window.innerWidth > 800) {
+        setFontSize(3);
+      } else if (window.innerWidth <= 800) {
+        setFontSize(2);
+      } else if (window.innerWidth <= 600) {
+        setFontSize(1);
+      } else if (window.innerWidth <= 500) {
+        setFontSize(0.5);
+      }
     };
 
-     handleResize();
-     window.addEventListener("resize", handleResize);
+    handleResize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
       clearTimeout(timeout);
@@ -126,7 +124,13 @@ const AboutMe = ({ setCurrentScene }) => {
   );
 };
 
-const arrowStyle = { width: "30px", height: "50px", position: "absolute", right: "0", bottom: "0" };
+const arrowStyle = {
+  width: "30px",
+  height: "50px",
+  position: "absolute",
+  right: "0",
+  bottom: "0",
+};
 
 const ExitButton = styled.button`
   font-family: "Pixelify Sans", serif;
@@ -206,7 +210,7 @@ const GameContainer = styled.div`
 
 const SelectionContainer = styled.div`
   width: 1100px;
-  height: 45%;
+  height: 50%;
   margin: 0;
   border: 10px solid white;
   background-color: black;
@@ -217,7 +221,7 @@ const SelectionContainer = styled.div`
   overflow: auto;
 
   @media (max-width: 1108px) {
-    width: 95%;
+    width: 100%;
     height: 50%;
   }
 `;

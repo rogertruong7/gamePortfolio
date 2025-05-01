@@ -90,8 +90,8 @@ const MainPage = () => {
       {currentScene === 1 && (
         <AboutMe setCurrentScene={setCurrentScene}></AboutMe>
       )}
-      {currentScene === 2 && <Projects></Projects>}
-      {currentScene === 3 && <Experiences></Experiences>}
+      {currentScene === 2 && <Projects ></Projects>}
+      {currentScene === 3 && <Experiences setCurrentScene={setCurrentScene}></Experiences>}
       {currentScene === 4 && <Skills></Skills>}
     </>
   );

@@ -12,7 +12,10 @@ export const projectsScript = [
 
 export const experiencesScript = [
   "Let's find out what experiences Roger has.",
+  "Just kidding! That's why we have LinkedIn!"
 ];
+
+export const skillsScript = ["Roger has lots of skills from Front-End to Back-End to Databases!"];
 
 export const projects = [
   [

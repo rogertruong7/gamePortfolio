@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import cat1 from "../assets/roomArt/aboutMeCat1.png";
+import cat1 from "../assets/roomArt/skillsCat.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
-import { projectsScript } from "./ShowcaseStatic";
+import { skillsScript } from "./ShowcaseStatic";
 import OptionSelector from "./OptionSelector";
 import TributaryPage from "./ProjectPages/TributaryPage";
 import QuizPage from "./ProjectPages/QuizPage";
@@ -112,7 +112,7 @@ const Skills = () => {
                     typewriter
                       .changeDelay(10)
                       .typeString(
-                        `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${projectsScript[0]}</h1>`
+                        `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${skillsScript[0]}</h1>`
                       )
                       .callFunction(showOptions)
                       .start();
@@ -128,14 +128,12 @@ const Skills = () => {
                     paddingRight: "0px",
                   }}
                 >
-                  {projectsScript[0]}
+                  {skillsScript[0]}
                 </h1>
               )}
               {optionCount === 1 && <Text>Hello world</Text>}
             </TextContainer>
-            {optionsVisible && (
-              <OptionSelector setPageToShow={setPageToShow} data={projects} />
-            )}
+            
           </SelectionContainer>
         </GameContainer>
       </Container>
@@ -229,7 +227,7 @@ const GameContainer = styled.div`
 
 const SelectionContainer = styled.div`
   width: 1100px;
-  height: 45%;
+  height: 50%;
   margin: 0;
   border: 10px solid white;
   background-color: black;
@@ -240,7 +238,7 @@ const SelectionContainer = styled.div`
   overflow: auto;
 
   @media (max-width: 1108px) {
-    width: 95%;
+    width: 100%;
     height: 50%;
   }
 `;

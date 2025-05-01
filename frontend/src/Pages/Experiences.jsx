@@ -1,65 +1,64 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import cat1 from "../assets/roomArt/experienceCat.png";
-
+import cat1 from "../assets/roomArt/skillsCat.png";
+import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
 import { experiencesScript } from "./ShowcaseStatic";
-import OptionSelector from "./OptionSelector";
-import TributaryPage from "./ProjectPages/TributaryPage";
-import QuizPage from "./ProjectPages/QuizPage";
-import { projects } from "./ShowcaseStatic";
 
-const Experiences = () => {
-  const pages = {
-    1: <TributaryPage />,
-    2: <QuizPage />,
-    3: <TributaryPage />,
-    4: <TributaryPage />,
-    5: <TributaryPage />,
-    6: <TributaryPage />,
-    7: <TributaryPage />,
+const Experiences = ({ setCurrentScene }) => {
+  const [cat1Visible, setCat1Visible] = useState(true);
+  const [cat2Visible, setCat2Visible] = useState(false);
+  const [optionCount, setOptionCount] = useState(-1);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [canClick, setCanClick] = useState(false);
+  const [endOfText, setEndOfText] = useState(false);
+  const [fontSize, setFontSize] = useState(3);
+
+  const onNextText = () => {
+    setOptionCount((prevCount) => prevCount + 1);
+    setCanClick(false);
   };
 
-  const [cat1Visible, setCat1Visible] = useState(true);
-  const [optionCount, setOptionCount] = useState(-1);
-  const [optionsVisible, setOptionsVisible] = useState(false);
-  const [fontSize, setFontSize] = useState(3);
-  const [pageToShow, setPageToShow] = useState(null);
-  const [cameFromBack, setCameFromBack] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  useEffect(() => {
+    const handleClick = (event) => {
+      if (canClick) {
+        onNextText();
+      }
+    };
+
+    const selectionContainer = document.getElementById("selectionContainer");
+    selectionContainer.addEventListener("click", handleClick);
+
+    const handleKeyDown = (event) => {
+      if (["Space", "Enter"].includes(event.code) && canClick) {
+        onNextText();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      selectionContainer.removeEventListener("click", handleClick);
+    };
+  }, [canClick]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 1700px)");
-    const handleResize = (e) => setIsVisible(e.matches);
+    const img = new Image();
+    img.src = cat2;
+    img.onload = () => setIsLoaded(true);
 
-    // Check on initial load
-    setIsVisible(mediaQuery.matches);
-
-    // Add listener
-    mediaQuery.addEventListener("change", handleResize);
-
-    // Cleanup listener on unmount
-    return () => mediaQuery.removeEventListener("change", handleResize);
-  }, []);
-
-  useEffect(() => {
-    if (pageToShow) {
-      console.log("pageToshow", pageToShow);
-    }
-  }, [pageToShow]);
-
-  useEffect(() => {
     const timeout = setTimeout(() => setOptionCount(0), 500);
     const handleResize = () => {
       if (window.innerWidth > 800) {
-        setFontSize(2);
+        setFontSize(3);
       } else if (window.innerWidth <= 800) {
-        setFontSize(1.5);
+        setFontSize(2);
       } else if (window.innerWidth <= 600) {
         setFontSize(1);
-      } else if (window.innerWidth <= 400) {
-        setFontSize(0.4);
+      } else if (window.innerWidth <= 500) {
+        setFontSize(0.5);
       }
     };
 
@@ -72,69 +71,55 @@ const Experiences = () => {
     };
   }, []);
 
-  const showOptions = () => {
-    setOptionsVisible(true);
-  };
+  const renderText = (index) => (
+    <Typewriter
+      onInit={(typewriter) => {
+        typewriter
+          .changeDelay(10)
+          .typeString(
+            `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${experiencesScript[index]}</h1>`
+          )
+          .callFunction(() => {
+            setCanClick(true);
+            if (index === 1) {
+              setEndOfText(true);
+            }
+          })
+          .start();
+      }}
+    />
+  );
 
   return (
     <>
       <Door />
       <Container>
-        {pageToShow && (
-          <>
-            {pages[pageToShow]}
-            {!isVisible && (
-              <button
-                style={{ height: "50px" }}
-                onClick={() => {
-                  setPageToShow(null);
-                  setCameFromBack(true);
-                }}
-              >
-                Back
-              </button>
-            )}
-          </>
-        )}
-        <GameContainer
-          style={{
-            display: isVisible && pageToShow ? "none" : "block",
-          }}
-        >
+        <GameContainer>
           <ImageWrapper>
             {cat1Visible && <ImageContainer src={cat1} alt="aboutMeCat1" />}
+            {cat2Visible && isLoaded && (
+              <ImageContainer src={cat2} alt="aboutMeCat2" />
+            )}
           </ImageWrapper>
           <SelectionContainer id="selectionContainer">
             <TextContainer>
-              {optionCount === 0 && !cameFromBack && (
-                <Typewriter
-                  onInit={(typewriter) => {
-                    typewriter
-                      .changeDelay(10)
-                      .typeString(
-                        `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${experiencesScript[0]}</h1>`
-                      )
-                      .callFunction(showOptions)
-                      .start();
-                  }}
-                />
+              {optionCount === 0 && renderText(0)}
+              {optionCount >= 1 && renderText(1)}
+              {optionCount < 2 && canClick && (
+                <img style={arrowStyle} src={arrowdown} />
               )}
-              {optionCount === 0 && cameFromBack && (
-                <h1
-                  style={{
-                    marginTop: 0,
-                    color: "white",
-                    fontSize: `${fontSize}rem`,
-                    paddingRight: "0px",
-                  }}
-                >
-                  {experiencesScript[0]}
-                </h1>
-              )}
-              {optionCount === 1 && <Text>Hello world</Text>}
             </TextContainer>
-            {optionsVisible && (
-              <OptionSelector setPageToShow={setPageToShow} data={projects} />
+            {optionCount >= 2 && endOfText && (
+              <>
+                <a
+                  href="https://www.linkedin.com/in/roger-truong/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <LinkedInButton>Take Me to Roger's LinkedIn</LinkedInButton>
+                </a>
+                <ExitButton onClick={() => setCurrentScene(0)}>Exit</ExitButton>
+              </>
             )}
           </SelectionContainer>
         </GameContainer>
@@ -150,6 +135,24 @@ const arrowStyle = {
   right: "0",
   bottom: "0",
 };
+
+const LinkedInButton = styled.button`
+  font-family: "Pixelify Sans", serif;
+  background-color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 15px;
+  font-size: 32px;
+  font-weight: bold;
+  color: #666;
+  cursor: pointer;
+  width: 100%;
+  height: 35%;
+
+  &:hover {
+    background-color: rgb(171, 171, 171);
+  }
+`;
 
 const ExitButton = styled.button`
   font-family: "Pixelify Sans", serif;
@@ -229,18 +232,18 @@ const GameContainer = styled.div`
 
 const SelectionContainer = styled.div`
   width: 1100px;
-  height: 45%;
+  height: 50%;
   margin: 0;
   border: 10px solid white;
   background-color: black;
   padding: 50px;
   position: relative;
-
+  cursor: pointer;
   box-sizing: border-box;
   overflow: auto;
 
   @media (max-width: 1108px) {
-    width: 95%;
+    width: 100%;
     height: 50%;
   }
 `;

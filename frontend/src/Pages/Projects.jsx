@@ -23,6 +23,7 @@ import RustSpreadsheet from "./ProjectPages/RustSpreadsheet";
 const Projects = () => {
   // To add more pages, add to this object and also to ShowcaseStatic.jsx
   // Order is based on below
+  // Also change on App.jsx the routes
   const pages = {
     1: <Datespot />,
     2: <Bridges />,

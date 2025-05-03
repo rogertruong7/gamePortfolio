@@ -28,6 +28,7 @@ const HelpButton = ({  }) => {
   const showHelp = () => {
     console.log("showing help");
   };
+  
   return (
     <>
       <Button onClick={showHelp}>?</Button>

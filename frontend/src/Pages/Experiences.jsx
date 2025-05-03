@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import cat1 from "../assets/roomArt/skillsCat.png";
+import cat1 from "../assets/roomArt/experienceCat.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";

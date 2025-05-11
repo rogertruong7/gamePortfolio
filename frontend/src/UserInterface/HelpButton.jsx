@@ -24,9 +24,9 @@ const Button = styled.button`
   }
 `;
 
-const HelpButton = ({  }) => {
+const HelpButton = ({ setShowHelp }) => {
   const showHelp = () => {
-    console.log("showing help");
+    setShowHelp(true);
   };
   
   return (

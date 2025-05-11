@@ -12,6 +12,7 @@ import HelpButton from "./UserInterface/HelpButton.jsx";
 import AboutMe from "./Pages/AboutMe.jsx";
 import Skills from "./Pages/Skills.jsx";
 import Experiences from "./Pages/Experiences.jsx";
+import HelpPopup from "./UserInterface/HelpPopup.jsx";
 
 const MainPage = () => {
   const [currentScene, setCurrentScene] = useState(0);
@@ -25,6 +26,7 @@ const MainPage = () => {
   const [loading, setLoading] = useState(true);
   const [reseted, setReseted] = useState(false);
   const [showPopup, setShowPopup] = useState(true);
+  const [showHelp, setShowHelp] = useState(false);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -45,10 +47,11 @@ const MainPage = () => {
             setReseted={setReseted}
             setCurrentScene={setCurrentScene}
           ></ResetButton>
-          <HelpButton></HelpButton>
+          <HelpButton setShowHelp={setShowHelp}></HelpButton>
           {localStorage.getItem("visited") !== "true" && showPopup && (
             <Popup setShowPopup={setShowPopup}></Popup>
           )}
+          {showHelp && <HelpPopup setShowHelp={setShowHelp}></HelpPopup>}
         </>
       )}
 
@@ -90,8 +93,10 @@ const MainPage = () => {
       {currentScene === 1 && (
         <AboutMe setCurrentScene={setCurrentScene}></AboutMe>
       )}
-      {currentScene === 2 && <Projects ></Projects>}
-      {currentScene === 3 && <Experiences setCurrentScene={setCurrentScene}></Experiences>}
+      {currentScene === 2 && <Projects></Projects>}
+      {currentScene === 3 && (
+        <Experiences setCurrentScene={setCurrentScene}></Experiences>
+      )}
       {currentScene === 4 && <Skills></Skills>}
     </>
   );

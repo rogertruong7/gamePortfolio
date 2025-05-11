@@ -1,31 +1,25 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 
+import MarkdownSection from "../MarkdownSection";
+
 import "@fontsource/roboto";
 import {
   PageContainer,
   Title,
-  Section,
-  Subtitle,
-  Paragraph,
-  List,
-  ListItem,
-  StyledTable,
-  StyledTh,
-  StyledTd,
   Button,
   ButtonsContainer,
 } from "../PageComponents";
 
 const RustSpreadsheet = () => {
   const openInNewTab = () => {
-    window.open(`/projects/tributary`, "_blank");
+    window.open(`/projects/rsheet`, "_blank");
   };
 
   const [md, setMd] = useState("");
 
   useEffect(() => {
-    fetch("/pageMarkdown/tributaryapi.md")
+    fetch("/pageMarkdown/rsheet.md")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load markdown");
         return res.text();

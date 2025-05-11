@@ -1,18 +1,11 @@
-import React, { useEffect } from "react";
-import styled from "styled-components";
+import { useEffect, useState } from "react";
+
+import MarkdownSection from "../MarkdownSection";
 
 import "@fontsource/roboto";
 import {
   PageContainer,
   Title,
-  Section,
-  Subtitle,
-  Paragraph,
-  List,
-  ListItem,
-  StyledTable,
-  StyledTh,
-  StyledTd,
   Button,
   ButtonsContainer,
 } from "../PageComponents";
@@ -25,7 +18,7 @@ const TikTokSpeed = () => {
   const [md, setMd] = useState("");
 
   useEffect(() => {
-    fetch("/pageMarkdown/tributaryapi.md")
+    fetch("/pageMarkdown/tiktokextension.md")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load markdown");
         return res.text();

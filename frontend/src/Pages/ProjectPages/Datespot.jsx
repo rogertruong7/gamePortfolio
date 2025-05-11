@@ -1,31 +1,22 @@
-import React, { useEffect } from "react";
-import styled from "styled-components";
+import { useEffect, useState } from "react";
+import MarkdownSection from "../MarkdownSection";
 
 import "@fontsource/roboto";
 import {
   PageContainer,
   Title,
-  Section,
-  Subtitle,
-  Paragraph,
-  List,
-  ListItem,
-  StyledTable,
-  StyledTh,
-  StyledTd,
   Button,
   ButtonsContainer,
 } from "../PageComponents";
 
 const Datespot = () => {
-
   const openInNewTab = () => {
-    window.open(`/projects/tributary`, "_blank");
-  }
+    window.open(`/projects/datespot`, "_blank");
+  };
   const [md, setMd] = useState("");
 
   useEffect(() => {
-    fetch("/pageMarkdown/tributaryapi.md")
+    fetch("/pageMarkdown/datespot.md")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load markdown");
         return res.text();
@@ -45,7 +36,6 @@ const Datespot = () => {
       </ButtonsContainer>
       {/* Render your fetched markdown */}
       <MarkdownSection md={md}></MarkdownSection>
-      
     </PageContainer>
   );
 };

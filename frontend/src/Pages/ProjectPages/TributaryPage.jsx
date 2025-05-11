@@ -1,24 +1,13 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { useEffect, useState } from "react";
+import MarkdownSection from "../MarkdownSection";
 
 import "@fontsource/roboto";
 import {
   PageContainer,
   Title,
-  Subtitle,
-  Paragraph,
-  List,
-  ListItem,
-  StyledTable,
-  StyledTh,
-  StyledTd,
   Button,
   ButtonsContainer,
 } from "../PageComponents";
-
-import MarkdownSection from "../MarkdownSection";
 
 const TributaryAPIPage = () => {
   const openInNewTab = () => {
@@ -28,7 +17,7 @@ const TributaryAPIPage = () => {
   const [md, setMd] = useState("");
 
   useEffect(() => {
-    fetch("/pageMarkdown/tributaryapi.md") // adjust path if you put it elsewhere
+    fetch("/pageMarkdown/tributaryapi.md")
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load markdown");
         return res.text();

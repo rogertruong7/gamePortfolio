@@ -31,7 +31,7 @@ const Buildings = ({ setLoading, setProgress }) => {
 
     // Once both scenes are loaded, update the loading state
     if (leftBuildingsScene && rightBuildingsScene) {
-      console.log("loaded");
+      // console.log("loaded");
       setLoading(false); // Update loading state
     }
   }, [leftBuildingsScene, rightBuildingsScene, setLoading]);

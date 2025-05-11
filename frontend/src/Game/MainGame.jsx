@@ -107,7 +107,7 @@ function MainGame({
 
   useEffect(() => {
     if (reseted === true) {
-      console.log("resetting");
+      // console.log("resetting");
       setDarkspot(false);
       setClickMoving(false);
       characterRef.current.position.copy(startVector);

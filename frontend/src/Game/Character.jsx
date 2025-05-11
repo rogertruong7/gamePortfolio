@@ -131,7 +131,7 @@ const Character = React.forwardRef(
     useEffect(() => {
       if (Object.values(keys).every(key => key === false)) {
         setArrowMoving(false);
-        console.log('not arrow moving');
+        // console.log('not arrow moving');
       }
     }, [keys]);
 

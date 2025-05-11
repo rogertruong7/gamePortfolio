@@ -82,6 +82,12 @@ export const Subtitle = styled.h2`
   margin-bottom: 10px;
 `;
 
+export const Subsubtitle = styled.h2`
+  font-size: 1.4rem;
+  color: #fff;
+  margin-bottom: 10px;
+`;
+
 export const Paragraph = styled.p`
   font-size: 1rem;
   color: #fff;

@@ -49,7 +49,7 @@ const Floor = React.forwardRef(({
       let newTargetPos = new THREE.Vector3();
       const intersects = raycaster.intersectObject(ref.current);
       if (intersects.length > 0 && intersects[0].point.y > -25) {
-        console.log("Mouse clicked on ", intersects[0].point);
+        // console.log("Mouse clicked on ", intersects[0].point);
         newTargetPos.copy(intersects[0].point);
         newTargetPos.y = 20; // Match character height
         setTargetPosition(newTargetPos);

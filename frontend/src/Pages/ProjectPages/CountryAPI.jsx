@@ -27,9 +27,12 @@ const CountryApi = () => {
   }, []);
   return (
     <PageContainer>
-      <Title>Countries Visited Python API w/ PostgreSQL database</Title>
+      <Title>Countries Visited Python API w/ SQLite database</Title>
       <ButtonsContainer>
-        <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
+        <a
+          href="https://github.com/rogertruong7/countries_visited_api"
+          target="_blank"
+        >
           <Button>View Repo</Button>
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>

@@ -56,21 +56,34 @@ const HelpPopup = ({ setShowHelp }) => {
         <p>You can use WASD/Arrow keys to move.</p>
         <p>You can also click to move to that location.</p>
         <p>Hold your mouse to move the camera.</p>
-        <p>Walk to a building and click enter to learn more about that section.</p>
+        <p>
+          Walk to a building and click enter to learn more about that section.
+        </p>
         <p>Press the reset button to reset your position.</p>
         <h3>About this Website</h3>
         <p>
           This website was made entirely by me and uses React Three Fiber, a
-          react renderer for three.js. It is also fully mobile responsive, if your mobile device can run it.
+          react renderer for three.js. It is also fully mobile responsive, if
+          your mobile device can run it.
         </p>
         <p>
-          The repository can be found 
-          <a href="https://github.com/rogertruong7/gamePortfolio" target="_blank"> here.</a>
+          The repository can be found
+          <a
+            href="https://github.com/rogertruong7/gamePortfolio"
+            target="_blank"
+          >
+            {" "}
+            here.
+          </a>
         </p>
 
         <p>All of the cats were drawn by me.</p>
         <p>The 3D models were found online and edited in blender.</p>
+
         <DefaultButton onClick={handleClose}>OK</DefaultButton>
+        <br></br>
+        <br></br>
+        <b>Roger Truong 2025</b>
       </PopupContent>
     </PopupWrapper>
   );

@@ -61,7 +61,7 @@ const HelpPopup = ({ setShowHelp }) => {
         <h3>About this Website</h3>
         <p>
           This website was made entirely by me and uses React Three Fiber, a
-          react renderer for three.js.
+          react renderer for three.js. It is also fully mobile responsive, if your mobile device can run it.
         </p>
         <p>
           The repository can be found 

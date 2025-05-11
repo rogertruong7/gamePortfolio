@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/projectsCat.png";
 import arrowdown from "../assets/arrowdown.gif";
@@ -39,7 +39,7 @@ const Projects = () => {
     12: <TikTokSpeed />,
     13: <ForumPage />,
   };
-
+  const twRef = useRef(null);
   const [cat1Visible, setCat1Visible] = useState(true);
   const [optionCount, setOptionCount] = useState(-1);
   const [optionsVisible, setOptionsVisible] = useState(false);
@@ -47,6 +47,28 @@ const Projects = () => {
   const [pageToShow, setPageToShow] = useState(null);
   const [cameFromBack, setCameFromBack] = useState(false);
   const [lessThan1700, setLessThan1700] = useState(true);
+  const [skipText, setSkipText] = useState(false);
+
+  const showOptions = () => {
+    setTimeout(() => {
+      setOptionsVisible(true);
+    }, 200);
+  };
+
+  const Text1 = ({ text, fontSize }) => <H1 fontSize={fontSize}>{text}</H1>;
+
+  useEffect(() => {
+    const finishImmediately = () => {
+      const tw = twRef.current;
+      if (!tw) return;
+      setSkipText(true);
+      tw.stop();
+      showOptions();
+    };
+
+    window.addEventListener('click', finishImmediately);
+    return () => window.removeEventListener('click', finishImmediately);
+  }, [fontSize, showOptions]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 1700px)");
@@ -85,11 +107,7 @@ const Projects = () => {
     };
   }, []);
 
-  const showOptions = () => {
-    setTimeout(() => {
-      setOptionsVisible(true);
-    }, 200);
-  };
+  
 
   return (
     <>
@@ -106,8 +124,12 @@ const Projects = () => {
           <SelectionContainer id="selectionContainer">
             <TextContainer>
               {optionCount === 0 && !cameFromBack && (
+                skipText ? (
+                  <Text1 fontSize={fontSize} text={projectsScript[0]}></Text1>
+                ) : (
                 <Typewriter
                   onInit={(typewriter) => {
+                    twRef.current = typewriter;
                     typewriter
                       .changeDelay(10)
                       .typeString(
@@ -116,7 +138,7 @@ const Projects = () => {
                       .callFunction(showOptions)
                       .start();
                   }}
-                />
+                />)
               )}
               {optionCount === 0 && cameFromBack && (
                 <h1
@@ -156,6 +178,13 @@ const Projects = () => {
     </>
   );
 };
+
+const H1 = styled.h1`
+  margin: 0;
+  color: white;
+  font-size: ${({ fontSize }) => fontSize}rem;
+  padding-right: 0;
+`;
 
 const Button = styled.button`
   position: absolute;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/aboutMeCat1.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
@@ -7,19 +7,40 @@ import Typewriter from "typewriter-effect";
 import { aboutMeScript } from "./ShowcaseStatic";
 
 const AboutMe = ({ setCurrentScene }) => {
-  const [cat1Visible, setCat1Visible] = useState(true);
-  const [cat2Visible, setCat2Visible] = useState(false);
-  const [optionCount, setOptionCount] = useState(-1);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [canClick, setCanClick] = useState(false);
-  const [endOfText, setEndOfText] = useState(false);
-  const [fontSize, setFontSize] = useState(3);
+  const twRef = useRef(null); // Reference to the Typewriter instance
+  const [optionCount, setOptionCount] = useState(-1); // Tracks which script line we’re on
+  const [isLoaded, setIsLoaded] = useState(false); // Indicates when second cat image has loaded
+  const [canClick, setCanClick] = useState(false); // Whether user can advance text
+  const [endOfText, setEndOfText] = useState(false); // Whether we've reached the last line
+  const [fontSize, setFontSize] = useState(3); // Dynamic font size in rem
+  const [skipText, setSkipText] = useState(-1); // Used to instantly finish typing
 
+  // Advance to the next text block
   const onNextText = () => {
+    setSkipText(optionCount);
     setOptionCount((prevCount) => prevCount + 1);
     setCanClick(false);
   };
 
+  // Allow a click/tap to instantly finish the current typewriter animation
+  useEffect(() => {
+    const finishImmediately = () => {
+      const tw = twRef.current;
+      if (!tw) return;
+      if (!canClick) {
+        tw.stop();
+        setCanClick(true);
+        setSkipText(optionCount);
+      }
+    };
+
+    const selectionContainer = document.getElementById("selectionContainer");
+    selectionContainer.addEventListener("click", finishImmediately);
+    return () =>
+      selectionContainer.removeEventListener("click", finishImmediately);
+  }, [fontSize, onNextText]);
+
+  // Handle advancing text on click or keypress once typing is complete
   useEffect(() => {
     const handleClick = (event) => {
       if (canClick) {
@@ -44,6 +65,8 @@ const AboutMe = ({ setCurrentScene }) => {
     };
   }, [canClick]);
 
+  // Preload the second cat image, initialise first script line after a delay,
+  // and adjust fontSize on window resize
   useEffect(() => {
     const img = new Image();
     img.src = cat2;
@@ -71,9 +94,11 @@ const AboutMe = ({ setCurrentScene }) => {
     };
   }, []);
 
+  // Render a Typewriter for the given script index
   const renderText = (index) => (
     <Typewriter
       onInit={(typewriter) => {
+        twRef.current = typewriter;
         typewriter
           .changeDelay(10)
           .typeString(
@@ -90,24 +115,52 @@ const AboutMe = ({ setCurrentScene }) => {
     />
   );
 
+  // Simple component for instantly-rendered text
+  const Text1 = ({ text, fontSize }) => <H1 fontSize={fontSize}>{text}</H1>;
+
   return (
     <>
       <Door />
       <Container>
         <GameContainer>
           <ImageWrapper>
-            {cat1Visible && <ImageContainer src={cat1} alt="aboutMeCat1" />}
-            {cat2Visible && isLoaded && (
-              <ImageContainer src={cat2} alt="aboutMeCat2" />
-            )}
+            <ImageContainer src={cat1} alt="aboutMeCat1" />
           </ImageWrapper>
           <SelectionContainer id="selectionContainer">
             <TextContainer>
-              {optionCount === 0 && renderText(0)}
-              {optionCount === 1 && renderText(1)}
-              {optionCount === 2 && renderText(2)}
-              {optionCount === 3 && renderText(3)}
-              {optionCount >= 4 && renderText(4)}
+              {optionCount === 0 &&
+                (skipText === 0 ? (
+                  <Text1 fontSize={fontSize} text={aboutMeScript[0]}></Text1>
+                ) : (
+                  renderText(0)
+                ))}
+              {optionCount === 1 &&
+                (skipText === 1 ? (
+                  <Text1 fontSize={fontSize} text={aboutMeScript[1]} />
+                ) : (
+                  renderText(1)
+                ))}
+
+              {optionCount === 2 &&
+                (skipText === 2 ? (
+                  <Text1 fontSize={fontSize} text={aboutMeScript[2]} />
+                ) : (
+                  renderText(2)
+                ))}
+
+              {optionCount === 3 &&
+                (skipText === 3 ? (
+                  <Text1 fontSize={fontSize} text={aboutMeScript[3]} />
+                ) : (
+                  renderText(3)
+                ))}
+
+              {optionCount >= 4 &&
+                (skipText >= 4 ? (
+                  <Text1 fontSize={fontSize} text={aboutMeScript[4]} />
+                ) : (
+                  renderText(4)
+                ))}
               {optionCount < 4 && canClick && (
                 <img style={arrowStyle} src={arrowdown} />
               )}
@@ -161,13 +214,6 @@ const TextContainer = styled.div`
   gap: 20px;
   margin: 0;
   position: relative;
-`;
-
-const Text = styled.h1`
-  margin: 0;
-  color: white;
-  font-size: 3rem;
-  padding-right: 0px;
 `;
 
 export const Container = styled.div`
@@ -248,6 +294,13 @@ const ImageContainer = styled.img`
   height: 100%;
   object-fit: cover;
   image-rendering: pixelated;
+`;
+
+const H1 = styled.h1`
+  margin: 0;
+  color: white;
+  font-size: ${({ fontSize }) => fontSize}rem;
+  padding-right: 0;
 `;
 
 export default AboutMe;

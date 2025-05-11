@@ -51,14 +51,14 @@ const Experiences = ({ setCurrentScene }) => {
 
     const timeout = setTimeout(() => setOptionCount(0), 500);
     const handleResize = () => {
-      if (window.innerWidth > 800) {
+      if (window.innerWidth > 950) {
         setFontSize(3);
-      } else if (window.innerWidth <= 800) {
-        setFontSize(2);
-      } else if (window.innerWidth <= 600) {
-        setFontSize(1);
       } else if (window.innerWidth <= 500) {
-        setFontSize(0.5);
+        setFontSize(1.2);
+      } else if (window.innerWidth <= 600) {
+        setFontSize(1.5);
+      } else if (window.innerWidth <= 950) {
+        setFontSize(2);
       }
     };
 
@@ -152,6 +152,11 @@ const LinkedInButton = styled.button`
   &:hover {
     background-color: rgb(171, 171, 171);
   }
+
+  @media (max-width: 1108px) {
+    font-size: 18px;
+    border-radius: 20px;
+  }
 `;
 
 const ExitButton = styled.button`
@@ -172,6 +177,11 @@ const ExitButton = styled.button`
   &:hover {
     background-color: rgb(171, 171, 171);
   }
+
+  @media (max-width: 1108px) {
+    left: 20px;
+    right: none;
+  }
 `;
 
 const TextContainer = styled.div`
@@ -182,12 +192,6 @@ const TextContainer = styled.div`
   position: relative;
 `;
 
-const Text = styled.h1`
-  margin: 0;
-  color: white;
-  font-size: 3rem;
-  padding-right: 0px;
-`;
 
 export const Container = styled.div`
   margin: 0;

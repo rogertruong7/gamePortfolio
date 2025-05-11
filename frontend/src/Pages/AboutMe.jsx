@@ -17,8 +17,6 @@ const AboutMe = ({ setCurrentScene }) => {
 
   const onNextText = () => {
     setOptionCount((prevCount) => prevCount + 1);
-    // setCat2Visible((prev) => !prev);
-    // setCat1Visible((prev) => !prev);
     setCanClick(false);
   };
 
@@ -53,14 +51,14 @@ const AboutMe = ({ setCurrentScene }) => {
 
     const timeout = setTimeout(() => setOptionCount(0), 500);
     const handleResize = () => {
-      if (window.innerWidth > 800) {
+      if (window.innerWidth > 950) {
         setFontSize(3);
-      } else if (window.innerWidth <= 800) {
-        setFontSize(2);
-      } else if (window.innerWidth <= 600) {
-        setFontSize(1);
       } else if (window.innerWidth <= 500) {
-        setFontSize(0.5);
+        setFontSize(1.2);
+      } else if (window.innerWidth <= 600) {
+        setFontSize(1.5);
+      } else if (window.innerWidth <= 950) {
+        setFontSize(2);
       }
     };
 
@@ -149,6 +147,11 @@ const ExitButton = styled.button`
 
   &:hover {
     background-color: rgb(171, 171, 171);
+  }
+
+  @media (max-width: 1108px) {
+    left: 20px;
+    right: none;
   }
 `;
 

@@ -46,7 +46,12 @@ const MarkdownSection = ({ md }) => (
       >
         {md}
       </ReactMarkdown>
-    )) || <Loading />}
+    )) || (
+      <>
+        <br></br>
+        <Loading />
+      </>
+    )}
   </Section>
 );
 

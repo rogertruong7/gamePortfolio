@@ -31,4 +31,6 @@ body {
   text-align: center;
 }
 
-
+.md-body {
+  font-family: 'Open Sans', sans-serif;
+}

@@ -27,9 +27,12 @@ const QuizPage = () => {
   }, []);
   return (
     <PageContainer>
-      <Title>Quiz Website w/ RESTful API</Title>
+      <Title>Quiz Website w/ REST API (TypeScript)</Title>
       <ButtonsContainer>
-        <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
+        <a
+          href="https://github.com/rogertruong7/Quiz-App-Backend"
+          target="_blank"
+        >
           <Button>View Repo</Button>
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>

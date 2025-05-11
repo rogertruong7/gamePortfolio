@@ -34,7 +34,6 @@ cargo run example_round.yml --explain
 
 
 ## Input Format
-
 cards_played:
   - 10♥
   - 10♠
@@ -53,6 +52,7 @@ jokers:
   - Zany Joker
   - Raised Fist
 
+
 Cards may repeat and include optional editions or enhancements.
 
 Jokers activate in defined order, with special ranking rules.
@@ -63,3 +63,4 @@ Jokers activate in defined order, with special ranking rules.
    ```bash
    git clone https://github.com/rogertruong7/balatro_clone.git
    cargo run example_round.yml
+   pip install -r requirements.txt

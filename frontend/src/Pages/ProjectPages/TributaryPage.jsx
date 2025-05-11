@@ -11,7 +11,7 @@ import {
 
 const TributaryAPIPage = () => {
   const openInNewTab = () => {
-    window.open(`/projects/tributary`, "_blank");
+    window.open(`/projects/tributaryapi`, "_blank");
   };
 
   const [md, setMd] = useState("");

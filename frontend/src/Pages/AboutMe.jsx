@@ -31,6 +31,10 @@ const AboutMe = ({ setCurrentScene }) => {
         tw.stop();
         setCanClick(true);
         setSkipText(optionCount);
+
+        if (optionCount === 4) {
+          setEndOfText(true);
+        }
       }
     };
 

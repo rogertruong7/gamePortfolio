@@ -13,40 +13,47 @@ const AboutMe = ({ setCurrentScene }) => {
   const [canClick, setCanClick] = useState(false); // Whether user can advance text
   const [endOfText, setEndOfText] = useState(false); // Whether we've reached the last line
   const [fontSize, setFontSize] = useState(3); // Dynamic font size in rem
-  const [skipText, setSkipText] = useState(false); // Used to instantly finish typing
+  const [skipText, setSkipText] = useState(-1); // Used to instantly finish typing
 
   // Advance to the next text block
   const onNextText = () => {
-    setCanClick(false);
-    setSkipText(false);
+    setSkipText(optionCount);
     setOptionCount((prevCount) => prevCount + 1);
+    setCanClick(false);
   };
 
   // Allow a click/tap to instantly finish the current typewriter animation
+  useEffect(() => {
+    const finishImmediately = () => {
+      const tw = twRef.current;
+      if (!tw) return;
+      if (!canClick) {
+        tw.stop();
+        setCanClick(true);
+        setSkipText(optionCount);
+      }
+    };
+
+    const selectionContainer = document.getElementById("selectionContainer");
+    selectionContainer.addEventListener("click", finishImmediately);
+    return () =>
+      selectionContainer.removeEventListener("click", finishImmediately);
+  }, [fontSize, onNextText]);
+
   // Handle advancing text on click or keypress once typing is complete
   useEffect(() => {
-    const handleInteraction = () => {
-      const tw = twRef.current;
-      // if still typing, finish immediately
-
-      if (tw && !canClick && optionCount <= 4) {
-        console.log(optionCount);
-        tw.stop();
-        setSkipText(true);
-
-        return;
-      }
-      // if typing is done, advance
-      if ((canClick && !endOfText) || skipText) {
+    const handleClick = (event) => {
+      if (canClick) {
         onNextText();
       }
     };
+
     const selectionContainer = document.getElementById("selectionContainer");
-    selectionContainer.addEventListener("click", handleInteraction);
+    selectionContainer.addEventListener("click", handleClick);
 
     const handleKeyDown = (event) => {
-      if (["Space", "Enter"].includes(event.code)) {
-        handleInteraction();
+      if (["Space", "Enter"].includes(event.code) && canClick) {
+        onNextText();
       }
     };
 
@@ -54,9 +61,9 @@ const AboutMe = ({ setCurrentScene }) => {
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      selectionContainer.removeEventListener("click", handleInteraction);
+      selectionContainer.removeEventListener("click", handleClick);
     };
-  }, [skipText, canClick, optionCount]);
+  }, [canClick]);
 
   // Preload the second cat image, initialise first script line after a delay,
   // and adjust fontSize on window resize
@@ -100,7 +107,6 @@ const AboutMe = ({ setCurrentScene }) => {
           .callFunction(() => {
             setCanClick(true);
             if (index === 4) {
-              setSkipText(true);
               setEndOfText(true);
             }
           })
@@ -123,42 +129,39 @@ const AboutMe = ({ setCurrentScene }) => {
           <SelectionContainer id="selectionContainer">
             <TextContainer>
               {optionCount === 0 &&
-                (skipText ? (
+                (skipText === 0 ? (
                   <Text1 fontSize={fontSize} text={aboutMeScript[0]}></Text1>
                 ) : (
                   renderText(0)
                 ))}
               {optionCount === 1 &&
-                (skipText ? (
+                (skipText === 1 ? (
                   <Text1 fontSize={fontSize} text={aboutMeScript[1]} />
                 ) : (
                   renderText(1)
                 ))}
 
               {optionCount === 2 &&
-                (skipText ? (
+                (skipText === 2 ? (
                   <Text1 fontSize={fontSize} text={aboutMeScript[2]} />
                 ) : (
                   renderText(2)
                 ))}
 
               {optionCount === 3 &&
-                (skipText ? (
+                (skipText === 3 ? (
                   <Text1 fontSize={fontSize} text={aboutMeScript[3]} />
                 ) : (
                   renderText(3)
                 ))}
 
-              {optionCount === 4 &&
-                (skipText ? (
+              {optionCount >= 4 &&
+                (skipText >= 4 ? (
                   <Text1 fontSize={fontSize} text={aboutMeScript[4]} />
                 ) : (
                   renderText(4)
                 ))}
-              {optionCount > 4 && (
-                <Text1 fontSize={fontSize} text={aboutMeScript[4]} />
-              )}
-              {optionCount < 4 && (canClick || skipText) && (
+              {optionCount < 4 && canClick && (
                 <img style={arrowStyle} src={arrowdown} />
               )}
             </TextContainer>

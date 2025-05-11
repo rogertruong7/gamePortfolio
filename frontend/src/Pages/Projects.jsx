@@ -65,14 +65,14 @@ const Projects = () => {
   useEffect(() => {
     const timeout = setTimeout(() => setOptionCount(0), 500);
     const handleResize = () => {
-      if (window.innerWidth > 800) {
+      if (window.innerWidth > 950) {
         setFontSize(2);
-      } else if (window.innerWidth <= 800) {
+      } else if (window.innerWidth <= 500) {
         setFontSize(1);
       } else if (window.innerWidth <= 600) {
-        setFontSize(0.5);
-      } else if (window.innerWidth <= 400) {
-        setFontSize(0.2);
+        setFontSize(1.2);
+      } else if (window.innerWidth <= 950) {
+        setFontSize(1.5);
       }
     };
 
@@ -196,6 +196,10 @@ const TextContainer = styled.div`
   height: 20%;
   margin: 0;
   position: relative;
+
+  @media (max-width: 500px) {
+    height: 15%;
+  }
 `;
 
 const Text = styled.h1`

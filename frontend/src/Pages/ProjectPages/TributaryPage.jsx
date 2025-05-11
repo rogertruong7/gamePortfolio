@@ -7,6 +7,7 @@ import {
   Title,
   Button,
   ButtonsContainer,
+  InternalPageContainer,
 } from "../PageComponents";
 
 const TributaryAPIPage = () => {
@@ -28,15 +29,17 @@ const TributaryAPIPage = () => {
 
   return (
     <PageContainer>
-      <Title>Event Driven Architecture: Tributary API Project</Title>
-      <ButtonsContainer>
-        <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
-          <Button>View Repo</Button>
-        </a>
-        <Button onClick={openInNewTab}>Open in new tab</Button>
-      </ButtonsContainer>
-      {/* Render your fetched markdown */}
-      <MarkdownSection md={md}></MarkdownSection>
+      <InternalPageContainer>
+        <Title>Event Driven Architecture: Tributary API Project</Title>
+        <ButtonsContainer>
+          <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
+            <Button>View Repo</Button>
+          </a>
+          <Button onClick={openInNewTab}>Open in new tab</Button>
+        </ButtonsContainer>
+        {/* Render your fetched markdown */}
+        <MarkdownSection md={md}></MarkdownSection>
+      </InternalPageContainer>
     </PageContainer>
   );
 };

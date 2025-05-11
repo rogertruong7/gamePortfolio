@@ -38,6 +38,9 @@ export const PageContainer = styled.div`
   padding-right: 100px;
   font-family: "Pixelify Sans", serif;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 
   &::-webkit-scrollbar {
     width: 8px; /* Skinny scrollbar */
@@ -61,6 +64,16 @@ export const PageContainer = styled.div`
     padding-left: 40px;
     padding-right: 40px;
     margin: 0;
+  }
+`;
+
+export const InternalPageContainer = styled.div`
+  container-type: inline-size;
+  width: 100%;
+  
+  @container (min-width: 1000px) {
+    width: 70%;
+    margin-left: 30%;
   }
 `;
 

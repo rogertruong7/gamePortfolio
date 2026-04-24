@@ -1,6 +1,3 @@
-import { useEffect, useState } from "react";
-import MarkdownSection from "../MarkdownSection";
-
 import "@fontsource/roboto";
 import {
   PageContainer,
@@ -9,23 +6,13 @@ import {
   ButtonsContainer,
   InternalPageContainer,
 } from "../PageComponents";
+import MdxSection, { mdxComponents } from "../MdxComponents";
+import Content from "../../content/tributaryapi.mdx";
 
 const TributaryAPIPage = () => {
   const openInNewTab = () => {
     window.open(`/projects/tributaryapi`, "_blank");
   };
-
-  const [md, setMd] = useState("");
-
-  useEffect(() => {
-    fetch("/pageMarkdown/tributaryapi.md")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load markdown");
-        return res.text();
-      })
-      .then((text) => setMd(text))
-      .catch(console.error);
-  }, []);
 
   return (
     <PageContainer>
@@ -37,8 +24,9 @@ const TributaryAPIPage = () => {
           </a>
           <Button onClick={openInNewTab}>Open in new tab</Button>
         </ButtonsContainer>
-        {/* Render your fetched markdown */}
-        <MarkdownSection md={md}></MarkdownSection>
+        <MdxSection>
+          <Content components={mdxComponents} />
+        </MdxSection>
       </InternalPageContainer>
     </PageContainer>
   );

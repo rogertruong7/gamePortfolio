@@ -1,8 +1,3 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-
-import MarkdownSection from "../MarkdownSection";
-
 import "@fontsource/roboto";
 import {
   PageContainer,
@@ -10,23 +5,13 @@ import {
   Button,
   ButtonsContainer,
 } from "../PageComponents";
+import MdxSection, { mdxComponents } from "../MdxComponents";
+import Content from "../../content/rsheet.mdx";
 
 const RustSpreadsheet = () => {
   const openInNewTab = () => {
     window.open(`/projects/rsheet`, "_blank");
   };
-
-  const [md, setMd] = useState("");
-
-  useEffect(() => {
-    fetch("/pageMarkdown/rsheet.md")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load markdown");
-        return res.text();
-      })
-      .then((text) => setMd(text))
-      .catch(console.error);
-  }, []);
 
   return (
     <PageContainer>
@@ -37,8 +22,9 @@ const RustSpreadsheet = () => {
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>
       </ButtonsContainer>
-      {/* Render your fetched markdown */}
-      <MarkdownSection md={md}></MarkdownSection>
+      <MdxSection>
+        <Content components={mdxComponents} />
+      </MdxSection>
     </PageContainer>
   );
 };

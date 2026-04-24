@@ -1,7 +1,3 @@
-import { useEffect, useState } from "react";
-
-import MarkdownSection from "../MarkdownSection";
-
 import "@fontsource/roboto";
 import {
   PageContainer,
@@ -9,22 +5,14 @@ import {
   Button,
   ButtonsContainer,
 } from "../PageComponents";
+import MdxSection, { mdxComponents } from "../MdxComponents";
+import Content from "../../content/countriesvisited.mdx";
 
 const CountryApi = () => {
   const openInNewTab = () => {
     window.open(`/projects/countriesvisited`, "_blank");
   };
-  const [md, setMd] = useState("");
 
-  useEffect(() => {
-    fetch("/pageMarkdown/countriesvisited.md")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load markdown");
-        return res.text();
-      })
-      .then((text) => setMd(text))
-      .catch(console.error);
-  }, []);
   return (
     <PageContainer>
       <Title>Countries Visited Python API w/ SQLite database</Title>
@@ -37,8 +25,9 @@ const CountryApi = () => {
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>
       </ButtonsContainer>
-      {/* Render your fetched markdown */}
-      <MarkdownSection md={md}></MarkdownSection>
+      <MdxSection>
+        <Content components={mdxComponents} />
+      </MdxSection>
     </PageContainer>
   );
 };

@@ -1,7 +1,3 @@
-import { useEffect, useState } from "react";
-
-import MarkdownSection from "../MarkdownSection";
-
 import "@fontsource/roboto";
 import {
   PageContainer,
@@ -9,22 +5,14 @@ import {
   Button,
   ButtonsContainer,
 } from "../PageComponents";
+import MdxSection, { mdxComponents } from "../MdxComponents";
+import Content from "../../content/houseprice.mdx";
 
 const HousePricePredictor = () => {
   const openInNewTab = () => {
     window.open(`/projects/houseprice`, "_blank");
   };
-  const [md, setMd] = useState("");
 
-  useEffect(() => {
-    fetch("/pageMarkdown/houseprice.md")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load markdown");
-        return res.text();
-      })
-      .then((text) => setMd(text))
-      .catch(console.error);
-  }, []);
   return (
     <PageContainer>
       <Title>House price and type predictor (Python Scikit ML)</Title>
@@ -34,8 +22,9 @@ const HousePricePredictor = () => {
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>
       </ButtonsContainer>
-      {/* Render your fetched markdown */}
-      <MarkdownSection md={md}></MarkdownSection>
+      <MdxSection>
+        <Content components={mdxComponents} />
+      </MdxSection>
     </PageContainer>
   );
 };

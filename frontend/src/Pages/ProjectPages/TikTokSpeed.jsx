@@ -1,7 +1,3 @@
-import { useEffect, useState } from "react";
-
-import MarkdownSection from "../MarkdownSection";
-
 import "@fontsource/roboto";
 import {
   PageContainer,
@@ -9,23 +5,13 @@ import {
   Button,
   ButtonsContainer,
 } from "../PageComponents";
+import MdxSection, { mdxComponents } from "../MdxComponents";
+import Content from "../../content/tiktokextension.mdx";
 
 const TikTokSpeed = () => {
   const openInNewTab = () => {
     window.open(`/projects/tiktokextension`, "_blank");
   };
-
-  const [md, setMd] = useState("");
-
-  useEffect(() => {
-    fetch("/pageMarkdown/tiktokextension.md")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load markdown");
-        return res.text();
-      })
-      .then((text) => setMd(text))
-      .catch(console.error);
-  }, []);
 
   return (
     <PageContainer>
@@ -36,8 +22,9 @@ const TikTokSpeed = () => {
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>
       </ButtonsContainer>
-      {/* Render your fetched markdown */}
-      <MarkdownSection md={md}></MarkdownSection>
+      <MdxSection>
+        <Content components={mdxComponents} />
+      </MdxSection>
     </PageContainer>
   );
 };

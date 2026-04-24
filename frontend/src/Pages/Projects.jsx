@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/projectsCat.png";
-import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
 import { projectsScript } from "./ShowcaseStatic";
 import { projects } from "./ShowcaseStatic";

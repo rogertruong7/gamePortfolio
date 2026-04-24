@@ -1,14 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/skillsCat.png";
-import cat2 from "../assets/roomArt/aboutMeCat2.png";
-import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
 import { skillsScript } from "./ShowcaseStatic";
-import OptionSelector from "./OptionSelector";
 import TributaryPage from "./ProjectPages/TributaryPage";
 import QuizPage from "./ProjectPages/QuizPage";
-import { projects } from "./ShowcaseStatic";
 
 const Skills = () => {
   const pages = {

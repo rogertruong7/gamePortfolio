@@ -1,8 +1,6 @@
 
 import { showcases } from "./Static";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect } from "react";
-import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 
 export default function Doorway({
   characterRef,
@@ -57,32 +55,12 @@ export default function Doorway({
     });
   }
 
-  const result = useThree();
-
-  // useEffect(() => {
-    
-  //   const helpers = []; // Array to store helpers
-
-  //   showcases.forEach((showcase) => {
-  //     const helper = new THREE.Box3Helper(showcase.box, 0xff0000); // Red color for the helper
-  //     result.scene.add(helper);
-  //     helpers.push(helper); // Store the helper
-  //   });
-
-  //   return () => {
-  //     // Clean up helpers on unmount
-  //     helpers.forEach((helper) => {
-  //       result.scene.remove(helper); // Remove each helper
-  //     });
-  //   };
-  // }, []);
-
   useFrame(() => {
     let standingOn = [];
     if (characterRef.current) {
       let characterPosition = characterRef.current.position;
 
-      Object.entries(showcases).forEach(([index, showcase]) => {
+      Object.entries(showcases).forEach(([, showcase]) => {
         let box = showcase.box;
         if (box.containsPoint(characterPosition)) {
           standingOn.push(showcase.showcaseName);

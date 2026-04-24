@@ -1,10 +1,7 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
+import { useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.js";
 
-const Buildings = ({ setLoading, setProgress }) => {
+const Buildings = ({ setLoading }) => {
   // Different way of loading
   const { scene: leftBuildingsScene } = useGLTF(
     "/models/leftBuildingsNew.glb"

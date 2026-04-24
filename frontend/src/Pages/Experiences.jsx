@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/experienceCat.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";

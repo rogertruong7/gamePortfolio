@@ -1,7 +1,3 @@
-import { useEffect, useState } from "react";
-
-import MarkdownSection from "../MarkdownSection";
-
 import "@fontsource/roboto";
 import {
   PageContainer,
@@ -9,22 +5,14 @@ import {
   Button,
   ButtonsContainer,
 } from "../PageComponents";
+import MdxSection, { mdxComponents } from "../MdxComponents";
+import Content from "../../content/gameportfolio.mdx";
 
 const Portfolio = () => {
   const openInNewTab = () => {
     window.open(`/projects/gameportfolio`, "_blank");
   };
-  const [md, setMd] = useState("");
 
-  useEffect(() => {
-    fetch("/pageMarkdown/gameportfolio.md")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to load markdown");
-        return res.text();
-      })
-      .then((text) => setMd(text))
-      .catch(console.error);
-  }, []);
   return (
     <PageContainer>
       <Title>React Three Fiber Portfolio</Title>
@@ -34,8 +22,9 @@ const Portfolio = () => {
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>
       </ButtonsContainer>
-      {/* Render your fetched markdown */}
-      <MarkdownSection md={md}></MarkdownSection>
+      <MdxSection>
+        <Content components={mdxComponents} />
+      </MdxSection>
     </PageContainer>
   );
 };

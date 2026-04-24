@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef } from "react";
 import { useLoader, useFrame } from "@react-three/fiber";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";

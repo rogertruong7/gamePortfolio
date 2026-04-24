@@ -1,6 +1,5 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { useRef, useEffect, useState } from "react";
+import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 import Lights from "./Lights.jsx";

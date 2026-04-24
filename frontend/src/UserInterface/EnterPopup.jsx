@@ -1,4 +1,3 @@
-import React from "react";
 import styled from "styled-components";
 
 // Styled-components for the different elements

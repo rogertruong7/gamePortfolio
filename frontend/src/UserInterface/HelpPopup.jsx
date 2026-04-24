@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import styled from "styled-components";
 
 const PopupWrapper = styled.div`
@@ -83,7 +82,7 @@ const HelpPopup = ({ setShowHelp }) => {
         <DefaultButton onClick={handleClose}>OK</DefaultButton>
         <br></br>
         <br></br>
-        <b>Roger Truong 2025</b>
+        <b>Roger Truong 2026</b>
       </PopupContent>
     </PopupWrapper>
   );

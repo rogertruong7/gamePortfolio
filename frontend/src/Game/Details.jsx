@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Text } from "@react-three/drei";
+import { useRef, useEffect } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 const Details = () => {
@@ -13,7 +13,7 @@ const Details = () => {
   const { scene: tree3Scene, animations: tree3Animations } = useGLTF(
     "/models/cherryTree3.glb"
   );
-  const { scene: floorDetails, animations: floorDetailsAnimations } = useGLTF(
+  const { scene: floorDetails } = useGLTF(
     "/models/floorDetails.glb"
   );
 

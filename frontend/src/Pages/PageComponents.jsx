@@ -26,6 +26,7 @@ export const ButtonsContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
 `
 
 export const PageContainer = styled.div`
@@ -82,11 +83,13 @@ export const Title = styled.h1`
   color: #fff;
   text-align: center;
   margin-bottom: 20px;
+  width: 100%;
 `;
 
 export const Section = styled.div`
   margin-bottom: 20px;
   font-family: "Roboto", serif;
+  width: 100%;
 `;
 
 export const Subtitle = styled.h2`

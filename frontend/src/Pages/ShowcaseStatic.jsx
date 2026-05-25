@@ -20,22 +20,25 @@ export const skillsScript = ["Roger has lots of skills from Front-End to Back-En
 
 export const projects = [
   [
+    "(FULLSTACK) Whereto: Social Date Planning App (React Native + Go)",
     "(FULLSTACK) Datespot: Spring Boot Project (WIP)",
     "(FULLSTACK) Bridges - DevSoc Projects",
     "(BACKEND) Event-Driven Architecture Java API",
-    "(BACKEND) Countries Visited Python API w/ SQLite database",
   ],
   [
+    "(BACKEND) Countries Visited Python API w/ SQLite database",
     "(BACKEND) House price and type predictor (Python Scikit ML)",
     "(BACKEND) Balatro Clone (Rust)",
     "(BACKEND) Simple Math Spreadsheet w/ Thread Concurrency (Rust)",
-    "(BACKEND) Quiz Website w/ RESTful API (TypeScript)",
   ],
   [
+    "(BACKEND) Quiz Website w/ RESTful API (TypeScript)",
     "(FRONTEND) Google Slides Frontend Site (React)",
     "(FRONTEND) Discord Economy Bot (JavaScript)",
     "(FRONTEND) This Portfolio!",
-    "(FRONTEND) TikTok Playback Speed Chrome Extension (JavaScript)",
   ],
-  ["(FRONTEND) Forum Website (Vanilla JS)"],
+  [
+    "(FRONTEND) TikTok Playback Speed Chrome Extension (JavaScript)",
+    "(FRONTEND) Forum Website (Vanilla JS)",
+  ],
 ];

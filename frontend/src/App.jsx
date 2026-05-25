@@ -15,6 +15,7 @@ import QuizPage from "./Pages/ProjectPages/QuizPage.jsx";
 import RustSpreadsheet from "./Pages/ProjectPages/RustSpreadsheet.jsx";
 import TikTokSpeed from "./Pages/ProjectPages/TikTokSpeed.jsx";
 import TributaryAPIPage from "./Pages/ProjectPages/TributaryPage.jsx";
+import Whereto from "./Pages/ProjectPages/Whereto.jsx";
 import RedirectToHome from "./Helpers/Redirect.jsx";
 
 const App = () => {
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/projects/rsheet" element={<RustSpreadsheet />} />
         <Route path="/projects/tiktokextension" element={<TikTokSpeed />} />
         <Route path="/projects/tributaryapi" element={<TributaryAPIPage />} />
+        <Route path="/projects/whereto" element={<Whereto />} />
         <Route path="*" element={<RedirectToHome />} />
       </Routes>
     </BrowserRouter>

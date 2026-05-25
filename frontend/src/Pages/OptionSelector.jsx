@@ -120,7 +120,7 @@ const OptionSelector = ({ setPageToShow, data }) => {
             onMouseEnter={() => setSelectedIndex(index)}
             onClick={() => handleClickOption(index)}
           >
-            <ArrowText selected={selectedIndex === index}>&gt;</ArrowText>
+            <PixelBook selected={selectedIndex === index} />
             <Text selected={selectedIndex === index}>{option}</Text>
           </Option>
         ))}
@@ -149,15 +149,96 @@ const Text = styled.div`
   }
 `;
 
-const ArrowText = styled.h1`
-  margin: 0;
-  color: ${({ selected }) => (selected ? "white" : "black")};
-  font-size: 1.3rem;
-  padding: 0px;
+const D = "#201a3d";
+const P = "#f0e8d0";
+const L = "#b0a898";
+const R = "#9b2848";
+const H = "#d44868";
+const G = "#e08030";
+const S = "#5c3a1e";
 
-  @media (max-width: 800px) {
-    font-size: 0.8rem;
-  }
+const pageRow = (y) => (
+  <>
+    <rect x="0" y={y} width="1" height="1" fill={D}/>
+    <rect x="1" y={y} width="8" height="1" fill={P}/>
+    <rect x="11" y={y} width="8" height="1" fill={P}/>
+    <rect x="19" y={y} width="1" height="1" fill={D}/>
+  </>
+);
+
+const textRow = (y) => (
+  <>
+    <rect x="0" y={y} width="1" height="1" fill={D}/>
+    <rect x="1" y={y} width="2" height="1" fill={P}/>
+    <rect x="3" y={y} width="4" height="1" fill={L}/>
+    <rect x="7" y={y} width="2" height="1" fill={P}/>
+    <rect x="11" y={y} width="2" height="1" fill={P}/>
+    <rect x="13" y={y} width="4" height="1" fill={L}/>
+    <rect x="17" y={y} width="2" height="1" fill={P}/>
+    <rect x="19" y={y} width="1" height="1" fill={D}/>
+  </>
+);
+
+const PixelBook = ({ selected }) => (
+  <BookWrapper>
+    <svg
+      viewBox="0 0 20 14"
+      xmlns="http://www.w3.org/2000/svg"
+      shapeRendering="crispEdges"
+      style={{ height: "100%", width: "auto", opacity: selected ? 1 : 0 }}
+    >
+      {/* Row 0: top outline */}
+      <rect x="2" y="0" width="6" height="1" fill={D}/>
+      <rect x="12" y="0" width="6" height="1" fill={D}/>
+      {/* Row 1: stepped page + spine */}
+      <rect x="1" y="1" width="1" height="1" fill={D}/>
+      <rect x="2" y="1" width="6" height="1" fill={P}/>
+      <rect x="8" y="1" width="1" height="1" fill={D}/>
+      <rect x="9" y="1" width="2" height="1" fill={S}/>
+      <rect x="11" y="1" width="1" height="1" fill={D}/>
+      <rect x="12" y="1" width="6" height="1" fill={P}/>
+      <rect x="18" y="1" width="1" height="1" fill={D}/>
+      {/* Spine column for rows 2-10 */}
+      <rect x="9" y="2" width="2" height="9" fill={S}/>
+      {/* Rows 2-9: alternating page / text */}
+      {pageRow(2)}
+      {textRow(3)}
+      {pageRow(4)}
+      {textRow(5)}
+      {pageRow(6)}
+      {textRow(7)}
+      {pageRow(8)}
+      {textRow(9)}
+      {/* Row 10: cover top */}
+      <rect x="0" y="10" width="1" height="1" fill={D}/>
+      <rect x="1" y="10" width="1" height="1" fill={H}/>
+      <rect x="2" y="10" width="7" height="1" fill={R}/>
+      <rect x="11" y="10" width="7" height="1" fill={R}/>
+      <rect x="18" y="10" width="1" height="1" fill={H}/>
+      <rect x="19" y="10" width="1" height="1" fill={D}/>
+      {/* Row 11: cover */}
+      <rect x="1" y="11" width="1" height="1" fill={D}/>
+      <rect x="2" y="11" width="7" height="1" fill={R}/>
+      <rect x="9" y="11" width="2" height="1" fill={D}/>
+      <rect x="11" y="11" width="7" height="1" fill={R}/>
+      <rect x="18" y="11" width="1" height="1" fill={D}/>
+      {/* Row 12: cover + clasp */}
+      <rect x="2" y="12" width="1" height="1" fill={D}/>
+      <rect x="3" y="12" width="5" height="1" fill={R}/>
+      <rect x="8" y="12" width="4" height="1" fill={G}/>
+      <rect x="12" y="12" width="5" height="1" fill={R}/>
+      <rect x="17" y="12" width="1" height="1" fill={D}/>
+      {/* Row 13: bottom outline */}
+      <rect x="3" y="13" width="14" height="1" fill={D}/>
+    </svg>
+  </BookWrapper>
+);
+
+const BookWrapper = styled.div`
+  height: 25%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 `;
 
 // Styled components

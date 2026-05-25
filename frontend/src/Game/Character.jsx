@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { invisWalls } from "./Static";
+import { invisWalls, pondEdges } from "./Static";
 
 const SPEED = 100;
 
@@ -32,23 +32,32 @@ const Character = React.forwardRef(
       let collidingWall = null;
 
       invisWalls.forEach((wall) => {
-        // Skip the wall that is passed as ignoreWall
         if (wall === ignoreWall) return;
 
         if (wall.intersectsSphere(characterHitbox)) {
-          // Calculate the closest point on the current wall's bounding box to the character
           const closestPoint = new THREE.Vector3(
             Math.max(wall.min.x, Math.min(newPosition.x, wall.max.x)),
             Math.max(wall.min.y, Math.min(newPosition.y, wall.max.y)),
             Math.max(wall.min.z, Math.min(newPosition.z, wall.max.z))
           );
-          // Calculate collision normal
           collisionNormal = new THREE.Vector3()
             .subVectors(newPosition, closestPoint)
             .normalize();
-
-          collisionNormal.y = 0; // Flatten the normal to the XZ plane
+          collisionNormal.y = 0;
           collidingWall = wall;
+        }
+      });
+
+      pondEdges.forEach((edge) => {
+        if (edge === ignoreWall) return;
+
+        if (edge.intersectsSphere(characterHitbox)) {
+          const closestPoint = edge.closestPoint(newPosition);
+          collisionNormal = new THREE.Vector3()
+            .subVectors(newPosition, closestPoint)
+            .normalize();
+          collisionNormal.y = 0;
+          collidingWall = edge;
         }
       });
 

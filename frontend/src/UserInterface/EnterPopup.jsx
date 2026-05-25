@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react";
 import styled from "styled-components";
 
 // Styled-components for the different elements
@@ -52,8 +53,11 @@ const EnterButton = styled.button`
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
 
-  &:hover {
+  &:hover,
+  &:focus {
     background-color: rgba(0, 0, 0, 0.9);
+    outline: 2px solid white;
+    outline-offset: 2px;
   }
 `;
 
@@ -66,8 +70,30 @@ const EnterPopup = ({
   skillsButton,
   setCurrentScene,
 }) => {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const firstButton = containerRef.current?.querySelector("button");
+    if (firstButton) {
+      firstButton.focus();
+    }
+  }, [aboutButton, projectButton, experiencesButton, skillsButton]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Tab") {
+      const buttons = containerRef.current?.querySelectorAll("button");
+      if (!buttons || buttons.length === 0) return;
+      e.preventDefault();
+      const currentIndex = Array.from(buttons).indexOf(document.activeElement);
+      const nextIndex = e.shiftKey
+        ? (currentIndex - 1 + buttons.length) % buttons.length
+        : (currentIndex + 1) % buttons.length;
+      buttons[nextIndex].focus();
+    }
+  };
+
   return (
-    <EntrancePopupContainer>
+    <EntrancePopupContainer ref={containerRef} onKeyDown={handleKeyDown}>
       {twoOptionsButton && (
         <OptionText id="twoOptions">Where would you like to go?</OptionText>
       )}

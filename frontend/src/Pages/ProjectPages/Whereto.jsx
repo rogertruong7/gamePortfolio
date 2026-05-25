@@ -6,18 +6,18 @@ import {
   ButtonsContainer,
 } from "../PageComponents";
 import MdxSection, { mdxComponents } from "../MdxComponents";
-import Content from "../../content/presto.mdx";
+import Content from "../../content/whereto.mdx";
 
-const Presto = () => {
+const Whereto = () => {
   const openInNewTab = () => {
-    window.open(`/projects/presto`, "_blank");
+    window.open(`/projects/whereto`, "_blank");
   };
 
   return (
     <PageContainer>
-      <Title>Presto: SlidesGo Clone</Title>
+      <Title>Whereto: Social Date Planning App</Title>
       <ButtonsContainer>
-        <a href="https://github.com/rogertruong7/presto-deploy" target="_blank">
+        <a href="https://github.com/rogertruong7/whereto" target="_blank">
           <Button>View Repo</Button>
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>
@@ -29,4 +29,4 @@ const Presto = () => {
   );
 };
 
-export default Presto;
+export default Whereto;

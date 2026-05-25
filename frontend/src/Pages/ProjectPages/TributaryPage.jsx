@@ -4,7 +4,6 @@ import {
   Title,
   Button,
   ButtonsContainer,
-  InternalPageContainer,
 } from "../PageComponents";
 import MdxSection, { mdxComponents } from "../MdxComponents";
 import Content from "../../content/tributaryapi.mdx";
@@ -16,18 +15,16 @@ const TributaryAPIPage = () => {
 
   return (
     <PageContainer>
-      <InternalPageContainer>
-        <Title>Event Driven Architecture: Tributary API Project</Title>
-        <ButtonsContainer>
-          <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
-            <Button>View Repo</Button>
-          </a>
-          <Button onClick={openInNewTab}>Open in new tab</Button>
-        </ButtonsContainer>
-        <MdxSection>
-          <Content components={mdxComponents} />
-        </MdxSection>
-      </InternalPageContainer>
+      <Title>Event Driven Architecture: Tributary API Project</Title>
+      <ButtonsContainer>
+        <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
+          <Button>View Repo</Button>
+        </a>
+        <Button onClick={openInNewTab}>Open in new tab</Button>
+      </ButtonsContainer>
+      <MdxSection>
+        <Content components={mdxComponents} />
+      </MdxSection>
     </PageContainer>
   );
 };

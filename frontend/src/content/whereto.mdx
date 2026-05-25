@@ -1,0 +1,95 @@
+A social mobile app for sharing and discovering date plans and activity itineraries. Users create structured Plans with ordered steps linked to real places, execute them in real-time, and publish posts about their experiences for others to discover and follow.
+
+---
+
+## Overview
+
+Whereto is a full-stack mobile application that combines itinerary planning with social sharing. Think of it as a social network for curated date ideas and activity plans. Users build step-by-step Plans (each step tied to a real location with notes and estimated duration), track their progress through a plan in real-time, then publish a Post about the experience — complete with images and captions — for their followers to see and save.
+
+---
+
+## Features
+
+- **Plan Creation**: build structured itineraries with ordered steps, each linked to a place with notes and estimated duration
+- **Plan Execution**: start a plan and track progress through each step in real-time, marking steps as complete as you go
+- **Social Feed**: browse posts from people you follow on a personalised home feed
+- **Explore Page**: discover new plans and posts from the broader community
+- **Post Publishing**: turn completed plans into shareable posts with images and captions
+- **Comments**: engage with posts through a comment system
+- **Post Saving**: bookmark posts to revisit later
+- **Follow System**: follow and unfollow other users to curate your feed
+- **User Profiles**: view profiles with post history and follower/following counts
+- **Tag System**: categorise plans and posts with tags for easier discovery
+- **Authentication**: secure JWT-based auth powered by Amazon Cognito
+
+---
+
+## Architecture
+
+The project follows a clean layered architecture on both the backend and mobile sides:
+
+### Backend (Go)
+- **Handlers**: HTTP request/response handling with input validation
+- **Services**: business logic layer orchestrating operations
+- **Repositories**: data access layer with GORM ORM queries
+- **Models**: User, Plan, PlanStep, Post, Comment, Follow, Tag, PostSave, PlanExecution
+
+### Mobile (React Native)
+- **Expo Router**: file-based routing with tab navigation (Home, Explore, Create, Plans, Profile, Settings)
+- **TanStack Query**: server state management with caching and background refetching
+- **API Layer**: typed API client with auth token injection
+
+---
+
+## Functionality
+
+### Plans
+- Create plans with a title, description, and ordered list of steps
+- Each step includes a place name, notes, and estimated duration
+- Browse and manage your saved plans
+- Execute a plan step-by-step in real-time
+
+### Posts
+- Publish a post from a completed plan with images and captions
+- View posts on your home feed or the explore page
+- Comment on posts
+- Save/bookmark posts for later
+
+### Social
+- Follow and unfollow users
+- View user profiles with their posts and stats
+- Personalised feed based on who you follow
+
+---
+
+## Tech Stack
+
+- **Mobile**: React Native (Expo), TypeScript, TanStack Query, Expo Router
+- **Backend**: Go (Fiber framework), GORM ORM
+- **Database**: PostgreSQL, Redis (caching)
+- **Auth**: Amazon Cognito (JWT-based)
+- **Storage**: Amazon S3 (images)
+- **Infrastructure**: Docker, Docker Compose
+
+---
+
+## Getting Started
+
+1. **Clone the repo**:
+   ```bash
+   git clone https://github.com/rogertruong7/whereto.git
+   cd whereto
+   ```
+
+2. **Start the backend**:
+   ```bash
+   cd backend
+   docker-compose up
+   ```
+
+3. **Start the mobile app**:
+   ```bash
+   cd mobile
+   npm install
+   npx expo start
+   ```

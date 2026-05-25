@@ -17,7 +17,7 @@ const DiscordBot = () => {
     <PageContainer>
       <Title>Discord Economy/Gaming Bot</Title>
       <ButtonsContainer>
-        <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
+        <a href="https://github.com/rogertruong7/discordBot" target="_blank">
           <Button>View Repo</Button>
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>

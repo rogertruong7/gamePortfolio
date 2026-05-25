@@ -1,1 +1,47 @@
-Description is in progress
+A Chrome extension that brings TikTok's mobile 2x playback speed feature to the browser. Hold your mouse button over any TikTok video to speed it up, just like long-pressing on the mobile app. Published on the Chrome Web Store.
+
+---
+
+## Overview
+
+TikTok's browser version doesn't natively support the hold-to-speed-up feature available on mobile. This Chrome extension adds that functionality — holding the mouse button on a video increases playback speed to 2x, and releasing returns it to normal speed. It uses MutationObserver to handle TikTok's dynamically loaded content.
+
+---
+
+## Features
+
+- **Hold-to-Speed**: press and hold the mouse button on any TikTok video to play at 2x speed
+- **Toggle On/Off**: enable or disable the extension via the popup UI
+- **Dynamic Content Support**: uses Mutation Summary library to observe DOM changes as TikTok loads new videos
+- **Lightweight**: minimal permissions, content-script-only architecture
+- **Chrome Web Store Published**: available for direct installation
+
+---
+
+## How It Works
+
+1. **Content Script** (`script.js`): listens for `mousedown`/`mouseup` events on video elements and adjusts `playbackRate`
+2. **DOM Observer** (`observer.js`): watches for new video elements added to the page as the user scrolls through the TikTok feed
+3. **Popup** (`popup.html` + `popup.js`): simple toggle UI to enable/disable the speed feature
+
+---
+
+## Tech Stack
+
+- **Platform**: Chrome Extensions (Manifest v3)
+- **Language**: Vanilla JavaScript
+- **DOM Observation**: MutationObserver / mutation_summary.js
+- **UI**: HTML + CSS popup
+
+---
+
+## Installation
+
+Install from the Chrome Web Store, or load locally:
+
+1. **Clone**:
+   ```bash
+   git clone https://github.com/rogertruong7/TikTok-Speed-Chrome-Extension.git
+   ```
+
+2. Open `chrome://extensions`, enable Developer Mode, and click "Load unpacked" pointing to the cloned directory

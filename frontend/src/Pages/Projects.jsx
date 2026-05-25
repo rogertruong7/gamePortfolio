@@ -18,25 +18,27 @@ import HousePricePredictor from "./ProjectPages/HousePricePredictor";
 import BalatroClone from "./ProjectPages/BalatroClone";
 import CountryApi from "./ProjectPages/CountryAPI";
 import RustSpreadsheet from "./ProjectPages/RustSpreadsheet";
+import Whereto from "./ProjectPages/Whereto";
 
 const Projects = () => {
   // To add more pages, add to this object and also to ShowcaseStatic.jsx
   // Order is based on below
   // Also change on App.jsx the routes
   const pages = {
-    1: <Datespot />,
-    2: <Bridges />,
-    3: <TributaryAPIPage />,
-    4: <CountryApi />,
-    5: <HousePricePredictor />,
-    6: <BalatroClone />,
-    7: <RustSpreadsheet />,
-    8: <QuizPage />,
-    9: <Presto />,
-    10: <DiscordBot />,
-    11: <Portfolio />,
-    12: <TikTokSpeed />,
-    13: <ForumPage />,
+    1: <Whereto />,
+    2: <Datespot />,
+    3: <Bridges />,
+    4: <TributaryAPIPage />,
+    5: <CountryApi />,
+    6: <HousePricePredictor />,
+    7: <BalatroClone />,
+    8: <RustSpreadsheet />,
+    9: <QuizPage />,
+    10: <Presto />,
+    11: <DiscordBot />,
+    12: <Portfolio />,
+    13: <TikTokSpeed />,
+    14: <ForumPage />,
   };
   const twRef = useRef(null);
   const [cat1Visible, setCat1Visible] = useState(true);

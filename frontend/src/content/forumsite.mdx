@@ -1,1 +1,67 @@
-Description is in progress
+A full-stack Q&A forum website built entirely with vanilla JavaScript for the frontend, using DOM manipulation to handle all page transitions on a single HTML page. The backend runs on Node.js with a JSON-based data store.
+
+---
+
+## Overview
+
+The QandA Forum Website is a Stack Overflow-style platform where users can create discussion threads, post comments, and interact with other users. The frontend is notable for being built on a single HTML page — all view transitions (login, dashboard, thread view, profile) are handled through JavaScript DOM manipulation rather than page reloads or a framework router.
+
+---
+
+## Features
+
+- **Single-Page Architecture**: all views rendered on one HTML page via DOM manipulation — no framework, no router
+- **User Authentication**: registration and login system with session management
+- **Thread System**: create, view, edit, and delete discussion threads
+- **Comments**: post and manage comments on threads
+- **Like System**: like threads and comments
+- **User Profiles**: view and edit user profile pages
+- **Responsive Design**: fully mobile-responsive with dedicated CSS for different screen sizes
+- **Dashboard**: personalized feed of threads and activity
+
+---
+
+## Functionality
+
+### Authentication
+- **Register**: create a new account with email and password
+- **Login**: authenticate and receive a session token
+- **Logout**: clear session and return to login view
+
+### Threads & Comments
+- **Create Thread**: post a new discussion topic with title and body
+- **View Thread**: see full thread content with all comments
+- **Edit/Delete**: modify or remove your own threads
+- **Comment**: reply to threads with threaded comments
+- **Like**: upvote threads and comments
+
+### Profile
+- **View Profile**: see user activity and post history
+- **Edit Profile**: update display name and profile details
+
+---
+
+## Tech Stack
+
+- **Frontend**: Vanilla JavaScript, HTML, CSS (no framework)
+- **Backend**: Node.js with Babel
+- **Data Store**: JSON file-based persistence
+- **Architecture**: Single-page DOM manipulation
+
+---
+
+## Getting Started
+
+1. **Clone & install**:
+   ```bash
+   git clone https://github.com/rogertruong7/QandA-Forum-Website.git
+   cd QandA-Forum-Website
+   npm install
+   ```
+
+2. **Start the backend**:
+   ```bash
+   npm start
+   ```
+
+3. **Open** `frontend/index.html` in a browser

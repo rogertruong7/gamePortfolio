@@ -1,1 +1,45 @@
-Description is in progress
+A JavaScript-based Discord bot featuring a virtual economy system and casino-style games. Built with Discord.js and Node.js, it uses a MySQL database to persist user balances and game state across sessions.
+
+---
+
+## Overview
+
+The Discord Economy Bot lets server members earn virtual currency, gamble, and play interactive games directly within Discord. User data is stored in a MySQL database so balances and stats persist between sessions.
+
+---
+
+## Features
+
+- **Virtual Economy**: users can check balances, earn currency, and manage their virtual wallets
+- **Blackjack**: fully interactive blackjack game with hit/stand buttons and proper card logic
+- **Gambling Games**: wager virtual currency with risk/reward mechanics
+- **Button Interactions**: uses Discord.js button components for interactive gameplay (hit, stand, double down)
+- **Persistent Data**: MySQL database stores user balances and game history
+- **Multi-Server Support**: bot can run across multiple Discord servers with isolated user data
+
+---
+
+## Tech Stack
+
+- **Runtime**: Node.js
+- **Library**: Discord.js
+- **Database**: MySQL2
+- **Interaction Handling**: Discord button components and slash commands
+
+---
+
+## Getting Started
+
+1. **Clone & install**:
+   ```bash
+   git clone https://github.com/rogertruong7/discordBot.git
+   cd discordBot
+   npm install
+   ```
+
+2. **Set up MySQL** and configure your database connection in `database/db.js`
+
+3. **Add your bot token** and run:
+   ```bash
+   node src/index.js
+   ```

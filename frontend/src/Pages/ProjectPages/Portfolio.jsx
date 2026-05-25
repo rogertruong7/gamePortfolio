@@ -17,7 +17,7 @@ const Portfolio = () => {
     <PageContainer>
       <Title>React Three Fiber Portfolio</Title>
       <ButtonsContainer>
-        <a href="https://github.com/rogertruong7/tributary_api" target="_blank">
+        <a href="https://github.com/rogertruong7/gamePortfolio" target="_blank">
           <Button>View Repo</Button>
         </a>
         <Button onClick={openInNewTab}>Open in new tab</Button>

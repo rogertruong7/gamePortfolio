@@ -1,1 +1,49 @@
-Description is in progress
+An interactive 3D portfolio website built with Three.js where users control a character that walks through a stylised pixel-art town. Each building represents a section of the portfolio — walking to a doorway transitions into that section's content.
+
+---
+
+## Overview
+
+This is the very portfolio you're browsing! It's built as a navigable 3D game world using Three.js and Vite. Players use keyboard or mouse controls to move a character through a town with buildings labelled "Projects", "About Me", "Experiences", and "Skills". Walking up to a building's doorway triggers a scene transition into the corresponding content page.
+
+---
+
+## Features
+
+- **3D Game World**: fully rendered 3D town with buildings, trees, and a textured floor
+- **Character Controls**: WASD/arrow key movement and click-to-move navigation
+- **Orbiting Camera**: mouse drag to rotate the camera around the character
+- **Collision Detection**: wall sliding physics to prevent walking through buildings
+- **Doorway Transitions**: approaching a building entrance triggers a scene change into that section
+- **GLTF Model Loading**: 3D models exported from Blender (buildings, trees, animated character)
+- **Loading Screen**: asset preloading with a loading indicator
+- **First-Visit Tutorial**: popup instructions for new visitors
+- **Custom Pixel Font**: retro-styled typography matching the pixel art aesthetic
+- **React Integration**: project pages rendered as React components with MDX content
+
+---
+
+## Tech Stack
+
+- **3D Engine**: Three.js
+- **Frontend**: React, Vite
+- **3D Models**: GLTF format (Blender exports)
+- **Content**: MDX (Markdown + JSX)
+- **Styling**: Styled Components
+- **Language**: JavaScript
+
+---
+
+## Getting Started
+
+1. **Clone & install**:
+   ```bash
+   git clone https://github.com/rogertruong7/gamePortfolio.git
+   cd gamePortfolio/frontend
+   npm install
+   ```
+
+2. **Run the dev server**:
+   ```bash
+   npm run dev
+   ```

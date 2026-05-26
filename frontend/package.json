@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "@fontsource-variable/pixelify-sans": "^5.1.1",
+    "@fontsource/dotgothic16": "^5.2.8",
+    "@fontsource/press-start-2p": "^5.2.7",
     "@fontsource/roboto": "^5.1.1",
+    "@fontsource/silkscreen": "^5.2.8",
+    "@fontsource/vt323": "^5.2.7",
     "@mdx-js/rollup": "^3.1.1",
     "@react-three/drei": "^9.120.8",
     "@react-three/fiber": "^8.17.12",

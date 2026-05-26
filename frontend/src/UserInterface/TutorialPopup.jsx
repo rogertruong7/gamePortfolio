@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 const PopupWrapper = styled.div`
-  font-family: "Pixelify Sans", serif;
+  font-family: "Determination Mono", "Pixelify Sans", serif;
   position: fixed;
   top: 0;
   left: 0;
@@ -23,7 +23,7 @@ const PopupContent = styled.div`
 `;
 
 const DefaultButton = styled.button`
-  font-family: "Pixelify Sans", serif;
+  font-family: "Determination Mono", "Pixelify Sans", serif;
   background-color:rgb(255, 229, 162);
   border: none;
   border-radius: 20px;

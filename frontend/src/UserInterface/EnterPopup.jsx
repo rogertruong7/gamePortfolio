@@ -41,7 +41,7 @@ const EnterButton = styled.button`
   border: 4px dashed white;
   width: 45%;
   text-align: center;
-  font-family: "Pixelify Sans", serif;
+  font-family: "Determination Mono", "Pixelify Sans", serif;
   z-index: 102;
   background-color: rgba(0, 0, 0, 0.5);
   border: none;

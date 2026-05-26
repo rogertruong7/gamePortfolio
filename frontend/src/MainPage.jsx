@@ -13,8 +13,30 @@ import AboutMe from "./Pages/AboutMe.jsx";
 import Skills from "./Pages/Skills.jsx";
 import Experiences from "./Pages/Experiences.jsx";
 import HelpPopup from "./UserInterface/HelpPopup.jsx";
-import { AudioProvider } from "./Audio/AudioContext.jsx";
+import { AudioProvider, useAudio } from "./Audio/AudioContext.jsx";
 import { AudioManager } from "./Audio/AudioManager.jsx";
+
+const AutoAudioReady = ({ loading }) => {
+  const { audioReady, setAudioReady } = useAudio();
+
+  useEffect(() => {
+    if (!loading && !audioReady && localStorage.getItem("visited") === "true") {
+      const unlock = () => {
+        setAudioReady(true);
+        window.removeEventListener("click", unlock);
+        window.removeEventListener("keydown", unlock);
+      };
+      window.addEventListener("click", unlock);
+      window.addEventListener("keydown", unlock);
+      return () => {
+        window.removeEventListener("click", unlock);
+        window.removeEventListener("keydown", unlock);
+      };
+    }
+  }, [loading, audioReady, setAudioReady]);
+
+  return null;
+};
 
 const MainPage = () => {
   const [currentScene, setCurrentScene] = useState(0);
@@ -52,6 +74,7 @@ const MainPage = () => {
 
   return (
     <AudioProvider>
+      <AutoAudioReady loading={loading} />
       <AudioManager currentScene={currentScene} isMoving={isMoving} />
       <Menu />
       {loading && currentScene === 0 && <LoadingScreen progress={progress} />}

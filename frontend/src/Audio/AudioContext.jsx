@@ -7,9 +7,7 @@ const AudioProvider = ({ children }) => {
   const [muted, setMutedState] = useState(
     () => localStorage.getItem("audioMuted") === "true"
   );
-  const [audioReady, setAudioReady] = useState(
-    () => localStorage.getItem("visited") === "true"
-  );
+  const [audioReady, setAudioReady] = useState(false);
 
   const setMuted = useCallback((value) => {
     setMutedState(value);

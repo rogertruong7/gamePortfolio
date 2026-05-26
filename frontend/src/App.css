@@ -1,11 +1,3 @@
-@font-face {
-  font-family: "Determination Mono";
-  src: url("/fonts/DeterminationMono.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-  font-display: block;
-}
-
 html,
 #root {
   height: 100%;
@@ -19,7 +11,7 @@ body {
   margin: 0;
   padding: 0;
   user-select: none;
-  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-family: "Pixelify Sans", serif;
 }
 
 .loading {
@@ -27,7 +19,7 @@ body {
   display: flex;
   flex-direction: column;
   background-color: #fad998;
-  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-family: "Pixelify Sans", serif;
   position: fixed;
   top: 0;
   left: 0;

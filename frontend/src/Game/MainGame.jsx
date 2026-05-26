@@ -27,7 +27,8 @@ function MainGame({
   setOneOptionButton,
   reseted,
   setReseted,
-  setProgress
+  setProgress,
+  setIsMoving
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
@@ -115,6 +116,11 @@ function MainGame({
     }
     setReseted(false);
   }, [reseted]);
+
+  useEffect(() => {
+    const anyKeyActive = Object.values(keys).some((v) => v === true);
+    setIsMoving(clickMoving || anyKeyActive);
+  }, [clickMoving, keys, setIsMoving]);
 
   return (
     <>

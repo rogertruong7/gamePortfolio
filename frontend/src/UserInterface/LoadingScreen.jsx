@@ -8,7 +8,7 @@ const LoadingContainer = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #fad998;
-  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-family: "Pixelify Sans", serif;
   position: fixed;
   top: 0;
   left: 0;

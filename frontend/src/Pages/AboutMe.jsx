@@ -4,8 +4,7 @@ import cat1 from "../assets/roomArt/aboutMeCat1.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
-import data from "./ShowcaseStatic.json";
-const aboutMeScript = data.aboutMe.script;
+import { aboutMeScript } from "./ShowcaseStatic";
 
 const AboutMe = ({ setCurrentScene }) => {
   const twRef = useRef(null); // Reference to the Typewriter instance
@@ -189,7 +188,7 @@ const arrowStyle = {
 };
 
 const ExitButton = styled.button`
-  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-family: "Pixelify Sans", serif;
   background-color: white;
   border: none;
   border-radius: 20px;

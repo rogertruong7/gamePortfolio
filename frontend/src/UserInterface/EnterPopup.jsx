@@ -1,9 +1,9 @@
 import { useRef, useEffect } from "react";
 import styled from "styled-components";
+import { Howl } from "howler";
 
 // Styled-components for the different elements
 const EntrancePopupContainer = styled.div`
-  font-family: "Pixelify Sans", serif;
   font-size: 28px;
   position: absolute;
   bottom: 30px;
@@ -71,6 +71,15 @@ const EnterPopup = ({
   skillsButton,
   setCurrentScene,
 }) => {
+  const doorSound = useRef(
+    new Howl({ src: ["/audio/door-open.mp3"], volume: 0.35 })
+  );
+
+  const enterScene = (scene) => {
+    doorSound.current.play();
+    setCurrentScene(scene);
+  };
+
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -101,25 +110,25 @@ const EnterPopup = ({
       {oneOptionButton && <OptionText id="oneOption">Go in?</OptionText>}
       <EnterButtonsContainer>
         {aboutButton && (
-          <EnterButton id="aboutme_button" onClick={() => setCurrentScene(1)}>
+          <EnterButton id="aboutme_button" onClick={() => enterScene(1)}>
             Enter About Me
           </EnterButton>
         )}
         {projectButton && (
-          <EnterButton id="projects_button" onClick={() => setCurrentScene(2)}>
+          <EnterButton id="projects_button" onClick={() => enterScene(2)}>
             Enter Projects
           </EnterButton>
         )}
         {experiencesButton && (
           <EnterButton
             id="experience_button"
-            onClick={() => setCurrentScene(3)}
+            onClick={() => enterScene(3)}
           >
             Enter Experience
           </EnterButton>
         )}
         {skillsButton && (
-          <EnterButton id="skills_button" onClick={() => setCurrentScene(4)}>
+          <EnterButton id="skills_button" onClick={() => enterScene(4)}>
             Enter Skills
           </EnterButton>
         )}

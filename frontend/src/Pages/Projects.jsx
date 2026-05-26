@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/projectsCat.png";
 import Typewriter from "typewriter-effect";
-import data from "./ShowcaseStatic.json";
-const projectsScript = data.projects.script;
-const projects = data.projects.options;
+import { projectsScript } from "./ShowcaseStatic";
+import { projects } from "./ShowcaseStatic";
 import OptionSelector from "./OptionSelector";
 import QuizPage from "./ProjectPages/QuizPage";
 import Presto from "./ProjectPages/Presto";
@@ -193,7 +192,7 @@ const Button = styled.button`
   top: 20px;
   left: 95px;
 
-  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-family: "Pixelify Sans", serif;
   background-color: white;
   border: none;
   border-radius: 20px;

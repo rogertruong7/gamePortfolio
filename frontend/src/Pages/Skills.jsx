@@ -37,10 +37,19 @@ const Skills = ({ setCurrentScene }) => {
       }
     };
 
+    const handleKeySkip = (event) => {
+      if (["Space", "Enter"].includes(event.code)) {
+        finishImmediately();
+      }
+    };
+
     const selectionContainer = document.getElementById("selectionContainer");
     selectionContainer.addEventListener("click", finishImmediately);
-    return () =>
+    window.addEventListener("keydown", handleKeySkip);
+    return () => {
       selectionContainer.removeEventListener("click", finishImmediately);
+      window.removeEventListener("keydown", handleKeySkip);
+    };
   }, [fontSize, onNextText]);
 
   useEffect(() => {

@@ -2,8 +2,8 @@ import { useEffect, useRef } from "react";
 import { Howl, Howler } from "howler";
 import { useAudio } from "./AudioContext.jsx";
 
-const BGM_VOLUME = 0.1;
-const FOOTSTEP_VOLUME = 1;
+const BGM_VOLUME = 0.05;
+const FOOTSTEP_VOLUME = 1.5;
 const FADE_DURATION = 1000;
 
 const AudioManager = ({ currentScene, isMoving }) => {
@@ -24,7 +24,7 @@ const AudioManager = ({ currentScene, isMoving }) => {
     shopRef.current = new Howl({
       src: ["/audio/shop.mp3"],
       loop: true,
-      volume: 0,
+      volume: BGM_VOLUME,
     });
     footstepsRef.current = new Howl({
       src: ["/audio/footsteps.mp3"],

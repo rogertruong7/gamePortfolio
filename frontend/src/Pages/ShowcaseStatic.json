@@ -2,8 +2,8 @@
   "aboutMe": {
     "script": [
       "Hello, you must be looking for Roger!",
-      "He's a Forward Deployed Engineer at Lyra with a Bachelor's Degree in Computer Sciene from UNSW. Roger has big dreams of making a difference in the world!",
-      "He's all about problem-solving, getting creative, and stepping up as a leader to bring great ideas to life.",
+      "He's a Forward Deployed Engineer at Lyra with a Bachelor's Degree in Computer Science from UNSW. Roger has big dreams of making a difference in the world!",
+      "He's all about problem solving, getting creative, and stepping up as a leader to bring great ideas to life.",
       "Roger's on the lookout for opportunities to show what he's got, put his skills to good use, and work on projects that really matter.",
       "I hope you get to talk to him one day! In the meantime, why don't you check out some of his projects!"
     ]
@@ -16,7 +16,7 @@
       [
         "(FULLSTACK) Whereto: Social Date Planning App (React Native + Go)",
         "(FULLSTACK) Shiftopia: Roster Management (React + Supabase + ML)",
-        "(FULLSTACK) Datespot: Spring Boot Project (WIP)",
+        "(FULLSTACK) Datespot: Spring Boot Project",
         "(FULLSTACK) Bridges - DevSoc Projects"
       ],
       [
@@ -55,8 +55,8 @@
       "Let's check out Roger's skills!",
       "Languages: Java, Go, Rust, C, C++, Python, JavaScript/TypeScript, HTML/CSS, SQL, POSIX Scripting",
       "Frameworks: React.js, Next.js, React Native, Vue.js, Django, Flask, FastAPI, Node.js, Spring Boot, Alembic, SQLAlchemy",
-      "Infrastructure and Tools: Git, Terraform, Docker, LLM Orchestration / Agentic Pipelines, AWS (Lambda, Step Functions, ECS, RDS, S3, Cognito, API Gateway)",
-      "We have to acknowledge good modern Software Engineers don't just need coding skills, but need to know how to optimise AI Tools and their setup! I'm proficient building with Conductor, Cursor, Ghostty Terminal, Claude, Claude MCPs and Codex.",
+      "Infrastructure and Tools: Git, Terraform, Docker, LLM Orchestration / Agentic Pipelines, AWS (CLI, Lambda, Step Functions, ECS, RDS, S3, Cognito, API Gateway)",
+      "Good modern software engineers don't just need coding skills, but need to know how to optimise AI Tools and their setup! I'm proficient building with Claude, Claude MCPs and Codex, and use Conductor, Cursor, Ghostty Terminal.",
       "That's all for now! Thanks for checking out Roger's skills."
     ]
   }

@@ -26,7 +26,7 @@ const SmallMenuContainer = styled.div`
 `;
 
 const DefaultButton = styled.button`
-  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-family: "Pixelify Sans", serif;
   background-color: white;
   border: none;
   border-radius: 20px;

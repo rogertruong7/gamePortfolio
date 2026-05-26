@@ -3,6 +3,7 @@ import styled from "styled-components";
 
 // Styled-components for the different elements
 const EntrancePopupContainer = styled.div`
+  font-family: "Pixelify Sans", serif;
   font-size: 28px;
   position: absolute;
   bottom: 30px;
@@ -41,7 +42,7 @@ const EnterButton = styled.button`
   border: 4px dashed white;
   width: 45%;
   text-align: center;
-  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-family: "Pixelify Sans", serif;
   z-index: 102;
   background-color: rgba(0, 0, 0, 0.5);
   border: none;

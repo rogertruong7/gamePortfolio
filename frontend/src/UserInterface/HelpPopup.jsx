@@ -78,6 +78,7 @@ const HelpPopup = ({ setShowHelp }) => {
 
         <p>All of the cats were drawn by me.</p>
         <p>The 3D models were found online and edited in blender.</p>
+        <p>This was heavily inspired by Undertale, music is also from the game!</p>
 
         <DefaultButton onClick={handleClose}>OK</DefaultButton>
         <br></br>

@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import resume from "../assets/RogerTruongResume.pdf";
+import MuteButton from "./MuteButton.jsx";
 
 // Styled components for Menu and Button
 const MenuContainer = styled.div`
   position: absolute;
   display: flex;
-
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
   top: 10px;
   right: 20px;
   z-index: 106;
+`;
+
+const MenuRow = styled.div`
+  display: flex;
 `;
 const SmallMenuContainer = styled.div`
   position: absolute;
@@ -116,23 +123,26 @@ const Menu = () => {
       </HamburgerMenuButton>
       {!lessThan1100 && (
         <MenuContainer>
-          <a
-            href="https://github.com/rogertruong7?tab=repositories"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <DefaultButton>github</DefaultButton>
-          </a>
-          <a
-            href="https://www.linkedin.com/in/roger-truong/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <DefaultButton>linkedin</DefaultButton>
-          </a>
-          <a href={resume} target="_blank" download="RogerTruongResume.pdf">
-            <DefaultButton>download cv</DefaultButton>
-          </a>
+          <MenuRow>
+            <a
+              href="https://github.com/rogertruong7?tab=repositories"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <DefaultButton>github</DefaultButton>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/roger-truong/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <DefaultButton>linkedin</DefaultButton>
+            </a>
+            <a href={resume} target="_blank" download="RogerTruongResume.pdf">
+              <DefaultButton>download cv</DefaultButton>
+            </a>
+          </MenuRow>
+          <MuteButton />
         </MenuContainer>
       )}
       {lessThan1100 && isMenuOpen && (
@@ -154,6 +164,7 @@ const Menu = () => {
           <a href={resume} target="_blank" download="RogerTruongResume.pdf">
             <DefaultButton>download cv</DefaultButton>
           </a>
+          <MuteButton />
         </SmallMenuContainer>
       )}
     </>

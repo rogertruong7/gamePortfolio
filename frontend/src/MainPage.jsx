@@ -13,6 +13,8 @@ import AboutMe from "./Pages/AboutMe.jsx";
 import Skills from "./Pages/Skills.jsx";
 import Experiences from "./Pages/Experiences.jsx";
 import HelpPopup from "./UserInterface/HelpPopup.jsx";
+import { AudioProvider } from "./Audio/AudioContext.jsx";
+import { AudioManager } from "./Audio/AudioManager.jsx";
 
 const MainPage = () => {
   const [currentScene, setCurrentScene] = useState(0);
@@ -28,6 +30,7 @@ const MainPage = () => {
   const [showPopup, setShowPopup] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isMoving, setIsMoving] = useState(false);
 
   useEffect(() => {
     if (currentScene === 0) {
@@ -37,8 +40,19 @@ const MainPage = () => {
     }
   }, [currentScene]);
 
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape" && currentScene !== 0) {
+        setCurrentScene(0);
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [currentScene]);
+
   return (
-    <>
+    <AudioProvider>
+      <AudioManager currentScene={currentScene} isMoving={isMoving} />
       <Menu />
       {loading && currentScene === 0 && <LoadingScreen progress={progress} />}
       {!loading && (
@@ -74,6 +88,7 @@ const MainPage = () => {
           reseted={reseted}
           setReseted={setReseted}
           setProgress={setProgress}
+          setIsMoving={setIsMoving}
         />
       </div>
       {enterPopupVisible && currentScene === 0 && (
@@ -97,8 +112,8 @@ const MainPage = () => {
       {currentScene === 3 && (
         <Experiences setCurrentScene={setCurrentScene}></Experiences>
       )}
-      {currentScene === 4 && <Skills setCurrentScene={setCurrentScene}></Skills>}
-    </>
+      {currentScene === 4 && <Skills></Skills>}
+    </AudioProvider>
   );
 };
 

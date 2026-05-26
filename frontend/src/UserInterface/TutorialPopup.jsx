@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import { useState } from "react";
+import { useAudio } from "../Audio/AudioContext.jsx";
 
 const PopupWrapper = styled.div`
   font-family: "Pixelify Sans", serif;
@@ -41,9 +43,28 @@ const DefaultButton = styled.button`
   }
 `;
 
+const MuteLabel = styled.label`
+  font-family: "Pixelify Sans", serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+`;
+
 const Popup = ({ setShowPopup }) => {
+  const { setMuted, setAudioReady } = useAudio();
+  const [startMuted, setStartMuted] = useState(false);
+
   const handleClose = () => {
     localStorage.setItem("visited", true);
+    if (startMuted) {
+      setMuted(true);
+    }
+    setAudioReady(true);
     setShowPopup(false);
   };
 
@@ -55,6 +76,15 @@ const Popup = ({ setShowPopup }) => {
         <p>You can also click to move to that location.</p>
         <p>Enter whichever building you want!</p>
         <p>Hold your mouse to move the camera.</p>
+        <p>This site has background music and sound effects.</p>
+        <MuteLabel>
+          <input
+            type="checkbox"
+            checked={startMuted}
+            onChange={(e) => setStartMuted(e.target.checked)}
+          />
+          Start muted
+        </MuteLabel>
         <DefaultButton onClick={handleClose}>OK</DefaultButton>
       </PopupContent>
     </PopupWrapper>

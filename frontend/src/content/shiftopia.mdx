@@ -1,0 +1,67 @@
+An event-driven rostering platform that forecasts labour demand from venue events and auto-generates optimised shift schedules using ML predictions and a greedy packing algorithm. Built as a UNSW COMP3900 capstone project.
+
+---
+
+## Overview
+
+Shiftopia is a roster management website built for the International Convention Centre (ICC). Department heads select a date and organisational scope, and the system predicts staffing needs based on that day's scheduled VenueOps events. It visualises demand-vs-coverage gaps on an interactive timeline, then auto-generates draft shifts that can be reviewed, confirmed, and injected directly into the roster.
+
+The core pipeline is fully event-driven: no events on a given day means zero predicted demand and zero generated shifts.
+
+---
+
+## Key Features
+
+- **Shift Synthesiser**: a predictive labour pipeline that translates ML demand forecasts into actionable, unassigned draft shifts ready for assignment
+- **ML Demand Forecasting**: XGBoost regressors (one per role class) predict headcount per 30-minute time slot based on event attributes like type, expected attendance, room capacity, and concurrent event count
+- **Greedy Shift Packing Algorithm**: an iterative "widest-block" approach that converts demand curves into discrete shifts with smoothing, min/max duration enforcement, and peak buffer typing
+- **Drag-and-Drop Rostering Engine**: a visual interface for assigning, adjusting, and reassigning shifts with real-time compliance validation (shift rules, staff availability, supervisor ratios)
+- **Demand vs Coverage Timeline**: a chart showing required staffing (ML prediction), existing coverage, residual gaps, and proposed injections across 30-minute slots
+- **Redundancy Cleanup**: automatically detects oversupplied time windows and suggests safe deletions of unneeded draft shifts before injecting new ones
+- **Undo Support**: every generation run is stamped with a run ID, enabling one-click rollback of injected shifts
+
+---
+
+## How the Shift Generation Pipeline Works
+
+The end-to-end workflow when a user clicks "Generate Shift Preview":
+
+1. **Event Fetching** — pull all VenueOps events overlapping the selected date
+2. **Role Mapping** — map the 77+ specific database role titles (e.g. "AV Lighting Manager", "F&B Team Member") to 4 ML-trained role classes (Usher, Security, Food Staff, Supervisor) via a priority-based regex heuristic
+3. **ML Prediction** — for each (event x role) pair, the XGBoost model predicts headcount per 30-minute time slot using features like event type, expected attendance, day of week, room capacity, and simultaneous event count
+4. **Demand Tensor Assembly** — merge predictions across events per role, subtract existing shift coverage to compute residual demand
+5. **Shift Synthesis (Greedy Packing)** — the algorithm iteratively:
+   - Smooths the raw demand curve with a moving average (preserving peaks via a 90% overstaff tolerance check)
+   - Finds the peak residual slot
+   - Expands left and right to form the widest contiguous demand window
+   - Creates a shift covering the full window at the minimum demand level within it
+   - Subtracts that shift's coverage and repeats until the curve is flat
+6. **Post-Processing** — shifts shorter than 3 hours are padded or merged; shifts longer than 12 hours are split in half; shifts are typed as "core" or "peak buffer"
+7. **Redundancy Scan** — identifies existing unassigned drafts that now overlap oversupplied windows and can be safely removed
+8. **Preview and Confirm** — the user reviews the proposed shifts on the timeline, then clicks "Confirm & Inject" to write them to the roster (with undo capability)
+
+---
+
+## ML Service
+
+A standalone FastAPI microservice with one XGBoost regressor per role class. The model was trained on historical VenueOps event data with features including event type, function type, expected attendance, day of week, room capacity, simultaneous event count, and time-of-day flags (entry peak, exit peak, meal window).
+
+Predictions are wrapped by a correction factor table so output can be tuned from post-event actuals without retraining.
+
+---
+
+## Architecture
+
+- **Frontend**: React (TypeScript), Vite, Tailwind CSS, shadcn/ui — Domain-Driven Design with modules isolated under `src/modules/`
+- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
+- **ML Service**: Python 3.13, FastAPI, XGBoost, Scikit-learn
+- **CI/CD**: GitHub Actions (linting, Vitest, architecture validation via dependency-cruiser)
+
+---
+
+## Tech Stack
+
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn/ui
+- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
+- **ML**: Python, FastAPI, XGBoost, Scikit-learn, Pandas, NumPy
+- **Infrastructure**: Docker, Docker Compose, GitHub Actions

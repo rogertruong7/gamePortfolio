@@ -20,6 +20,7 @@ import BalatroClone from "./ProjectPages/BalatroClone";
 import CountryApi from "./ProjectPages/CountryAPI";
 import RustSpreadsheet from "./ProjectPages/RustSpreadsheet";
 import Whereto from "./ProjectPages/Whereto";
+import Shiftopia from "./ProjectPages/Shiftopia";
 
 const Projects = () => {
   // To add more pages, add to this object and also to ShowcaseStatic.jsx
@@ -27,19 +28,20 @@ const Projects = () => {
   // Also change on App.jsx the routes
   const pages = {
     1: <Whereto />,
-    2: <Datespot />,
-    3: <Bridges />,
-    4: <TributaryAPIPage />,
-    5: <CountryApi />,
-    6: <HousePricePredictor />,
-    7: <BalatroClone />,
-    8: <RustSpreadsheet />,
-    9: <QuizPage />,
-    10: <Presto />,
-    11: <DiscordBot />,
-    12: <Portfolio />,
-    13: <TikTokSpeed />,
-    14: <ForumPage />,
+    2: <Shiftopia />,
+    3: <Datespot />,
+    4: <Bridges />,
+    5: <TributaryAPIPage />,
+    6: <CountryApi />,
+    7: <HousePricePredictor />,
+    8: <BalatroClone />,
+    9: <RustSpreadsheet />,
+    10: <QuizPage />,
+    11: <Presto />,
+    12: <DiscordBot />,
+    13: <Portfolio />,
+    14: <TikTokSpeed />,
+    15: <ForumPage />,
   };
   const twRef = useRef(null);
   const [cat1Visible, setCat1Visible] = useState(true);

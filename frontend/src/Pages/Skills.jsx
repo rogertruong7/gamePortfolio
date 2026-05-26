@@ -1,83 +1,61 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/skillsCat.png";
-import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
-import data from "./ShowcaseStatic.json";
-const skillsScript = data.skills.script;
+import { skillsScript } from "./ShowcaseStatic";
+import TributaryPage from "./ProjectPages/TributaryPage";
+import QuizPage from "./ProjectPages/QuizPage";
 
-const lastIndex = skillsScript.length - 1;
-
-const Skills = ({ setCurrentScene }) => {
-  const twRef = useRef(null);
-  const [optionCount, setOptionCount] = useState(-1);
-  const [canClick, setCanClick] = useState(false);
-  const [endOfText, setEndOfText] = useState(false);
-  const [fontSize, setFontSize] = useState(3);
-  const [skipText, setSkipText] = useState(-1);
-
-  const onNextText = () => {
-    setSkipText(optionCount);
-    setOptionCount((prevCount) => prevCount + 1);
-    setCanClick(false);
+const Skills = () => {
+  const pages = {
+    1: <TributaryPage />,
+    2: <QuizPage />,
+    3: <TributaryPage />,
+    4: <TributaryPage />,
+    5: <TributaryPage />,
+    6: <TributaryPage />,
+    7: <TributaryPage />,
   };
 
-  useEffect(() => {
-    const finishImmediately = () => {
-      const tw = twRef.current;
-      if (!tw) return;
-      if (!canClick) {
-        tw.stop();
-        setCanClick(true);
-        setSkipText(optionCount);
-
-        if (optionCount === lastIndex) {
-          setEndOfText(true);
-        }
-      }
-    };
-
-    const selectionContainer = document.getElementById("selectionContainer");
-    selectionContainer.addEventListener("click", finishImmediately);
-    return () =>
-      selectionContainer.removeEventListener("click", finishImmediately);
-  }, [fontSize, onNextText]);
+  const [cat1Visible, setCat1Visible] = useState(true);
+  const [optionCount, setOptionCount] = useState(-1);
+  const [optionsVisible, setOptionsVisible] = useState(false);
+  const [fontSize, setFontSize] = useState(3);
+  const [pageToShow, setPageToShow] = useState(null);
+  const [cameFromBack, setCameFromBack] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const handleClick = () => {
-      if (canClick) {
-        onNextText();
-      }
-    };
+    const mediaQuery = window.matchMedia("(max-width: 1700px)");
+    const handleResize = (e) => setIsVisible(e.matches);
 
-    const selectionContainer = document.getElementById("selectionContainer");
-    selectionContainer.addEventListener("click", handleClick);
+    // Check on initial load
+    setIsVisible(mediaQuery.matches);
 
-    const handleKeyDown = (event) => {
-      if (["Space", "Enter"].includes(event.code) && canClick) {
-        onNextText();
-      }
-    };
+    // Add listener
+    mediaQuery.addEventListener("change", handleResize);
 
-    window.addEventListener("keydown", handleKeyDown);
+    // Cleanup listener on unmount
+    return () => mediaQuery.removeEventListener("change", handleResize);
+  }, []);
 
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      selectionContainer.removeEventListener("click", handleClick);
-    };
-  }, [canClick]);
+  useEffect(() => {
+    if (pageToShow) {
+      console.log("pageToshow", pageToShow);
+    }
+  }, [pageToShow]);
 
   useEffect(() => {
     const timeout = setTimeout(() => setOptionCount(0), 500);
     const handleResize = () => {
-      if (window.innerWidth > 950) {
-        setFontSize(3);
-      } else if (window.innerWidth <= 500) {
-        setFontSize(1.2);
-      } else if (window.innerWidth <= 600) {
-        setFontSize(1.5);
-      } else if (window.innerWidth <= 950) {
+      if (window.innerWidth > 800) {
         setFontSize(2);
+      } else if (window.innerWidth <= 800) {
+        setFontSize(1.5);
+      } else if (window.innerWidth <= 600) {
+        setFontSize(1);
+      } else if (window.innerWidth <= 400) {
+        setFontSize(0.4);
       }
     };
 
@@ -90,65 +68,68 @@ const Skills = ({ setCurrentScene }) => {
     };
   }, []);
 
-  const renderText = (index) => (
-    <Typewriter
-      onInit={(typewriter) => {
-        twRef.current = typewriter;
-        typewriter
-          .changeDelay(10)
-          .typeString(
-            `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${skillsScript[index]}</h1>`
-          )
-          .callFunction(() => {
-            setCanClick(true);
-            if (index === lastIndex) {
-              setEndOfText(true);
-            }
-          })
-          .start();
-      }}
-    />
-  );
-
-  const Text1 = ({ text, fontSize }) => <H1 fontSize={fontSize}>{text}</H1>;
+  const showOptions = () => {
+    setOptionsVisible(true);
+  };
 
   return (
     <>
       <Door />
       <Container>
-        <GameContainer>
+        {pageToShow && (
+          <>
+            {pages[pageToShow]}
+            {!isVisible && (
+              <button
+                style={{ height: "50px" }}
+                onClick={() => {
+                  setPageToShow(null);
+                  setCameFromBack(true);
+                }}
+              >
+                Back
+              </button>
+            )}
+          </>
+        )}
+        <GameContainer
+          style={{
+            display: isVisible && pageToShow ? "none" : "block",
+          }}
+        >
           <ImageWrapper>
-            <ImageContainer src={cat1} alt="skillsCat" />
+            {cat1Visible && <ImageContainer src={cat1} alt="aboutMeCat1" />}
           </ImageWrapper>
           <SelectionContainer id="selectionContainer">
             <TextContainer>
-              {skillsScript.map((text, index) => {
-                if (index < lastIndex) {
-                  if (optionCount === index) {
-                    return skipText === index ? (
-                      <Text1 key={index} fontSize={fontSize} text={text} />
-                    ) : (
-                      renderText(index)
-                    );
-                  }
-                  return null;
-                }
-                if (optionCount >= lastIndex) {
-                  return skipText >= lastIndex ? (
-                    <Text1 key={index} fontSize={fontSize} text={text} />
-                  ) : (
-                    renderText(lastIndex)
-                  );
-                }
-                return null;
-              })}
-              {optionCount < lastIndex && canClick && (
-                <img style={arrowStyle} src={arrowdown} />
+              {optionCount === 0 && !cameFromBack && (
+                <Typewriter
+                  onInit={(typewriter) => {
+                    typewriter
+                      .changeDelay(10)
+                      .typeString(
+                        `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${skillsScript[0]}</h1>`
+                      )
+                      .callFunction(showOptions)
+                      .start();
+                  }}
+                />
               )}
+              {optionCount === 0 && cameFromBack && (
+                <h1
+                  style={{
+                    marginTop: 0,
+                    color: "white",
+                    fontSize: `${fontSize}rem`,
+                    paddingRight: "0px",
+                  }}
+                >
+                  {skillsScript[0]}
+                </h1>
+              )}
+              {optionCount === 1 && <Text>Hello world</Text>}
             </TextContainer>
-            {optionCount >= lastIndex && endOfText && (
-              <ExitButton onClick={() => setCurrentScene(0)}>Exit</ExitButton>
-            )}
+            
           </SelectionContainer>
         </GameContainer>
       </Container>
@@ -164,15 +145,8 @@ const arrowStyle = {
   bottom: "0",
 };
 
-const H1 = styled.h1`
-  margin: 0;
-  color: white;
-  font-size: ${({ fontSize }) => fontSize}rem;
-  padding-right: 0;
-`;
-
 const ExitButton = styled.button`
-  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-family: "Pixelify Sans", serif;
   background-color: white;
   border: none;
   border-radius: 20px;
@@ -189,11 +163,6 @@ const ExitButton = styled.button`
   &:hover {
     background-color: rgb(171, 171, 171);
   }
-
-  @media (max-width: 1108px) {
-    left: 20px;
-    right: none;
-  }
 `;
 
 const TextContainer = styled.div`
@@ -202,6 +171,13 @@ const TextContainer = styled.div`
   gap: 20px;
   margin: 0;
   position: relative;
+`;
+
+const Text = styled.h1`
+  margin: 0;
+  color: white;
+  font-size: 3rem;
+  padding-right: 0px;
 `;
 
 export const Container = styled.div`
@@ -253,7 +229,7 @@ const SelectionContainer = styled.div`
   background-color: black;
   padding: 50px;
   position: relative;
-  cursor: pointer;
+
   box-sizing: border-box;
   overflow: auto;
 

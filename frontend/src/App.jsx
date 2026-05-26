@@ -16,9 +16,6 @@ import RustSpreadsheet from "./Pages/ProjectPages/RustSpreadsheet.jsx";
 import TikTokSpeed from "./Pages/ProjectPages/TikTokSpeed.jsx";
 import TributaryAPIPage from "./Pages/ProjectPages/TributaryPage.jsx";
 import Whereto from "./Pages/ProjectPages/Whereto.jsx";
-import Lyra from "./Pages/ExperiencePages/Lyra.jsx";
-import Corveris from "./Pages/ExperiencePages/Corveris.jsx";
-import Cognimark from "./Pages/ExperiencePages/Cognimark.jsx";
 import RedirectToHome from "./Helpers/Redirect.jsx";
 
 const App = () => {
@@ -40,9 +37,6 @@ const App = () => {
         <Route path="/projects/tiktokextension" element={<TikTokSpeed />} />
         <Route path="/projects/tributaryapi" element={<TributaryAPIPage />} />
         <Route path="/projects/whereto" element={<Whereto />} />
-        <Route path="/experiences/lyra" element={<Lyra />} />
-        <Route path="/experiences/corveris" element={<Corveris />} />
-        <Route path="/experiences/cognimark" element={<Cognimark />} />
         <Route path="*" element={<RedirectToHome />} />
       </Routes>
     </BrowserRouter>

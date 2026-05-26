@@ -133,7 +133,6 @@ const Text = styled.div`
   margin: 0;
   color: white;
   width: 100%;
-  font-family: "Determination Mono", "Pixelify Sans", serif;
   font-size: 1.3rem;
   padding-left: 10px;
   padding-right: 10px;

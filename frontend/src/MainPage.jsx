@@ -97,7 +97,7 @@ const MainPage = () => {
       {currentScene === 3 && (
         <Experiences setCurrentScene={setCurrentScene}></Experiences>
       )}
-      {currentScene === 4 && <Skills></Skills>}
+      {currentScene === 4 && <Skills setCurrentScene={setCurrentScene}></Skills>}
     </>
   );
 };

@@ -1,0 +1,43 @@
+A healthcare AI platform managing 5,000+ patient records across 3 healthcare organizations with HIPAA-compliant multi-tenant architecture. Built with Python, AWS SAM, Django, and Vue.js.
+
+---
+
+## Overview
+
+Cognimark is a clinical management platform that ingests, deduplicates, and manages electronic health records (EHR) using FHIR R4 standards. The platform serves multiple healthcare organizations with strict data isolation, processing patient data through serverless ingestion pipelines and providing a full-stack clinical management interface for healthcare providers.
+
+---
+
+## Impact
+
+- Reduced EHR data duplication by **40%** across 3 healthcare organizations, saving an estimated **$15,000/year** in wasted storage and manual reconciliation
+- Accelerated patient data ingestion throughput by **60%** for multi-tenant healthcare clients
+- Delivered a fullstack application used by **3 organizations** to manage **5,000+ patient records**
+- Eliminated **100%** of cross-tenant data leakage risks for HIPAA-compliant deployments
+
+---
+
+## Key Contributions
+
+### FHIR R4 Deduplication Engine
+Designed deterministic deduplication logic within AWS Step Functions ingestion pipelines that cross-references patient records before persisting to per-tenant PostgreSQL databases, reducing data duplication by 40%.
+
+### Serverless Ingestion Pipeline
+Architected an AWS pipeline (API Gateway, Step Functions, Lambda, S3) with resumable job tracking, fault-tolerant NDJSON assembly, and batch conflict resolution via HTTP 409 retry logic — boosting ingestion throughput by 60%.
+
+### Clinical Management Application
+Built a Django REST Framework backend with Celery async task queues and a Vue 3 frontend using TanStack Query and Pinia state management, integrated with AWS Cognito JWT authentication and multi-tenant database routing.
+
+### HIPAA-Compliant Infrastructure
+Implemented per-organization PostgreSQL databases with dedicated ECS/Fargate HAPI FHIR servers, dynamic ALB routing, VPC isolation, and Secrets Manager credential rotation via Terraform-managed infrastructure.
+
+---
+
+## Tech Stack
+
+- **Backend**: Python, Django REST Framework, Celery
+- **Frontend**: Vue 3, TanStack Query, Pinia
+- **Infrastructure**: AWS SAM, Step Functions, Lambda, ECS/Fargate, Terraform
+- **Database**: PostgreSQL (multi-tenant), S3
+- **Auth**: AWS Cognito (JWT-based)
+- **Standards**: FHIR R4, HIPAA

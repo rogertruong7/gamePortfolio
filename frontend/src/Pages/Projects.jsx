@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import cat1 from "../assets/roomArt/projectsCat.png";
 import Typewriter from "typewriter-effect";
-import { projectsScript } from "./ShowcaseStatic";
-import { projects } from "./ShowcaseStatic";
+import data from "./ShowcaseStatic.json";
+const projectsScript = data.projects.script;
+const projects = data.projects.options;
 import OptionSelector from "./OptionSelector";
 import QuizPage from "./ProjectPages/QuizPage";
 import Presto from "./ProjectPages/Presto";
@@ -134,7 +135,7 @@ const Projects = () => {
                     typewriter
                       .changeDelay(10)
                       .typeString(
-                        `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${projectsScript[0]}</h1>`
+                        `<h1 style='margin: 0; color: white; font-family: Determination Mono, Pixelify Sans, serif; font-size: ${fontSize}rem; padding-right: 0px;'>${projectsScript[0]}</h1>`
                       )
                       .callFunction(showOptions)
                       .start();
@@ -183,6 +184,7 @@ const Projects = () => {
 const H1 = styled.h1`
   margin: 0;
   color: white;
+  font-family: "Determination Mono", "Pixelify Sans", serif;
   font-size: ${({ fontSize }) => fontSize}rem;
   padding-right: 0;
 `;

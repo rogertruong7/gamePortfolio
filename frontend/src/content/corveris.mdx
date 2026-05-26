@@ -1,0 +1,46 @@
+An AI-powered crime reporting platform used by 8+ law enforcement departments including Sacramento PD, Laredo PD, Citrus Heights, and Campbell. Built with Python, FastAPI, React, Next.js, and Terraform on AWS.
+
+---
+
+## Overview
+
+Corveris is an AI crime reporting platform that enables citizens to file police reports through a conversational interface. Reports are processed by an LLM-powered pipeline that classifies incidents, resolves jurisdiction-specific penal codes, and routes them to officers for review. The platform supports multiple law enforcement departments across California and Texas.
+
+---
+
+## Impact
+
+- **200+ pull requests** shipped across 4 repositories (backend, dashboard, reporter app, infrastructure) in 5 months
+- Serving **8+ law enforcement departments** across multiple states
+- Improved report accuracy by **25%** and reduced officer review time by **30 minutes per incident**
+- Reduced anonymous report fraud by **70%**
+- Enabled **real-time emergency intervention** for high-risk reports (averaging 3 escalations/week)
+- Expanded accessibility to **20 locales** for non-English-speaking communities
+
+---
+
+## Key Contributions
+
+### Jurisdiction-Specific Penal Code Resolution
+Built classification systems for California Penal Code and Texas Penal Code via YAML-based config systems, NIBRS-compliant classification overrides, and LLM-powered sub-classifiers for theft, fraud, vandalism, assault, and hit-and-run incidents.
+
+### Dashboard Performance
+Increased dashboard load performance by 45% for tables with 100+ active reports by migrating crime heatmaps from Google Street View API to deck.gl, implementing TanStack Virtual for virtualized table rendering, and adding URL-synced query-based filtering.
+
+### Anti-Fraud SMS Verification
+Implemented a claim-via-SMS workflow using Twilio OTP verification, rate-limited claim tokens (72-hour expiry, single-use), and constant-time comparison for urlsafe base64 identity binding.
+
+### Real-Time Crisis Detection
+Created a background async agent that monitors citizen messages in parallel with the main DAG pipeline, detecting crisis keywords and triggering instant 911 referrals with officer notifications.
+
+### Full i18n Support
+Implemented full internationalization across the Next.js reporter app using next-intl, translating all hardcoded UI strings, and integrating auto-translation of non-English submissions via Claude before LLM processing.
+
+---
+
+## Tech Stack
+
+- **Backend**: Python, FastAPI
+- **Frontend**: React (Vite), Next.js
+- **Infrastructure**: Terraform, AWS
+- **Integrations**: Twilio, deck.gl, Claude API, next-intl

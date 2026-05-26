@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const Button = styled.button`
-  font-family: "Pixelify Sans", serif;
+  font-family: "Roboto", serif;
   background-color: rgb(255, 235, 212);
   border: none;
   border-radius: 20px;
@@ -37,7 +37,8 @@ export const PageContainer = styled.div`
   overflow: auto;
   padding-left: 100px;
   padding-right: 100px;
-  font-family: "Pixelify Sans", serif;
+  font-family: "Roboto", serif;
+  letter-spacing: normal;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -79,6 +80,7 @@ export const InternalPageContainer = styled.div`
 `;
 
 export const Title = styled.h1`
+  font-family: "Roboto", serif;
   font-size: 2.5rem;
   color: #fff;
   text-align: center;

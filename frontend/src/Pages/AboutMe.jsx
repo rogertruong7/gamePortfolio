@@ -4,7 +4,8 @@ import cat1 from "../assets/roomArt/aboutMeCat1.png";
 import cat2 from "../assets/roomArt/aboutMeCat2.png";
 import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
-import { aboutMeScript } from "./ShowcaseStatic";
+import data from "./ShowcaseStatic.json";
+const aboutMeScript = data.aboutMe.script;
 
 const AboutMe = ({ setCurrentScene }) => {
   const twRef = useRef(null); // Reference to the Typewriter instance
@@ -106,7 +107,7 @@ const AboutMe = ({ setCurrentScene }) => {
         typewriter
           .changeDelay(10)
           .typeString(
-            `<h1 style='margin: 0; color: white; font-size: ${fontSize}rem; padding-right: 0px;'>${aboutMeScript[index]}</h1>`
+            `<h1 style='margin: 0; color: white; font-family: Determination Mono, Pixelify Sans, serif; font-size: ${fontSize}rem; padding-right: 0px;'>${aboutMeScript[index]}</h1>`
           )
           .callFunction(() => {
             setCanClick(true);
@@ -303,6 +304,7 @@ const ImageContainer = styled.img`
 const H1 = styled.h1`
   margin: 0;
   color: white;
+  font-family: "Determination Mono", "Pixelify Sans", serif;
   font-size: ${({ fontSize }) => fontSize}rem;
   padding-right: 0;
 `;

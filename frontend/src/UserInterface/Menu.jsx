@@ -125,7 +125,7 @@ const Menu = () => {
         <MenuContainer>
           <MenuRow>
             <a
-              href="https://github.com/rogertruong7?tab=repositories"
+              href="https://github.com/rogertruong7"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -141,14 +141,14 @@ const Menu = () => {
             <a href={resume} target="_blank" download="RogerTruongResume.pdf">
               <DefaultButton>download cv</DefaultButton>
             </a>
+            <MuteButton />
           </MenuRow>
-          <MuteButton />
         </MenuContainer>
       )}
       {lessThan1100 && isMenuOpen && (
         <SmallMenuContainer>
           <a
-            href="https://github.com/rogertruong7?tab=repositories"
+            href="https://github.com/rogertruong7"
             target="_blank"
             rel="noopener noreferrer"
           >

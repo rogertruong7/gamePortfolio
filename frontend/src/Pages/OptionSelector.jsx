@@ -27,7 +27,7 @@ const OptionSelector = ({ setPageToShow, data }) => {
   }, []);
 
   const handleKeyDown = (e) => {
-    if (e.key === "ArrowRight") {
+    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
       if (selectedIndex + 1 === currentOptions.length && selectedIndex !== 3) {
         console.log("last option");
       } else if (selectedIndex === 3 && currentPage < data.length - 1) {
@@ -36,14 +36,14 @@ const OptionSelector = ({ setPageToShow, data }) => {
       } else if (selectedIndex < 3) {
         setSelectedIndex((prev) => prev + 1);
       }
-    } else if (e.key === "ArrowLeft") {
+    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
       if (selectedIndex === 0 && currentPage > 0) {
         setCurrentPage((prev) => prev - 1);
         setSelectedIndex(3);
       } else if (selectedIndex > 0) {
         setSelectedIndex((prev) => prev - 1);
       }
-    } else if (e.key === "ArrowUp") {
+    } else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
       if (isMobileView) {
         if (selectedIndex === 0 && currentPage > 0) {
           setCurrentPage((prev) => prev - 1);
@@ -54,7 +54,7 @@ const OptionSelector = ({ setPageToShow, data }) => {
       } else if (selectedIndex === 2 || selectedIndex === 3) {
         setSelectedIndex((prev) => prev - 2);
       }
-    } else if (e.key === "ArrowDown") {
+    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
       if (isMobileView) {
         if (
           selectedIndex + 1 === currentOptions.length &&

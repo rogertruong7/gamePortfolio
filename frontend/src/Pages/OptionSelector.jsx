@@ -134,7 +134,7 @@ const Text = styled.div`
   color: white;
   width: 100%;
   font-family: "Determination Mono", "Pixelify Sans", serif;
-  font-size: 1.3rem;
+  font-size: 1.6rem;
   padding-left: 10px;
   padding-right: 10px;
   border-radius: 20px;
@@ -146,7 +146,7 @@ const Text = styled.div`
     selected ? "2px dashed white" : "2px solid transparent"};
 
   @media (max-width: 800px) {
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 `;
 

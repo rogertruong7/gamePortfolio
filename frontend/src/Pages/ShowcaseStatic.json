@@ -52,9 +52,9 @@
   "skills": {
     "script": [
       "Let's check out Roger's skills!",
-      "Languages: Java, Go, Rust, C, Python, JavaScript/TypeScript, HTML/CSS, SQL, POSIX Scripting",
-      "Frameworks: React.js, Next.js, React Native, Vue.js, Django, Flask, FastAPI, Node.js, Spring Boot, Fiber",
-      "Infrastructure and Tools: Git, Terraform, Docker, AWS (Lambda, Step Functions, ECS, RDS, S3, Cognito, API Gateway)",
+      "Languages: Java, Go, Rust, C, C++, Python, JavaScript/TypeScript, HTML/CSS, SQL, POSIX Scripting",
+      "Frameworks: React.js, Next.js, React Native, Vue.js, Django, Flask, FastAPI, Node.js, Spring Boot, Alembic, SQLAlchemy",
+      "Infrastructure and Tools: Git, Terraform, Docker, LLM Orchestration / Agentic Pipelines, AWS (Lambda, Step Functions, ECS, RDS, S3, Cognito, API Gateway)",
       "That's all for now! Thanks for checking out Roger's skills."
     ]
   }

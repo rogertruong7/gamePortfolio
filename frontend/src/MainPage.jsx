@@ -112,6 +112,7 @@ const MainPage = () => {
           setReseted={setReseted}
           setProgress={setProgress}
           setIsMoving={setIsMoving}
+          currentScene={currentScene}
         />
       </div>
       {enterPopupVisible && currentScene === 0 && (

@@ -28,7 +28,8 @@ function MainGame({
   reseted,
   setReseted,
   setProgress,
-  setIsMoving
+  setIsMoving,
+  currentScene
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
@@ -80,17 +81,17 @@ function MainGame({
   }
 
   function onKeyDown(event) {
+    if (currentScene !== 0) return;
     setKeys((prevKeys) => ({
       ...prevKeys,
-      [event.key.toLowerCase()]: true, // Track key press
+      [event.key.toLowerCase()]: true,
     }));
   }
 
-  // Handler for key up event
   function onKeyUp(event) {
     setKeys((prevKeys) => ({
       ...prevKeys,
-      [event.key.toLowerCase()]: false, // Track key release
+      [event.key.toLowerCase()]: false,
     }));
   }
 
@@ -100,10 +101,18 @@ function MainGame({
     window.addEventListener("keyup", onKeyUp);
     return () => {
       window.removeEventListener("blur", onWindowBlur);
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     };
-  }, []);
+  }, [currentScene]);
+
+  useEffect(() => {
+    if (currentScene !== 0) {
+      setKeys({});
+      setClickMoving(false);
+      setDarkspot(false);
+    }
+  }, [currentScene]);
 
   useEffect(() => {
     if (reseted === true) {
@@ -149,6 +158,7 @@ function MainGame({
           clickMoving={clickMoving}
           targetPosition={targetPosition}
           keys={keys}
+          currentScene={currentScene}
         />
         {labels.map(({ text, position, fontSize }, index) => (
           <Text

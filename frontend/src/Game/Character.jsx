@@ -17,6 +17,7 @@ const Character = React.forwardRef(
       clickMoving,
       targetPosition,
       keys,
+      currentScene,
     },
     ref
   ) => {
@@ -255,17 +256,18 @@ const Character = React.forwardRef(
     }, [scene, animations]);
 
     useFrame(({ clock }, delta) => {
-      let adjustedDelta = Math.max(clock.getDelta(), 0.001); // Ensure a minimum value for delta
+      let adjustedDelta = Math.max(clock.getDelta(), 0.001);
 
       if (clickMoving || arrowMoving) {
-        // Set a minimum delta value when certain conditions are met
         adjustedDelta = Math.max(delta, 0.015);
       }
 
-      // Update the animation mixer if it exists
       if (mixer.current) {
         mixer.current.update(adjustedDelta);
       }
+
+      if (currentScene !== 0) return;
+
       let finalDirection = keyboardMovement();
 
       clickToMove(delta);

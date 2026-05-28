@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 
 const Buildings = ({ setLoading }) => {
@@ -54,4 +54,4 @@ const Buildings = ({ setLoading }) => {
 };
 
 
-export default Buildings;
+export default React.memo(Buildings);

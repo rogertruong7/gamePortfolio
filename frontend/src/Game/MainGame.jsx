@@ -67,7 +67,7 @@ function MainGame({
 
       // Enable shadows
       gl.shadowMap.enabled = true;
-      gl.shadowMap.type = THREE.PCFSoftShadowMap;
+      gl.shadowMap.type = THREE.PCFShadowMap;
 
       // Set pixel ratio for better rendering on high-DPI screens
       gl.setPixelRatio(devicePixelRatio);
@@ -162,9 +162,9 @@ function MainGame({
         />
         {labels.map(({ text, position, fontSize }, index) => (
           <Text
-            key={index}
+            key={text}
             text={text}
-            position={[position[0], position[1], position[2]]}
+            position={position}
             fontPath="fonts/PixelifySans_Regular.json"
             fontSize={fontSize}
             color="#ff8080"

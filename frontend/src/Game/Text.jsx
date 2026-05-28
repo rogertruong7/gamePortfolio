@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { useLoader, useFrame } from "@react-three/fiber";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
@@ -7,21 +7,18 @@ function Text({ text, position, fontPath, fontSize, color, cameraRef }) {
   const font = useLoader(FontLoader, fontPath);
   const meshRef = useRef();
 
-  const geometry = new TextGeometry(text, {
-    font: font,
-    size: fontSize,
-    depth: 5,
-  });
+  const geometry = useMemo(() => {
+    const geo = new TextGeometry(text, { font, size: fontSize, depth: 5 });
+    geo.computeBoundingBox();
+    const bb = geo.boundingBox;
+    geo.translate(
+      -(bb.max.x - bb.min.x) / 2,
+      -(bb.max.y - bb.min.y) / 2,
+      -(bb.max.z - bb.min.z) / 2
+    );
+    return geo;
+  }, [text, font, fontSize]);
 
-  // center the geometry over position
-  geometry.computeBoundingBox();
-  const boundingBox = geometry.boundingBox;
-  const offsetX = (boundingBox.max.x - boundingBox.min.x) / 2;
-  const offsetY = (boundingBox.max.y - boundingBox.min.y) / 2;
-  const offsetZ = (boundingBox.max.z - boundingBox.min.z) / 2;
-  geometry.translate(-offsetX, -offsetY, -offsetZ);
-
-  // .current property is used with the useRef hook to access the underlying DOM element
   useFrame(() => {
     if (meshRef.current && cameraRef.current) {
       meshRef.current.lookAt(cameraRef.current.position);
@@ -35,4 +32,4 @@ function Text({ text, position, fontPath, fontSize, color, cameraRef }) {
   );
 }
 
-export default Text;
+export default React.memo(Text);

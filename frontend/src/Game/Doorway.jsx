@@ -1,4 +1,5 @@
 
+import { useRef } from "react";
 import { showcases } from "./Static";
 import { useFrame } from "@react-three/fiber";
 
@@ -12,6 +13,8 @@ export default function Doorway({
   setTwoOptionsButton,
   setOneOptionButton,
 }) {
+  const prevKey = useRef("");
+
   function resetPopupText() {
     setEnterPopupVisible(false);
     setProjectButton(false);
@@ -23,13 +26,11 @@ export default function Doorway({
   }
 
   function turnOptionsOn(showcases, length) {
-    // Showing popup
     setProjectButton(false);
     setAboutButton(false);
     setExperiencesButton(false);
     setSkillsButton(false);
     setEnterPopupVisible(true);
-    // Showing text
     if (length > 1) {
       setTwoOptionsButton(true);
       setOneOptionButton(false);
@@ -56,23 +57,26 @@ export default function Doorway({
   }
 
   useFrame(() => {
+    if (!characterRef.current) return;
+
     let standingOn = [];
-    if (characterRef.current) {
-      let characterPosition = characterRef.current.position;
+    let characterPosition = characterRef.current.position;
 
-      Object.entries(showcases).forEach(([, showcase]) => {
-        let box = showcase.box;
-        if (box.containsPoint(characterPosition)) {
-          standingOn.push(showcase.showcaseName);
-        }
-      });
-
-      let length = standingOn.length;
-      if (length > 0) {
-        turnOptionsOn(standingOn, length);
-      } else {
-        resetPopupText();
+    Object.entries(showcases).forEach(([, showcase]) => {
+      let box = showcase.box;
+      if (box.containsPoint(characterPosition)) {
+        standingOn.push(showcase.showcaseName);
       }
+    });
+
+    const key = standingOn.sort().join(",");
+    if (key === prevKey.current) return;
+    prevKey.current = key;
+
+    if (standingOn.length > 0) {
+      turnOptionsOn(standingOn, standingOn.length);
+    } else {
+      resetPopupText();
     }
   });
 

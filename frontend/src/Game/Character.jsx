@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { invisWalls, pondEdges } from "./Static";
 
 const SPEED = 100;
+const _hitbox = new THREE.Sphere();
+const _closestPt = new THREE.Vector3();
 
 const Character = React.forwardRef(
   (
@@ -26,23 +28,22 @@ const Character = React.forwardRef(
     const mixer = useRef();
 
     function isCollision(newPosition, ignoreWall = null) {
-      // Define character as a sphere for collision purposes
-      const characterRadius = 5; // Approximate radius of the character
-      const characterHitbox = new THREE.Sphere(newPosition, characterRadius);
+      const characterRadius = 5;
+      _hitbox.set(newPosition, characterRadius);
       let collisionNormal = null;
       let collidingWall = null;
 
       invisWalls.forEach((wall) => {
         if (wall === ignoreWall) return;
 
-        if (wall.intersectsSphere(characterHitbox)) {
-          const closestPoint = new THREE.Vector3(
+        if (wall.intersectsSphere(_hitbox)) {
+          _closestPt.set(
             Math.max(wall.min.x, Math.min(newPosition.x, wall.max.x)),
             Math.max(wall.min.y, Math.min(newPosition.y, wall.max.y)),
             Math.max(wall.min.z, Math.min(newPosition.z, wall.max.z))
           );
           collisionNormal = new THREE.Vector3()
-            .subVectors(newPosition, closestPoint)
+            .subVectors(newPosition, _closestPt)
             .normalize();
           collisionNormal.y = 0;
           collidingWall = wall;
@@ -52,7 +53,7 @@ const Character = React.forwardRef(
       pondEdges.forEach((edge) => {
         if (edge === ignoreWall) return;
 
-        if (edge.intersectsSphere(characterHitbox)) {
+        if (edge.intersectsSphere(_hitbox)) {
           const closestPoint = edge.closestPoint(newPosition);
           collisionNormal = new THREE.Vector3()
             .subVectors(newPosition, closestPoint)

@@ -20,6 +20,7 @@ import BalatroClone from "./ProjectPages/BalatroClone";
 import CountryApi from "./ProjectPages/CountryAPI";
 import RustSpreadsheet from "./ProjectPages/RustSpreadsheet";
 import Whereto from "./ProjectPages/Whereto";
+import AirtableClone from "./ProjectPages/AirtableClone";
 import Shiftopia from "./ProjectPages/Shiftopia";
 
 const Projects = () => {
@@ -28,20 +29,21 @@ const Projects = () => {
   // Also change on App.jsx the routes
   const pages = {
     1: <Whereto />,
-    2: <Shiftopia />,
-    3: <Datespot />,
-    4: <Bridges />,
-    5: <TributaryAPIPage />,
-    6: <CountryApi />,
-    7: <HousePricePredictor />,
-    8: <BalatroClone />,
-    9: <RustSpreadsheet />,
-    10: <QuizPage />,
-    11: <Presto />,
-    12: <DiscordBot />,
-    13: <Portfolio />,
-    14: <TikTokSpeed />,
-    15: <ForumPage />,
+    2: <AirtableClone />,
+    3: <Shiftopia />,
+    4: <Datespot />,
+    5: <Bridges />,
+    6: <TributaryAPIPage />,
+    7: <CountryApi />,
+    8: <HousePricePredictor />,
+    9: <BalatroClone />,
+    10: <RustSpreadsheet />,
+    11: <QuizPage />,
+    12: <Presto />,
+    13: <DiscordBot />,
+    14: <Portfolio />,
+    15: <TikTokSpeed />,
+    16: <ForumPage />,
   };
   const twRef = useRef(null);
   const [cat1Visible, setCat1Visible] = useState(true);

@@ -15,23 +15,24 @@
     "options": [
       [
         "(FULLSTACK) Whereto: Social Date Planning App (React Native + Go)",
+        "(FULLSTACK) Airtable Clone: T3 Stack Spreadsheet App (Next.js + tRPC + Prisma)",
         "(FULLSTACK) Shiftopia: Roster Management (React + Supabase + ML)",
-        "(FULLSTACK) Datespot: Spring Boot Project",
-        "(FULLSTACK) Bridges - DevSoc Projects"
+        "(FULLSTACK) Datespot: Spring Boot Project"
       ],
       [
+        "(FULLSTACK) Bridges - DevSoc Projects",
         "(BACKEND) Event-Driven Architecture Java API",
         "(BACKEND) Countries Visited Python API w/ SQLite database",
-        "(BACKEND) House price and type predictor (Python Scikit ML)",
-        "(BACKEND) Balatro Clone (Rust)"
+        "(BACKEND) House price and type predictor (Python Scikit ML)"
       ],
       [
+        "(BACKEND) Balatro Clone (Rust)",
         "(BACKEND) Simple Math Spreadsheet w/ Thread Concurrency (Rust)",
         "(BACKEND) Quiz Website w/ RESTful API (TypeScript)",
-        "(FRONTEND) Google Slides Frontend Site (React)",
-        "(FRONTEND) Discord Economy Bot (JavaScript)"
+        "(FRONTEND) Google Slides Frontend Site (React)"
       ],
       [
+        "(FRONTEND) Discord Economy Bot (JavaScript)",
         "(FRONTEND) This Portfolio!",
         "(FRONTEND) TikTok Playback Speed Chrome Extension (JavaScript)",
         "(FRONTEND) Forum Website (Vanilla JS)"

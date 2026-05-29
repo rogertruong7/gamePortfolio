@@ -1,0 +1,119 @@
+A full-stack Airtable clone built from scratch with the T3 Stack — end-to-end type-safe spreadsheet application with multi-base management, infinite-scroll virtualized tables, advanced filtering/sorting, and Google OAuth authentication. Deployed live on Vercel with a hosted PostgreSQL database.
+
+---
+
+## Overview
+
+This project is a faithful recreation of Airtable's core functionality — the spreadsheet-database hybrid that powers workflows at thousands of companies. I built it to deeply learn the T3 Stack (Next.js, tRPC, Prisma, Tailwind CSS, TypeScript) and tackle the hard problems behind building a performant, interactive data grid: virtualized rendering of massive datasets, complex multi-column sorting with cursor-based pagination, recursive filter group evaluation, and real-time inline cell editing.
+
+The app supports creating multiple bases (workspaces), each containing tables with fully editable rows, columns, and cells. Users can create custom views with their own sort rules, filter conditions, hidden columns, and search — just like the real Airtable.
+
+---
+
+## The T3 Stack
+
+The T3 Stack is an opinionated collection of technologies focused on end-to-end type safety. Every layer of the app — from the database schema to the API layer to the frontend components — shares the same TypeScript types, meaning a schema change in Prisma automatically propagates type errors through tRPC routers all the way to the React components that consume the data.
+
+### Next.js 15 (App Router)
+- Server Components for initial data fetching with `prefetch()` and `HydrateClient` for seamless server-to-client data handoff
+- File-based routing with dynamic segments (`[baseId]/[tableId]/[viewId]`)
+- Server-side rendering for the landing page and auth pages, client-side interactivity for the spreadsheet
+
+### tRPC
+- 10 type-safe API routers (base, table, column, row, cell, view, sorts, filter, filterGroup, user)
+- All procedures use `protectedProcedure` middleware enforcing authentication
+- Input validation with Zod schemas — every API call is validated at runtime with the same types used at compile time
+- Custom middleware for timing, logging, and authorization checks (ownership verification on base operations)
+
+### Prisma ORM
+- 13 database models with 4 enums modelling the full spreadsheet domain
+- Relational schema: Base → Table → Column/Row → Cell, with a separate View system (View → Sort/FilterGroup → Filter)
+- Composite unique constraints (e.g., `[columnId, rowId]` on Cell, `[tableId, position]` on Row) enforcing data integrity at the database level
+- Used `$queryRawUnsafe` for the complex pagination query where Prisma's query builder couldn't express the needed SQL
+
+### Tailwind CSS
+- Utility-first styling across the entire app
+- Custom scrollbar styling, responsive layouts, and dynamic colour theming for bases
+- Conditional classes for sorted columns (yellow highlight), filtered columns (green highlight), and search matches (yellow cells)
+
+### TypeScript
+- Strict mode across the entire codebase (97.1% TypeScript)
+- End-to-end type inference from Prisma schema → tRPC router → React Query hooks → component props
+- Zod schemas for runtime validation that mirror compile-time types
+
+---
+
+## Features
+
+- **Multi-base management** — create, rename, and delete bases (workspaces), each with a randomly assigned colour pair for visual identification. Dashboard shows bases sorted by last opened with relative timestamps
+- **Table CRUD** — create, rename, and delete tables within bases. New tables come pre-populated with 6 columns and 3 sample rows using Faker.js generated data
+- **Column management** — add STRING or INT typed columns with auto-naming. Columns use position-based ordering (multiplied by 1000 for easy insertion between existing columns)
+- **Inline cell editing** — double-click or start typing to edit a cell. Arrow key navigation between cells. Changes are upserted on blur with optimistic UI updates
+- **Virtualized rendering** — TanStack React Virtual renders only visible rows with 40-row overscan, enabling smooth scrolling through massive datasets without DOM bloat
+- **Infinite scroll pagination** — cursor-based pagination loading 500 rows per page as the user scrolls. The cursor logic handles compound sorting across multiple columns
+- **Multi-column sorting** — add multiple sort rules per view with ascending/descending direction per column. Server-side sorting via raw SQL with compound cursor logic for correct lexicographic ordering
+- **Advanced filtering** — recursive filter groups with AND/OR operators and 8 filter conditions (IS, IS_NOT, CONTAINS, NOT_CONTAINS, EMPTY, NOT_EMPTY, GREATER_THAN, LESS_THAN). Nested condition groups allow arbitrarily complex filter expressions
+- **Multiple views** — create named grid views per table, each with independent sort rules, filter conditions, hidden columns, and auto-sort settings
+- **Column visibility** — hide and show columns per view with a toggle popup
+- **Cell search** — search across all cells with ILIKE pattern matching, matched cells highlighted in yellow
+- **Column resizing** — drag column header borders to resize, double-click to reset
+- **Bulk row insertion** — add 100 rows at once, or trigger a million-row bulk insert with chunked processing (500 per chunk, 5 concurrent), complete with a progress bar and confirmation dialog
+- **Google OAuth** — NextAuth.js v5 with Prisma adapter for session-based authentication. Custom sign-in page styled to match the real Airtable landing page
+
+---
+
+## Architecture
+
+### Database Schema
+
+The schema models the full spreadsheet domain with cascading relationships:
+
+- **Base** → contains Tables (cascade delete)
+- **Table** → contains Columns, Rows, and Views (cascade delete)
+- **Column** + **Row** → intersect at **Cell** (composite unique on `[columnId, rowId]`)
+- **View** → has Sorts, a root FilterGroup, and hidden column list
+- **FilterGroup** → self-referencing tree structure with child FilterGroups and Filters (enabling nested AND/OR logic)
+
+### API Layer
+
+The tRPC routers handle all CRUD operations with authorization middleware. The most complex procedure is `getInfiniteRowsDB` in the table router — it constructs raw SQL with:
+
+- JOIN subqueries to fetch sort column values for each row
+- Compound cursor conditions for multi-column lexicographic pagination
+- Recursive `buildFilterGroupSQL` that traverses the FilterGroup tree to produce parameterized WHERE clauses
+- ILIKE search across all cells
+
+This was necessary because Prisma's query builder can't express the dynamic joins and compound cursor logic required for a spreadsheet's sorting and pagination.
+
+### Frontend
+
+The main spreadsheet view is built with TanStack React Table for column definitions, sorting state, and column visibility, paired with TanStack React Virtual for row virtualization. TanStack React Query handles server state with caching, background refetching, and optimistic updates.
+
+The component tree flows: Base Layout → TableSection → TanStackTable → TableCell/ResizableHeader, with the ViewHeader toolbar providing sort/filter/hide/search controls through dedicated popup components.
+
+---
+
+## What I Learned
+
+- **End-to-end type safety** changes how you build apps — a schema change in Prisma immediately surfaces as type errors in every tRPC router and React component that touches that data. Bugs that would normally appear at runtime become compile-time errors
+- **Raw SQL is still necessary** — ORMs like Prisma are great for standard CRUD, but complex queries with dynamic joins, compound cursors, and recursive filter evaluation need handwritten SQL. Learning to build parameterized queries safely (preventing SQL injection while constructing dynamic WHERE clauses) was a key takeaway
+- **Cursor-based pagination with multi-column sorting** is a hard problem — you need lexicographic comparison across all sort fields, handling both ascending and descending directions correctly. This was one of the most challenging parts of the project
+- **Virtualization matters** — rendering thousands of DOM nodes kills performance. TanStack Virtual's overscan approach keeps scrolling smooth while only rendering ~40 extra rows beyond the viewport
+- **Recursive data structures in SQL** — modelling nested filter groups (AND/OR trees) with Prisma's self-referencing relations and then evaluating them in raw SQL required careful recursive function design
+- **The T3 Stack's developer experience** — the tight integration between Next.js, tRPC, Prisma, and Zod creates a workflow where the type system guides you through changes. Adding a new column type, for example, means updating the Prisma enum, and TypeScript errors lead you through every router and component that needs updating
+
+---
+
+## Tech Stack
+
+- **Framework**: Next.js 15 (App Router) with React 19
+- **Language**: TypeScript (strict mode)
+- **API**: tRPC 11 with Zod validation
+- **ORM**: Prisma 6 with PostgreSQL
+- **Auth**: NextAuth.js v5 (Auth.js) with Google OAuth
+- **UI**: Tailwind CSS, TanStack React Table, TanStack React Virtual
+- **State**: TanStack React Query (React Query v5)
+- **Testing**: Vitest with mocked Prisma client
+- **CI/CD**: GitHub Actions (Vitest on push/PR)
+- **Deployment**: Vercel
+- **Data Generation**: Faker.js for sample data

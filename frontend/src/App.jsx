@@ -16,6 +16,7 @@ import RustSpreadsheet from "./Pages/ProjectPages/RustSpreadsheet.jsx";
 import TikTokSpeed from "./Pages/ProjectPages/TikTokSpeed.jsx";
 import TributaryAPIPage from "./Pages/ProjectPages/TributaryPage.jsx";
 import Whereto from "./Pages/ProjectPages/Whereto.jsx";
+import AirtableClone from "./Pages/ProjectPages/AirtableClone.jsx";
 import Shiftopia from "./Pages/ProjectPages/Shiftopia.jsx";
 import Lyra from "./Pages/ExperiencePages/Lyra.jsx";
 import Corveris from "./Pages/ExperiencePages/Corveris.jsx";
@@ -41,6 +42,7 @@ const App = () => {
         <Route path="/projects/tiktokextension" element={<TikTokSpeed />} />
         <Route path="/projects/tributaryapi" element={<TributaryAPIPage />} />
         <Route path="/projects/whereto" element={<Whereto />} />
+        <Route path="/projects/airtableclone" element={<AirtableClone />} />
         <Route path="/projects/shiftopia" element={<Shiftopia />} />
         <Route path="/experiences/lyra" element={<Lyra />} />
         <Route path="/experiences/corveris" element={<Corveris />} />

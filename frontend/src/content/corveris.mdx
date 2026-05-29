@@ -25,7 +25,7 @@ Corveris is an AI crime reporting platform that enables citizens to file police 
 Built classification systems for California Penal Code and Texas Penal Code via YAML-based config systems, NIBRS-compliant classification overrides, and LLM-powered sub-classifiers for theft, fraud, vandalism, assault, and hit-and-run incidents.
 
 ### Dashboard Performance
-Increased dashboard load performance by 45% for tables with 100+ active reports by migrating crime heatmaps from Google Street View API to deck.gl, implementing TanStack Virtual for virtualized table rendering, and adding URL-synced query-based filtering.
+Increased dashboard load performance by 45% for tables with 100+ active reports by migrating crime heatmaps from Google Street View API to deck.gl, implementing TanStack Virtual for virtualised table rendering, and adding URL-synced query-based filtering.
 
 ### Anti-Fraud SMS Verification
 Implemented a claim-via-SMS workflow using Twilio OTP verification, rate-limited claim tokens (72-hour expiry, single-use), and constant-time comparison for urlsafe base64 identity binding.
@@ -34,7 +34,7 @@ Implemented a claim-via-SMS workflow using Twilio OTP verification, rate-limited
 Created a background async agent that monitors citizen messages in parallel with the main DAG pipeline, detecting crisis keywords and triggering instant 911 referrals with officer notifications.
 
 ### Full i18n Support
-Implemented full internationalization across the Next.js reporter app using next-intl, translating all hardcoded UI strings, and integrating auto-translation of non-English submissions via Claude before LLM processing.
+Implemented full internationalisation across the Next.js reporter app using next-intl, translating all hardcoded UI strings, and integrating auto-translation of non-English submissions via Claude before LLM processing.
 
 ---
 

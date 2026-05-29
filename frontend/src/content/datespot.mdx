@@ -29,7 +29,7 @@ Each functional area is separated into its own package, leveraging Spring Data J
 
 - **Get Current User**: `GET /api/v1/users/me` returns the authenticated user's profile
 - **Change Password**: `PATCH /api/v1/users` accepts a `ChangePasswordRequest` (current, new, confirmation) to update user password
-- **Role & Permission Enforcement**: `Role` enum defines `USER`, `MANAGER`, `ADMIN` with associated `Permission` sets; Spring Security ensures only authorized roles can access protected endpoints
+- **Role & Permission Enforcement**: `Role` enum defines `USER`, `MANAGER`, `ADMIN` with associated `Permission` sets; Spring Security ensures only authorised roles can access protected endpoints
 
 ### Itinerary Module
 

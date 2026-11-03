@@ -6,6 +6,13 @@ import * as THREE from "three";
 const CAMERA_OFFSET = new THREE.Vector3(140, 90, 140);
 const CAMERA_ROTATION_SPEED = 0.0012;
 
+// When nobody's touched anything for a while, the camera slowly sways side to side
+const IDLE_AFTER_SECONDS = 8;
+const IDLE_SWAY_RANGE = 0.42;
+const IDLE_SWAY_SPEED = 0.22;
+const IDLE_SWAY_FADE_IN_SECONDS = 2;
+const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 const _rotationQuat = new THREE.Quaternion();
 const _euler = new THREE.Euler(0, 0, 0, "YXZ");
 const _cameraOffset = new THREE.Vector3();
@@ -16,6 +23,8 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
   const rotationRef = useRef(new THREE.Vector2(0, 0));
   const isDraggingRef = useRef(false);
   const previousMousePosition = useRef({ x: 0, y: 0 });
+  const lastPlayerPos = useRef(playerPos.clone());
+  const idle = useRef({ seconds: 0, swayTime: 0, swayStrength: 0 });
 
   useEffect(() => {
     const handleResize = () => {
@@ -72,12 +81,33 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
     };
   }, []);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (!ref.current) return;
     const camera = ref.current;
     const rot = rotationRef.current;
+    const state = idle.current;
 
-    _euler.set(rot.x, rot.y, 0);
+    const swayAngle = () =>
+      Math.sin(state.swayTime * IDLE_SWAY_SPEED) * IDLE_SWAY_RANGE * state.swayStrength;
+
+    const playerMoved = lastPlayerPos.current.distanceToSquared(playerPos) > 0.0001;
+    lastPlayerPos.current.copy(playerPos);
+
+    if (playerMoved || isDraggingRef.current) {
+      // Stop right where the sway has got to, so the view doesn't jump
+      rot.y += swayAngle();
+      state.seconds = 0;
+      state.swayTime = 0;
+      state.swayStrength = 0;
+    } else if (!REDUCED_MOTION) {
+      state.seconds += delta;
+      if (state.seconds > IDLE_AFTER_SECONDS) {
+        state.swayTime += delta;
+        state.swayStrength = Math.min(1, state.swayStrength + delta / IDLE_SWAY_FADE_IN_SECONDS);
+      }
+    }
+
+    _euler.set(rot.x, rot.y + swayAngle(), 0);
     _rotationQuat.setFromEuler(_euler);
 
     _cameraOffset.copy(CAMERA_OFFSET);
@@ -96,8 +126,8 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
       position={CAMERA_OFFSET}
       fov={60}
       aspect={aspect}
-      near={0.1}
-      far={1000}
+      near={1}
+      far={2000}
     />
   );
 });

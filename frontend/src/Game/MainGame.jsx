@@ -2,9 +2,11 @@ import { useRef, useEffect, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
+import Backdrop from "./Backdrop.jsx";
 import Lights from "./Lights.jsx";
 import MainCamera from "./MainCamera.jsx";
 import Character from "./Character.jsx";
+import PlayerShadow from "./PlayerShadow.jsx";
 import Floor from "./Floor.jsx";
 import Buildings from "./Buildings.jsx";
 import Text from "./Text.jsx";
@@ -15,6 +17,21 @@ import { labels } from "./Static.jsx";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
+
+function ResizeHandler() {
+  // gl is renderer
+  const { gl } = useThree();
+  useEffect(() => {
+    const handleResize = () => {
+      gl.setSize(window.innerWidth, window.innerHeight);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [gl]);
+
+  return null;
+}
 
 function MainGame({
   setLoading,
@@ -43,38 +60,6 @@ function MainGame({
   const [targetPosition, setTargetPosition] = useState(
     new THREE.Vector3(...startPosition)
   );
-
-  function ResizeHandler() {
-    // gl is renderer
-    const { gl } = useThree();
-    useEffect(() => {
-      const handleResize = () => {
-        gl.setSize(window.innerWidth, window.innerHeight);
-      };
-
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }, [gl]);
-
-    return null;
-  }
-
-  function RendererSettings() {
-    const { gl } = useThree();
-    useEffect(() => {
-      // Set clear color
-      gl.setClearColor(0x87ceeb); //0xfad998 0xffd9d9 0xffd8d1 0xe3fcff
-
-      // Enable shadows
-      gl.shadowMap.enabled = true;
-      gl.shadowMap.type = THREE.PCFShadowMap;
-
-      // Set pixel ratio for better rendering on high-DPI screens
-      gl.setPixelRatio(devicePixelRatio);
-    }, [gl]);
-
-    return null;
-  }
 
   function onWindowBlur() {
     setKeys({}); // Clear all keys
@@ -133,9 +118,14 @@ function MainGame({
 
   return (
     <>
-      <Canvas id="gameCanvas" shadows>
-        <RendererSettings />
+      <Canvas
+        id="gameCanvas"
+        shadows={{ type: THREE.PCFShadowMap }}
+        dpr={[1, 1.5]}
+        frameloop={currentScene === 0 ? "always" : "never"}
+      >
         <ResizeHandler />
+        <Backdrop />
         <MainCamera ref={cameraRef} playerPos={playerPos} />
         <Lights />
         <Floor
@@ -160,6 +150,7 @@ function MainGame({
           keys={keys}
           currentScene={currentScene}
         />
+        <PlayerShadow characterRef={characterRef} />
         {labels.map(({ text, position, fontSize }, index) => (
           <Text
             key={text}

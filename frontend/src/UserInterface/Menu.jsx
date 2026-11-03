@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 import resume from "../assets/RogerTruongResume.pdf";
 import MuteButton from "./MuteButton.jsx";
+import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 
 // Styled components for Menu and Button
 const MenuContainer = styled.div`
@@ -33,22 +34,14 @@ const SmallMenuContainer = styled.div`
 `;
 
 const DefaultButton = styled.button`
-  font-family: "Pixelify Sans", serif;
-  background-color: white;
-  border: none;
-  border-radius: 20px;
+  ${chromeButton}
+  position: relative;
   padding: 10px 15px;
   margin: 0 5px;
   font-size: 14px;
   font-weight: bold;
-  color: #666;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   width: 130px;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
 `;
 
 const HamburgerMenuButton = styled.button`
@@ -129,17 +122,26 @@ const Menu = () => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <DefaultButton>github</DefaultButton>
+              <DefaultButton>
+                github
+                <ChromeFrame barbs={false} />
+              </DefaultButton>
             </a>
             <a
               href="https://www.linkedin.com/in/roger-truong/"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <DefaultButton>linkedin</DefaultButton>
+              <DefaultButton>
+                linkedin
+                <ChromeFrame barbs={false} />
+              </DefaultButton>
             </a>
             <a href={resume} target="_blank" download="RogerTruongResume.pdf">
-              <DefaultButton>download cv</DefaultButton>
+              <DefaultButton>
+                download cv
+                <ChromeFrame barbs={false} />
+              </DefaultButton>
             </a>
             <MuteButton />
           </MenuRow>
@@ -152,17 +154,26 @@ const Menu = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <DefaultButton>github</DefaultButton>
+            <DefaultButton>
+                github
+                <ChromeFrame barbs={false} />
+              </DefaultButton>
           </a>
           <a
             href="https://www.linkedin.com/in/roger-truong/"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <DefaultButton>linkedin</DefaultButton>
+            <DefaultButton>
+                linkedin
+                <ChromeFrame barbs={false} />
+              </DefaultButton>
           </a>
           <a href={resume} target="_blank" download="RogerTruongResume.pdf">
-            <DefaultButton>download cv</DefaultButton>
+            <DefaultButton>
+                download cv
+                <ChromeFrame barbs={false} />
+              </DefaultButton>
           </a>
           <MuteButton />
         </SmallMenuContainer>

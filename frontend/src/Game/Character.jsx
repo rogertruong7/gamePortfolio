@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { invisWalls, pondEdges } from "./Static";
 
 const SPEED = 100;
+// Idle plays the walk clip very slowly as a gentle breathing motion
+const IDLE_ANIMATION_SPEED = 0.06;
 const _hitbox = new THREE.Sphere();
 const _closestPt = new THREE.Vector3();
 
@@ -256,15 +258,11 @@ const Character = React.forwardRef(
       });
     }, [scene, animations]);
 
-    useFrame(({ clock }, delta) => {
-      let adjustedDelta = Math.max(clock.getDelta(), 0.001);
-
-      if (clickMoving || arrowMoving) {
-        adjustedDelta = Math.max(delta, 0.015);
-      }
+    useFrame((_, delta) => {
+      const moving = clickMoving || arrowMoving;
 
       if (mixer.current) {
-        mixer.current.update(adjustedDelta);
+        mixer.current.update(moving ? delta : delta * IDLE_ANIMATION_SPEED);
       }
 
       if (currentScene !== 0) return;

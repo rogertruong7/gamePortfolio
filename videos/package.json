@@ -1,0 +1,1 @@
+{"name":"portfolio-videos","private":true,"type":"module","dependencies":{"@fontsource-variable/pixelify-sans":"^5.3.0","@fontsource/zen-kaku-gothic-new":"^5.3.1","gsap":"^3.15.0","hyperframes":"0.9.7","playwright":"^1.50.0"}}

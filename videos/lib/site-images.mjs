@@ -7,7 +7,6 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { BUILDINGS } from "../../frontend/src/UserInterface/skylineData.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const pub = path.resolve(root, "..", "frontend", "public");
@@ -40,8 +39,8 @@ async function renderIcons() {
   // iOS fills transparency with black, so its home-screen icon sits on the site's sky colour.
   await renderIcon(180, path.join(pub, "apple-touch-icon.png"), { background: "#86CDEB", inset: 16 });
   fs.writeFileSync(path.join(pub, "site.webmanifest"), `${JSON.stringify({
-    name: "Roger Truong",
-    short_name: "Roger",
+    name: "roger's portfolio",
+    short_name: "roger",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
@@ -53,52 +52,55 @@ async function renderIcons() {
 }
 
 async function captureTown() {
-  const context = await browser.newContext({ viewport: { width: 1200, height: 760 }, deviceScaleFactor: 2 });
+  const context = await browser.newContext({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 2 });
   await context.route("**/api/**", (route) => route.fulfill({ status: 204, body: "" }));
   await context.addInitScript(() => localStorage.setItem("visited", "true"));
+  // For this shot only, without touching the game: start the camera further back than usual.
+  await context.route(/\/src\/Game\/MainCamera\.jsx/, async (route) => {
+    const response = await route.fetch();
+    const code = (await response.text()).replace("new THREE.Vector3(140, 90, 140)", "new THREE.Vector3(205, 118, 205)");
+    if (!code.includes("205, 118, 205")) throw new Error("camera offset not found in MainCamera.jsx");
+    await route.fulfill({ response, body: code });
+  });
   const page = await context.newPage();
   await page.goto(SITE, { waitUntil: "load" });
-  await page.locator("canvas").first().waitFor({ state: "visible", timeout: 60000 });
-  await page.waitForFunction(() => !document.getElementById("loading_screen"), null, { timeout: 90000 });
+  await page.waitForFunction(() => !document.getElementById("loading_screen") && document.querySelector("canvas"), null, { timeout: 90000 });
   await page.addStyleTag({ content: "#root button, #root a { display: none !important }" });
-  await page.waitForTimeout(7000); // lets the camera settle and petals spread
+  await page.waitForTimeout(6000); // lets the camera settle and petals spread
   await page.screenshot({ path: townFile });
   await context.close();
 }
 
-const skylineSvg = () => {
-  const parts = BUILDINGS.map(([x, top, w, wall, roof]) => {
-    const panes = [];
-    for (let y = top + 7; y < 36; y += 7) for (let wx = x + 4; wx < x + w - 5; wx += 8) panes.push(`<rect x="${wx}" y="${y}" width="3" height="3" fill="#FFE9B8"/>`);
-    return `<rect x="${x}" y="${top}" width="${w}" height="${40 - top}" fill="${wall}"/><rect x="${x - 1}" y="${top}" width="${w + 2}" height="2" fill="${roof}"/><rect x="${x + 1}" y="${top - 2}" width="${w - 2}" height="2" fill="${roof}"/><rect x="${x + 3}" y="${top - 4}" width="${w - 6}" height="2" fill="${roof}"/>${panes.join("")}`;
-  });
-  return `<svg id="skyline" viewBox="0 0 384 40" preserveAspectRatio="xMidYMax slice" shape-rendering="crispEdges">${parts.join("")}</svg>`;
-};
-
 async function renderThumbnail() {
   const town = fs.readFileSync(townFile).toString("base64");
   const font = fs.readFileSync(path.join(root, "assets", "fonts", "pixelify.woff2")).toString("base64");
-  const zen = fs.readFileSync(path.join(root, "assets", "fonts", "zen-500.woff2")).toString("base64");
-  const n = 10;
-  const stepped = `polygon(0 ${n}px,${n}px ${n}px,${n}px 0,calc(100% - ${n}px) 0,calc(100% - ${n}px) ${n}px,100% ${n}px,100% calc(100% - ${n}px),calc(100% - ${n}px) calc(100% - ${n}px),calc(100% - ${n}px) 100%,${n}px 100%,${n}px calc(100% - ${n}px),0 calc(100% - ${n}px))`;
   const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
+  // Bake the real frame with the game's own code, on the dev server's origin so it can be imported.
+  await page.route(`${SITE}/__og`, (route) => route.fulfill({ contentType: "text/html", body: "<!doctype html><html><body></body></html>" }));
+  await page.goto(`${SITE}/__og`);
+  const frame = await page.evaluate(async () => {
+    const { bakeChromeFrame } = await import("/src/UserInterface/chromeFrameBake.js");
+    return bakeChromeFrame(582, 297, true);
+  });
+  // Baked at half size and shown at double, so the rim and spikes read at thumbnail size.
+  const placed = `left:${18 - frame.padding * 2}px;top:${18 - frame.padding * 2}px;width:${frame.width * 2}px;height:${frame.height * 2}px`;
   await page.setContent(`<!doctype html><html><head><style>
     @font-face { font-family: Pixel; src: url(data:font/woff2;base64,${font}) format("woff2"); font-weight: 400 700; }
-    @font-face { font-family: Zen; src: url(data:font/woff2;base64,${zen}) format("woff2"); font-weight: 500; }
     * { margin: 0; box-sizing: border-box; }
-    body { width: 1200px; height: 630px; overflow: hidden; position: relative; background: #86CDEB; color: #14235A; }
-    #skyline { position: absolute; left: 0; bottom: 0; width: 1200px; height: 150px; display: block; }
-    #screen { position: absolute; right: 44px; top: 44px; width: 680px; height: 480px; padding: 10px; background: #14235A; clip-path: ${stepped}; }
-    #screen img { display: block; width: 100%; height: 100%; object-fit: cover; }
-    #copy { position: absolute; left: 52px; top: 76px; width: 420px; }
-    h1 { font: 600 112px/0.96 Pixel; letter-spacing: -0.01em; }
-    p { font: 500 37px/1.2 Zen; margin-top: 24px; }
+    body { width: 1200px; height: 630px; overflow: hidden; position: relative; background: #3f8fd6; font-family: Pixel; }
+    #town { position: absolute; inset: 0; width: 1200px; height: 630px; display: block; }
+    #frame { position: absolute; display: block; filter: drop-shadow(0 3px 5px rgba(7, 8, 12, 0.45)); }
+    #shade { position: absolute; left: 0; top: 0; width: 1200px; height: 132px; background: linear-gradient(180deg, rgba(20, 35, 90, 0.62) 0%, rgba(20, 35, 90, 0.45) 62%, rgba(20, 35, 90, 0) 100%); }
+    h1 { position: absolute; left: 0; right: 0; top: 30px; text-align: center; color: #fff; font-weight: 700; font-size: 84px; line-height: 1; letter-spacing: 0.015em;
+      -webkit-text-stroke: 6px #14235A; paint-order: stroke fill;
+      text-shadow: 0 5px 0 #14235A, 0 12px 14px rgba(7, 14, 40, 0.5); }
   </style></head><body>
-    ${skylineSvg()}
-    <div id="screen"><img src="data:image/png;base64,${town}"></div>
-    <div id="copy"><h1>Roger<br>Truong</h1><p>A portfolio you can walk around</p></div>
+    <img id="town" src="data:image/png;base64,${town}">
+    <div id="shade"></div>
+    <h1>roger's portfolio</h1>
+    <img id="frame" src="${frame.url}" style="${placed}">
   </body></html>`);
-  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode())]));
   await page.waitForTimeout(300);
   await page.screenshot({ path: path.join(pub, "og.png") });
   await page.close();

@@ -133,7 +133,7 @@ Adding those two files adds the menu option, the page and the route (`/projects/
 
 ### Document page (`DocumentPage.jsx`, `MdxComponents.jsx`)
 
-One template renders every entry: a sky-coloured header with the title, links and demo film in front of the town's rooftops, then the facts column and the MDX body. It uses container queries because it sits beside the menu on wide screens and alone on narrow ones. Colours come from the 3D town; headings use Pixelify Sans and body text uses Zen Kaku Gothic New.
+One template renders every entry: a sky-coloured header with the title, links and demo film, then the facts column and the MDX body. It uses container queries because it sits beside the menu on wide screens and alone on narrow ones. Colours come from the 3D town; headings use Pixelify Sans and body text uses Zen Kaku Gothic New.
 
 ### Demo films
 

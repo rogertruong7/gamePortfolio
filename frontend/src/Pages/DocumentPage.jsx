@@ -5,7 +5,6 @@ import "@fontsource/zen-kaku-gothic-new/400.css";
 import "@fontsource/zen-kaku-gothic-new/500.css";
 import "@fontsource/zen-kaku-gothic-new/700.css";
 import { mdxComponents } from "./MdxComponents";
-import Skyline from "../UserInterface/Skyline.jsx";
 
 const ink = "#14235A";
 const inkSoft = "#46557F";
@@ -52,7 +51,7 @@ const DocumentPage = ({ entry, onBack }) => {
 
   return (
     <Page>
-      <Hero $hasVideo={entry.video} $standalone={!onBack}>
+      <Hero $standalone={!onBack}>
         <HeroInner>
           {onBack ? (
             <BackLink as="button" type="button" onClick={onBack}>
@@ -85,7 +84,6 @@ const DocumentPage = ({ entry, onBack }) => {
           </Actions>
           {entry.video && <DemoVideo entry={entry} />}
         </HeroInner>
-        <HeroSkyline />
       </Hero>
       <Sheet>
         <Facts>
@@ -161,8 +159,7 @@ const Hero = styled.header`
   box-sizing: border-box;
   background: ${sky};
   /* In the game, the HUD's back and menu buttons float over the top of the page. */
-  padding: ${({ $standalone }) => ($standalone ? "32px" : "84px")} 24px
-    ${({ $hasVideo }) => ($hasVideo ? "48px" : "clamp(96px, 18cqw, 210px)")};
+  padding: ${({ $standalone }) => ($standalone ? "32px" : "84px")} 24px 56px;
 
   @container (min-width: 760px) {
     padding-left: 56px;
@@ -175,15 +172,6 @@ const HeroInner = styled.div`
   z-index: 1;
   max-width: 1040px;
   margin: 0 auto;
-`;
-
-const HeroSkyline = styled(Skyline)`
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: clamp(72px, 15cqw, 180px);
-  display: block;
 `;
 
 const BackLink = styled.a`

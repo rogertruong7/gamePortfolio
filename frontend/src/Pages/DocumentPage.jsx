@@ -5,6 +5,7 @@ import "@fontsource/zen-kaku-gothic-new/400.css";
 import "@fontsource/zen-kaku-gothic-new/500.css";
 import "@fontsource/zen-kaku-gothic-new/700.css";
 import { mdxComponents } from "./MdxComponents";
+import Skyline from "../UserInterface/Skyline.jsx";
 
 const ink = "#14235A";
 const inkSoft = "#46557F";
@@ -21,51 +22,6 @@ const stepped = (n) => `polygon(
   calc(100% - ${n}px) 0, calc(100% - ${n}px) ${n}px, 100% ${n}px,
   100% calc(100% - ${n}px), calc(100% - ${n}px) calc(100% - ${n}px), calc(100% - ${n}px) 100%,
   ${n}px 100%, ${n}px calc(100% - ${n}px), 0 calc(100% - ${n}px))`;
-
-// The town's rooftops, in the building colours of the 3D scene: [x, top, width, wall, roof].
-const BUILDINGS = [
-  [0, 13, 34, "#A8123F", "#6E0A29"],
-  [34, 19, 26, "#C8643A", "#A8123F"],
-  [60, 9, 30, "#2E8B3D", "#1F5F2A"],
-  [90, 15, 42, "#1B3A9C", "#14235A"],
-  [132, 21, 24, "#C8643A", "#1B3A9C"],
-  [156, 11, 36, "#A8123F", "#14235A"],
-  [192, 17, 30, "#2E8B3D", "#A8123F"],
-  [222, 8, 28, "#1B3A9C", "#6E0A29"],
-  [250, 18, 40, "#C8643A", "#14235A"],
-  [290, 12, 30, "#A8123F", "#1F5F2A"],
-  [320, 20, 28, "#1B3A9C", "#A8123F"],
-  [348, 10, 36, "#C8643A", "#6E0A29"],
-];
-
-const windowsFor = (x, top, width) => {
-  const panes = [];
-  for (let wy = top + 7; wy < 36; wy += 7) {
-    for (let wx = x + 4; wx < x + width - 5; wx += 8) panes.push([wx, wy]);
-  }
-  return panes;
-};
-
-const Skyline = () => (
-  <SkylineSvg
-    viewBox="0 0 384 40"
-    preserveAspectRatio="xMidYMax slice"
-    shapeRendering="crispEdges"
-    aria-hidden="true"
-  >
-    {BUILDINGS.map(([x, top, width, wall, roof]) => (
-      <g key={x}>
-        <rect x={x} y={top} width={width} height={40 - top} fill={wall} />
-        <rect x={x - 1} y={top} width={width + 2} height={2} fill={roof} />
-        <rect x={x + 1} y={top - 2} width={width - 2} height={2} fill={roof} />
-        <rect x={x + 3} y={top - 4} width={width - 6} height={2} fill={roof} />
-        {windowsFor(x, top, width).map(([wx, wy]) => (
-          <rect key={`${wx}-${wy}`} x={wx} y={wy} width={3} height={3} fill="#FFE9B8" />
-        ))}
-      </g>
-    ))}
-  </SkylineSvg>
-);
 
 const DemoVideo = ({ entry }) => {
   const [calm] = useState(
@@ -129,7 +85,7 @@ const DocumentPage = ({ entry, onBack }) => {
           </Actions>
           {entry.video && <DemoVideo entry={entry} />}
         </HeroInner>
-        <Skyline />
+        <HeroSkyline />
       </Hero>
       <Sheet>
         <Facts>
@@ -221,7 +177,7 @@ const HeroInner = styled.div`
   margin: 0 auto;
 `;
 
-const SkylineSvg = styled.svg`
+const HeroSkyline = styled(Skyline)`
   position: absolute;
   left: 0;
   bottom: 0;

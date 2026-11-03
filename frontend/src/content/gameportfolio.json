@@ -8,9 +8,24 @@
   "category": "Frontend",
   "period": "2025 to now",
   "role": "Solo project",
-  "stack": ["React", "Three.js", "react-three-fiber", "drei", "Vite", "styled-components", "MDX"],
+  "stack": [
+    "React",
+    "Three.js",
+    "react-three-fiber",
+    "drei",
+    "Vite",
+    "styled-components",
+    "MDX"
+  ],
   "links": [
-    { "label": "Try it live", "href": "https://roger-was-here.com" },
-    { "label": "View code", "href": "https://github.com/rogertruong7/gamePortfolio" }
-  ]
+    {
+      "label": "Try it live",
+      "href": "https://roger-was-here.com"
+    },
+    {
+      "label": "View code",
+      "href": "https://github.com/rogertruong7/gamePortfolio"
+    }
+  ],
+  "video": true
 }

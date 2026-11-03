@@ -1,0 +1,34 @@
+{
+  "kind": "project",
+  "slug": "airtableclone",
+  "order": 9,
+  "title": "Airtable Clone",
+  "option": "(FULLSTACK) Airtable Clone: T3 Stack Spreadsheet App (Next.js + tRPC + Prisma)",
+  "tagline": "Sign in with Google and build spreadsheet-style tables with saved views, nested filters and multi-column sorting.",
+  "category": "Full stack",
+  "period": "2025 to 2026",
+  "role": "Solo project",
+  "stack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "tRPC",
+    "Prisma",
+    "PostgreSQL",
+    "NextAuth",
+    "TanStack Table",
+    "TanStack Virtual",
+    "Tailwind CSS"
+  ],
+  "links": [
+    {
+      "label": "Try it live",
+      "href": "https://airclone-roger-truong.vercel.app"
+    },
+    {
+      "label": "View code",
+      "href": "https://github.com/rogertruong7/airtable-clone-rt"
+    }
+  ],
+  "video": true
+}

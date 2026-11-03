@@ -1,0 +1,24 @@
+{
+  "kind": "project",
+  "slug": "whereto",
+  "order": 8,
+  "title": "Whereto",
+  "option": "(FULLSTACK) Whereto: Social Date Planning App (React Native + Go)",
+  "tagline": "Plan a date stop by stop, then publish it so other people can find it and do the same route.",
+  "category": "Mobile",
+  "period": "2026",
+  "role": "Solo project",
+  "stack": [
+    "React Native",
+    "Expo",
+    "TypeScript",
+    "TanStack Query",
+    "Go",
+    "Fiber",
+    "GORM",
+    "PostgreSQL",
+    "Docker"
+  ],
+  "links": [],
+  "video": true
+}

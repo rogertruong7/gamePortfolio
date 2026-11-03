@@ -1,0 +1,23 @@
+{
+  "kind": "project",
+  "slug": "markaway",
+  "order": 4,
+  "title": "Markaway",
+  "option": "(FULLSTACK) Markaway: AI marking for NSW teachers (React + FastAPI)",
+  "tagline": "Teachers upload a task, marking criteria and student scans, approve or deny each AI mark, and leave with red-ticked papers.",
+  "category": "Full stack",
+  "period": "Aug 2026",
+  "role": "Solo project",
+  "stack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "TanStack Router",
+    "FastAPI",
+    "SQLAlchemy",
+    "Postgres",
+    "Claude API"
+  ],
+  "links": [],
+  "video": true
+}

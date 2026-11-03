@@ -1,67 +1,50 @@
-An event-driven rostering platform that forecasts labour demand from venue events and auto-generates optimised shift schedules using ML predictions and a greedy packing algorithm. Built as a UNSW COMP3900 capstone project.
+## What it is
 
----
+Shiftopia is a workforce scheduling app for convention venues, modelled around ICC Sydney. Managers build rosters, and the app also covers availability, bids and swaps, timesheets and broadcasts. I built it with my UNSW COMP3900 capstone team. The repository sits in a private university organisation, so there's no code link.
 
-## Overview
+The headline feature is shift generation: a manager picks a date and part of the organisation, and the app predicts staffing from that day's events and proposes draft shifts.
 
-Shiftopia is a roster management website built for the International Convention Centre (ICC). Department heads select a date and organisational scope, and the system predicts staffing needs based on that day's scheduled VenueOps events. It visualises demand-vs-coverage gaps on an interactive timeline, then auto-generates draft shifts that can be reviewed, confirmed, and injected directly into the roster.
+## What I worked on
 
-The core pipeline is fully event-driven: no events on a given day means zero predicted demand and zero generated shifts.
+Teammates built the ML service, the demand forecasting and the shift packing algorithm. My work was on either side of them:
 
----
+- Turning packed shifts into real rows with rule enforcement, in the synthesiser orchestrator
+- Rollback, through a `synthesis_runs` table
+- The generate shifts screen: demand curves, coverage, gaps, injection preview, projected cost change and compliance warnings
+- Dragging shifts across days and subgroups, with a compliance check before each move
+- The CI pipeline for the rosters module
 
-## Key Features
+## How shift generation works
 
-- **Shift Synthesiser**: a predictive labour pipeline that translates ML demand forecasts into actionable, unassigned draft shifts ready for assignment
-- **ML Demand Forecasting**: XGBoost regressors (one per role class) predict headcount per 30-minute time slot based on event attributes like type, expected attendance, room capacity, and concurrent event count
-- **Greedy Shift Packing Algorithm**: an iterative "widest-block" approach that converts demand curves into discrete shifts with smoothing, min/max duration enforcement, and peak buffer typing
-- **Drag-and-Drop Rostering Engine**: a visual interface for assigning, adjusting, and reassigning shifts with real-time compliance validation (shift rules, staff availability, supervisor ratios)
-- **Demand vs Coverage Timeline**: a chart showing required staffing (ML prediction), existing coverage, residual gaps, and proposed injections across 30-minute slots
-- **Redundancy Cleanup**: automatically detects oversupplied time windows and suggests safe deletions of unneeded draft shifts before injecting new ones
-- **Undo Support**: every generation run is stamped with a run ID, enabling one-click rollback of injected shifts
+1. **Fetch events.** Pull the venue events that overlap the selected date.
+2. **Map roles.** The models know four role classes: Usher, Security, Food Staff and Supervisor. The database has 77+ job titles, so a priority-ordered regex maps each title to a class, and titles that don't fit are skipped.
+3. **Predict.** A FastAPI service runs one XGBoost regressor per class for each event and role pair, using features such as event type, expected attendance and room capacity. The result is a headcount per 30 minute slot.
+4. **Find the gap.** Predictions are merged per role and existing shifts are subtracted, leaving residual demand.
+5. **Pack shifts.** The packer repeatedly takes the peak slot, widens it to the full demand window, creates a shift and subtracts it.
+6. **Apply policy.** Shifts are held between 3 and 12 hours, and supervisor ratios and minimum staffing rules are applied.
+7. **Preview and confirm.** Nothing is written until the manager clicks Confirm & Inject.
 
----
+A day with no events produces no shifts, because the models have nothing to score. The models are trained from the project's seed data, so this demonstrates the pipeline rather than a forecast validated against real rosters.
 
-## How the Shift Generation Pipeline Works
+## The orchestrator
 
-The end-to-end workflow when a user clicks "Generate Shift Preview":
+`synthesizeAndInsertShifts` takes the demand for a scope and writes the shifts. Each rule is behind a flag, so the manager can turn supervisor ratios, minimum staffing and duration limits on or off in the generation options. Headcounts are expanded into individual shifts and inserted in chunks of 20.
 
-1. **Event Fetching** — pull all VenueOps events overlapping the selected date
-2. **Role Mapping** — map the 77+ specific database role titles (e.g. "AV Lighting Manager", "F&B Team Member") to 4 ML-trained role classes (Usher, Security, Food Staff, Supervisor) via a priority-based regex heuristic
-3. **ML Prediction** — for each (event x role) pair, the XGBoost model predicts headcount per 30-minute time slot using features like event type, expected attendance, day of week, room capacity, and simultaneous event count
-4. **Demand Tensor Assembly** — merge predictions across events per role, subtract existing shift coverage to compute residual demand
-5. **Shift Synthesis (Greedy Packing)** — the algorithm iteratively:
-   - Smooths the raw demand curve with a moving average (preserving peaks via a 90% overstaff tolerance check)
-   - Finds the peak residual slot
-   - Expands left and right to form the widest contiguous demand window
-   - Creates a shift covering the full window at the minimum demand level within it
-   - Subtracts that shift's coverage and repeats until the curve is flat
-6. **Post-Processing** — shifts shorter than 3 hours are padded or merged; shifts longer than 12 hours are split in half; shifts are typed as "core" or "peak buffer"
-7. **Redundancy Scan** — identifies existing unassigned drafts that now overlap oversupplied windows and can be safely removed
-8. **Preview and Confirm** — the user reviews the proposed shifts on the timeline, then clicks "Confirm & Inject" to write them to the roster (with undo capability)
+For rollback, each confirmed run gets a row in `synthesis_runs`, and its shifts carry that run's ID so an undo can find exactly those shifts. There was a catch: the database function that creates shifts has a fixed list of allowed fields and silently dropped the new column. So the orchestrator stamps the run ID onto the rows after inserting them.
 
----
+I wrote tests for the policy functions, the orchestrator and the confirmation modal.
 
-## ML Service
+## Showing the manager what will happen
 
-A standalone FastAPI microservice with one XGBoost regressor per role class. The model was trained on historical VenueOps event data with features including event type, function type, expected attendance, day of week, room capacity, simultaneous event count, and time-of-day flags (entry peak, exit peak, meal window).
+The timeline shows four series across 27 half-hour slots:
 
-Predictions are wrapped by a correction factor table so output can be tuned from post-event actuals without retraining.
+| Series | What it means |
+| --- | --- |
+| Required | The model's predicted headcount |
+| Existing | Current non-cancelled shifts |
+| Residual | Required minus existing, never below zero |
+| Injection | A dry run of what Confirm & Inject would create |
 
----
+## CI for a shared codebase
 
-## Architecture
-
-- **Frontend**: React (TypeScript), Vite, Tailwind CSS, shadcn/ui — Domain-Driven Design with modules isolated under `src/modules/`
-- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
-- **ML Service**: Python 3.13, FastAPI, XGBoost, Scikit-learn
-- **CI/CD**: GitHub Actions (linting, Vitest, architecture validation via dependency-cruiser)
-
----
-
-## Tech Stack
-
-- **Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn/ui
-- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
-- **ML**: Python, FastAPI, XGBoost, Scikit-learn, Pandas, NumPy
-- **Infrastructure**: Docker, Docker Compose, GitHub Actions
+The rosters workflow runs separate jobs for linting, tests and architecture checks. Lint and dependency-cruiser only look at the rosters files changed in the diff, so existing issues elsewhere in a large codebase don't block a change, and lint fixes are committed back to the pull request automatically.

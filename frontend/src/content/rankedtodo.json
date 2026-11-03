@@ -1,0 +1,24 @@
+{
+  "kind": "project",
+  "slug": "rankedtodo",
+  "order": 5,
+  "title": "RankedTodo",
+  "option": "(MOBILE) RankedTodo: A to-do app with a Valorant-style ladder (Expo + Go)",
+  "tagline": "A to-do app where finishing your day's tasks earns rank points on a Valorant-style ladder, solo or against an opponent.",
+  "category": "Mobile",
+  "period": "Jun to Jul 2026",
+  "role": "Solo project",
+  "stack": [
+    "Expo",
+    "React Native",
+    "TypeScript",
+    "TanStack Query",
+    "Go",
+    "Fiber",
+    "GORM",
+    "Postgres",
+    "WebSockets"
+  ],
+  "links": [],
+  "video": true
+}

@@ -1,47 +1,37 @@
-A Chrome extension that brings TikTok's mobile 2x playback speed feature to the browser. Hold your mouse button over any TikTok video to speed it up, just like long-pressing on the mobile app. Published on the Chrome Web Store.
+## What it does
 
----
+TikTok's mobile app lets you hold on a video to play it at 2x, and the website didn't have an equivalent. This extension adds one. Hold the left mouse button on a video and it speeds up with a small indicator on screen, and let go to return to normal speed. A popup has an on/off toggle.
 
-## Overview
+I published it on the Chrome Web Store in 2024. To try it now, load the code as an unpacked extension. It only asks for the `storage` permission and access to `tiktok.com`.
 
-TikTok's browser version doesn't natively support the hold-to-speed-up feature available on mobile. This Chrome extension adds that functionality — holding the mouse button on a video increases playback speed to 2x, and releasing returns it to normal speed. It uses MutationObserver to handle TikTok's dynamically loaded content.
+## How it works
 
----
+It's a Manifest V3 content script with three small parts:
 
-## Features
+| File | Job |
+| --- | --- |
+| `observer.js` | Wraps the Mutation Summary library to watch the page for new video elements |
+| `script.js` | Finds the current video and handles the hold |
+| `popup.js` | Saves the toggle with `chrome.storage.sync` |
 
-- **Hold-to-Speed**: press and hold the mouse button on any TikTok video to play at 2x speed
-- **Toggle On/Off**: enable or disable the extension via the popup UI
-- **Dynamic Content Support**: uses Mutation Summary library to observe DOM changes as TikTok loads new videos
-- **Lightweight**: minimal permissions, content-script-only architecture
-- **Chrome Web Store Published**: available for direct installation
+## The details that mattered
 
----
+### Telling a hold from a click
 
-## How It Works
+A normal click on a TikTok video pauses it, so the speed can't change as soon as the button goes down. The script records when the button was pressed, and a `requestAnimationFrame` loop only sets `playbackRate` to 2 once the press has lasted 300 milliseconds.
 
-1. **Content Script** (`script.js`): listens for `mousedown`/`mouseup` events on video elements and adjusts `playbackRate`
-2. **DOM Observer** (`observer.js`): watches for new video elements added to the page as the user scrolls through the TikTok feed
-3. **Popup** (`popup.html` + `popup.js`): simple toggle UI to enable/disable the speed feature
+### Handling videos that come and go
 
----
+TikTok is a single-page app, so videos are added and swapped without a page load. Listening on one video element wouldn't survive scrolling to the next. Instead:
 
-## Tech Stack
+1. The observer calls `checkPage` whenever a `video` element appears.
+2. `checkPage` finds the active video with the selector `video[data-xgplayerid]` and stores it in a variable.
+3. The mouse listeners sit on `document` and are added only once, guarded by a flag, so they don't stack up as videos change.
 
-- **Platform**: Chrome Extensions (Manifest v3)
-- **Language**: Vanilla JavaScript
-- **DOM Observation**: MutationObserver / mutation_summary.js
-- **UI**: HTML + CSS popup
+### Working out what was pressed
 
----
+A listener on `document` hears every press on the page, so it has to decide whether this one was on the video. It compares the mouse position with the video's `getBoundingClientRect`.
 
-## Installation
+### Reacting to the toggle
 
-Install from the Chrome Web Store, or load locally:
-
-1. **Clone**:
-   ```bash
-   git clone https://github.com/rogertruong7/TikTok-Speed-Chrome-Extension.git
-   ```
-
-2. Open `chrome://extensions`, enable Developer Mode, and click "Load unpacked" pointing to the cloned directory
+The content script listens to `chrome.storage.sync.onChanged`, so switching the extension on takes effect in an open tab without a refresh. Switching it off is only half done: the mouse listeners already attached don't check the setting, so an open tab keeps its 2x hold until the page reloads.

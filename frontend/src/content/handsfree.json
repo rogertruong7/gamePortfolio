@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "handsfree",
+  "order": 7,
+  "title": "hands-free",
+  "option": "(DESKTOP) hands-free: On-device wake-word dictation for macOS (Python)",
+  "tagline": "Say a wake phrase, keep talking, and your words are typed into whichever Mac app has focus, with nothing leaving the laptop.",
+  "category": "Desktop",
+  "period": "Sep 2026",
+  "role": "Solo project",
+  "stack": ["Python", "sherpa-onnx", "Parakeet TDT", "PyObjC", "CoreGraphics"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/hands-free" }]
+}

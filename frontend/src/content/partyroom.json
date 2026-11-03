@@ -1,0 +1,26 @@
+{
+  "kind": "project",
+  "slug": "partyroom",
+  "order": 3,
+  "title": "Partyroom",
+  "option": "(FULLSTACK) Partyroom: QR party check-in that deals teams (Next.js + tRPC)",
+  "tagline": "Guests scan a QR code at the door, tap their name and get told which colour team they're on.",
+  "category": "Full stack",
+  "period": "Oct to Nov 2026",
+  "role": "Solo project",
+  "stack": [
+    "Next.js",
+    "TypeScript",
+    "tRPC",
+    "Drizzle",
+    "Postgres",
+    "Tailwind CSS"
+  ],
+  "links": [
+    {
+      "label": "Try it live",
+      "href": "https://partyroom-lovat.vercel.app"
+    }
+  ],
+  "video": true
+}

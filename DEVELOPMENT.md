@@ -122,4 +122,4 @@ GLB models live in `frontend/public/models/`. To optimize new or modified models
 
 ## Project Content
 
-Project descriptions are Markdown files in `public/pageMarkdown/`. Edit these directly — they're fetched at runtime and rendered via react-markdown with GitHub Flavored Markdown support.
+Projects and experiences are in `frontend/src/content/`: one `<slug>.json` for the metadata and one `<slug>.mdx` for the page body, rendered with GitHub Flavored Markdown support.

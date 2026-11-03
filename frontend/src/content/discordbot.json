@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "discordbot",
+  "order": 20,
+  "title": "Discord Bot",
+  "option": "(BACKEND) Discord Bot: Blackjack + Type Races (JavaScript)",
+  "tagline": "A Discord bot that lets people in a server play blackjack against a dealer or challenge each other to a typing race.",
+  "category": "Backend",
+  "period": "2024",
+  "role": "Solo project",
+  "stack": ["JavaScript", "Node.js", "discord.js", "random-words"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/discordBot" }]
+}

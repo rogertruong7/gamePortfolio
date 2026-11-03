@@ -1,0 +1,47 @@
+## What it does
+
+Parlo is for people who want to speak a language, not tap through flashcards. You pick one of 12 built-in scenes from A1 to C1, such as ordering at a café or explaining lost luggage, or write your own. Then you talk or type with a partner who stays in character, in any of 30 languages.
+
+Every line you say gets a correction and a native-speaker phrasing. A session ends with scores for grammar, vocabulary, fluency and relevance, and new words go into a spaced-repetition deck using SM-2.
+
+The app runs on each learner's own Claude API key. That one decision shaped most of the engineering below.
+
+## Keeping someone else's API key safe
+
+Bring-your-own-key only works if the key is properly protected. My first version encrypted it in IndexedDB on the app's origin, behind a strict Content Security Policy. I replaced that, because a CSP can't stop a script that is already running from leaking data, and a compromised npm dependency would be exactly that script.
+
+The key now lives on a separate origin, and browser origin isolation does the work:
+
+1. The key is typed, stored and used only inside a small vault page on its own origin, embedded in the app as an iframe.
+2. The app's Anthropic SDK client is built with a placeholder key and a custom `fetch` that forwards each request over a private `MessagePort`.
+3. The vault checks the request against an allowlist, attaches the real key and streams the response back chunk by chunk.
+4. Nothing posted back to the app contains the key: only status, the last four characters, response bytes and opaque error codes.
+
+The allowlist permits `POST /v1/messages` and nothing else. Anthropic endpoints that store retrievable data, such as batches and files, are refused so a compromised app can't use them as a drop box. The vault's CSP can connect only to `api.anthropic.com` and can be framed only by the app, while the app's own CSP doesn't allow Anthropic at all.
+
+The production build fails unless `VAULT_ORIGIN` is a genuinely separate origin, and a test holds vault code to an import allowlist.
+
+| Storage mode | How the key is protected |
+| --- | --- |
+| Device | AES-256-GCM under a non-extractable WebCrypto key |
+| Passphrase | PBKDF2-SHA-256 with 600,000 iterations, a 12 character minimum and a lock after 30 idle minutes |
+| Session | Memory only |
+
+Pasting a key into a chat box is covered too: the first tRPC client link refuses to send anything key-shaped, and the server rejects it as a backstop. Signing out wipes the vault and tells other tabs to drop their clients.
+
+## Voice without a speech API bill
+
+Speech recognition uses the browser's Web Speech API. Speech output uses Piper, an open-source neural voice model, running in WebAssembly in the browser. There are voices for 22 languages, downloaded once and cached, with the browser's built-in voices as a fallback.
+
+Live calls needed two small pieces of careful code:
+
+- **`TurnListener`** keeps the microphone open, ends your turn after a short silence and restarts itself if the browser stops early.
+- **`SentenceSpeaker`** pulls complete sentences out of Claude's stream and starts synthesising each one immediately, so the partner starts talking while Claude is still writing. It knows "3.5" isn't a sentence end and that Chinese and Japanese stops need no trailing space. Tutor tips in `[brackets]` are shown as captions and never read aloud.
+
+Pronunciation drills align what the recogniser heard against the target line with a longest-common-subsequence match, comparing character by character for scripts written without spaces. This tells you which words were understood, which is not the same as phonetic scoring.
+
+## A degree pathway, with an honest limit
+
+Each language is laid out like a university degree: six CEFR levels numbered 100 to 600, each with three coded courses such as SPAN 301, and lessons, course quizzes and a level final. Unlocks are strictly linear and enforced on the server.
+
+Exams are oral. Listening answers are marked on the server against a stored key. Spoken answers are graded by Claude in the learner's browser, because the server never sees the key and so can't call Claude itself. The transcript is therefore self-assessed: it tracks progress and is not a verified qualification, and the app says so plainly.

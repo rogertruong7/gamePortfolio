@@ -1,0 +1,25 @@
+{
+  "kind": "project",
+  "slug": "tiktokextension",
+  "order": 22,
+  "title": "TikTok Speed Extension",
+  "option": "(FRONTEND) TikTok Playback Speed Chrome Extension (JavaScript)",
+  "tagline": "Hold your mouse down on a TikTok video in Chrome to watch at 2x, like you can in the mobile app.",
+  "category": "Frontend",
+  "period": "2024",
+  "role": "Solo project",
+  "stack": [
+    "JavaScript",
+    "Chrome Extensions (Manifest V3)",
+    "Mutation Summary",
+    "HTML",
+    "CSS"
+  ],
+  "links": [
+    {
+      "label": "View code",
+      "href": "https://github.com/rogertruong7/TikTok-Speed-Chrome-Extension"
+    }
+  ],
+  "video": true
+}

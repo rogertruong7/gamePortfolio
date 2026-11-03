@@ -1,0 +1,43 @@
+## What it does
+
+I work across a lot of git worktrees at once, often with coding agents running in several of them, and I wanted one place to see them all. Shipdeck scans your folders and shows every worktree grouped by branch name, so one ticket's work across several repos sits together. Each card has an inline diff, with uncommitted or against-default-branch modes and a unified or split view.
+
+The main feature is the timer. You can arm a dirty worktree with a one-shot timer that runs a commit-and-PR skill headlessly through the Claude Code CLI, and it fires even with the app closed and the lid shut. You get a notification with the PR link when it's done. There's also a daily summary button, a scheduled Slack message dialog and an in-app editor for the skills themselves.
+
+## A timer that survives closing the app
+
+A timer inside an Electron app dies with the app, so scheduling lives outside it:
+
+1. Arming a card writes `~/.shipdeck/schedules.json`.
+2. A launchd agent wakes every 60 seconds, takes a PID lock and runs anything due.
+3. Each run happens in the worktree, wrapped in `caffeinate` so the Mac stays awake during the push.
+4. Run records and logs go to files, which the app reads when it's open.
+
+The app and agent talk only through atomically written JSON files, and they share their pure scheduling logic. There's no socket to keep alive and no service that has to be running for state to make sense.
+
+## Sleep is the hard part
+
+A closed laptop raises two problems. Exact timing needs a scheduled wake, and `pmset` requires root. An optional setup step takes one admin prompt and installs a sudoers rule limited to `pmset schedule *`, checked with `visudo -c` before it's put in place. The app then schedules a wake two minutes before each timer.
+
+On battery with the lid closed, macOS may suppress that wake anyway. So the design doesn't depend on it: the run fires the moment the Mac next wakes and is marked "ran N min late". A schedule is never lost.
+
+## When launchd quietly stops
+
+One failure I hit was launchd keeping a job loaded and enabled while refusing every non-demand spawn. It shows up as `pended nondemand spawn` in `launchctl print`. The interval and run-at-load triggers both stop firing, and even bootout and bootstrap don't clear it. An explicit kickstart still works, so reinstalling is the wrong fix.
+
+Detecting it takes more care than fixing it. launchd holds spawns during sleep, so a long gap between ticks means nothing by itself. My own log had 230 gaps of more than an hour, the longest 16 hours, all of them ordinary overnight sleep. Shipdeck compares the time since the later of the last tick and the last wake, which asks the real question: has the agent failed to tick while the machine was up? If so, it kickstarts the agent, with a cooldown, and never during a run. The UI warns when armed timers can't fire.
+
+## Runs that get interrupted
+
+Unattended runs fail in dull ways, and most of this code handles them:
+
+- **Hangs.** `claude -p` reads piped stdin until EOF, so an open pipe hangs it forever, and stdin is now ignored. Plain `-p` also prints nothing until the end, which looks like a hang, so runs use `stream-json` and the log updates live.
+- **Lost work.** The session id is captured from the first stream event, so an interrupted run can resume where it stopped.
+- **Orphans.** A run whose process has died is classified from its log: a PR URL means done, otherwise it needs attention. Anything still running after two hours is marked failed.
+- **Early links.** The PR URL is spotted mid-run, so the card links it before the run ends.
+
+## Trade-offs
+
+Running unattended means passing `--dangerously-skip-permissions`, because nobody is there to approve a prompt. This is a tool for my own machine, and the skill's secret scan is the guard: if it blocks a commit, the run stops and shows "Needs attention" with the full log. The Slack token is encrypted with Electron's `safeStorage`.
+
+Tagged versions build macOS DMGs in GitHub Actions and publish them as releases.

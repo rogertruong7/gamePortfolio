@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "quizwebsite",
+  "order": 18,
+  "title": "Quiz Website Backend",
+  "option": "(BACKEND) Quiz Website w/ RESTful API (TypeScript)",
+  "tagline": "The API behind a live quiz game: admins build quizzes and start sessions, and players join and answer.",
+  "category": "Backend",
+  "period": "2023",
+  "role": "University project",
+  "stack": ["TypeScript", "Node.js", "Express", "Jest", "Swagger"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/Quiz-App-Backend" }]
+}

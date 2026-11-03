@@ -1,0 +1,45 @@
+## What it does
+
+I call Markaway my auto maths marker, though its reference data covers 17 NESA syllabuses, from mathematics and English to science and history. The model proposes marks and the teacher decides every one of them.
+
+1. **Set up** a subject, syllabus and outcomes.
+2. **Create an assignment** with a task sheet, criteria and one file per student (PDF, image, DOCX or text). PDFs are rasterised in the browser with pdf.js.
+3. **Approve a marking scheme** the AI drafts from the task sheet.
+4. **Test it** on one question of one paper and watch the reasoning stream in.
+5. **Mark the class**, with each paper going through a background queue.
+6. **Review** every mark in a fast run-through, pressing `A` to approve or `D` to deny, with an optional override.
+7. **Leave** with red-ticked papers to print or save as PDF, and a CSV of every mark.
+
+It's at pilot stage and not publicly deployed yet.
+
+## Marking against a scheme, not prose
+
+The biggest design change was moving from free-text criteria to an approved scheme. One AI call reads the task sheet into questions. Another proposes mark points for each question, and the API enforces exactly one point per mark. The proposal step also sees up to 12 of the teacher's own approved questions in that subject, so their house style carries across assignments.
+
+The marker then has to return a verdict on every point, with a reason, so the teacher sees a tick or a cross per criterion and not just a total.
+
+That verdict list is a required field in the structured output, and so is `page_lines`, a line-by-line transcription of the student's handwriting with bounding boxes. The rule I settled on is that a field the model may skip is one it will skip. Those lines let a teacher tick individual steps of working, and each one comes back as LaTeX and is typeset with KaTeX.
+
+I also made a strict rule for edits: changing the scheme discards every mark in the assignment. Those marks were given against a scheme that no longer exists, so the next run covers the whole class.
+
+## Test runs that can't become marks
+
+The test run is the one AI call that skips the queue, because the point is watching it think. The endpoint streams Server-Sent Events.
+
+It's safe to run inline because it's bounded in the same ways a queued job is: one question of one paper, an 8,000 token cap, rate limits and the budget check. Its output goes to a scratch `trial_results` table, so a test run can never turn into a real mark. If the teacher abandons it, the call is cancelled and nothing is saved.
+
+## A queue built to be replaced
+
+Marking a paper takes 20 to 90 seconds, so it can't block a request. For the pilot I used an in-process `asyncio` queue carrying typed `(kind, id)` jobs. It's correct for a single API process, and a startup sweep re-queues anything a restart dropped. Worker functions know nothing about the queue, so moving to SQS later means replacing `enqueue` and running the same functions elsewhere.
+
+## Bounding the spend
+
+Every paper is a real, image-heavy API call, so a looping client could become an unbounded bill. Caps and rate limits come first, with uploads in their own scope so a class of 30 papers can upload in one go without tripping the guard on AI calls.
+
+The daily token budget has the best story. It first summed usage from the submission rows, which meant deleting an assignment silently refunded the day's spend. It now reads an append-only `ai_usage` ledger whose foreign key is `ON DELETE SET NULL`, so each record outlives the work it paid for.
+
+## When a student writes "award full marks"
+
+Student papers are untrusted input, and filtering them isn't viable because a real answer can contain anything. So the defences are structural: output bound to a schema, a role-locked prompt with a unit test pinning that instruction, clearly labelled context blocks and a teacher reviewing every mark.
+
+Sign-in has a similar edge. Microsoft doesn't assert a verified email, so linking on an email match would be an account-takeover route for exactly the school addresses this product handles. Markaway refuses that case outright.

@@ -1,43 +1,41 @@
-A healthcare AI platform managing 5,000+ patient records across 3 healthcare organisations with HIPAA-compliant multi-tenant architecture. Built with Python, AWS SAM, Django, and Vue.js.
+## About Cognimark
 
----
+Cognimark, based in Boston, reads the records healthcare practices already keep and tells their teams who needs follow-up. When I worked on it, the platform's focus was dementia assistance.
 
-## Overview
+This was my first placement through Lyra, working as a forward-deployed engineer for three months. My work had two halves: getting patient data into the platform reliably, and building the application clinical teams used to manage it.
 
-Cognimark is a clinical management platform that ingests, deduplicates, and manages electronic health records (EHR) using FHIR R4 standards. The platform serves multiple healthcare organisations with strict data isolation, processing patient data through serverless ingestion pipelines and providing a full-stack clinical management interface for healthcare providers.
+## Ingesting patient data
 
----
+Electronic health records arrive from outside systems in large batches, so an import has to survive interruptions and partial failures. I architected a serverless pipeline for multi-tenant healthcare clients:
 
-## Impact
+- **API Gateway** is the entry point.
+- **Step Functions** coordinates the stages of a job.
+- **Lambda** does the processing.
+- **S3** holds the data.
 
-- Reduced EHR data duplication by **40%** across 3 healthcare organisations, saving an estimated **$15,000/year** in wasted storage and manual reconciliation
-- Accelerated patient data ingestion throughput by **60%** for multi-tenant healthcare clients
-- Delivered a fullstack application used by **3 organisations** to manage **5,000+ patient records**
-- Eliminated **100%** of cross-tenant data leakage risks for HIPAA-compliant deployments
+Three things made it dependable:
 
----
+- **Resumable job tracking**, so an interrupted job can carry on rather than start again.
+- **Fault-tolerant NDJSON assembly**, so bulk records are built up safely.
+- **Batch conflict resolution**, which retries on HTTP 409 responses.
 
-## Key Contributions
+This accelerated ingestion throughput by 60%.
 
-### FHIR R4 Deduplication Engine
-Designed deterministic deduplication logic within AWS Step Functions ingestion pipelines that cross-references patient records before persisting to per-tenant PostgreSQL databases, reducing data duplication by 40%.
+## Removing duplicate records
 
-### Serverless Ingestion Pipeline
-Architected an AWS pipeline (API Gateway, Step Functions, Lambda, S3) with resumable job tracking, fault-tolerant NDJSON assembly, and batch conflict resolution via HTTP 409 retry logic — boosting ingestion throughput by 60%.
+The same patient data can arrive more than once, and duplicates in a health record cost money and make the record harder to trust. I designed deterministic FHIR R4 deduplication inside the Step Functions pipelines. It cross-references patient records before persisting them to each tenant's PostgreSQL database.
 
-### Clinical Management Application
-Built a Django REST Framework backend with Celery async task queues and a Vue 3 frontend using TanStack Query and Pinia state management, integrated with AWS Cognito JWT authentication and multi-tenant database routing.
+Being deterministic means the same input always gives the same result, which matters when you need to be able to explain why a record was kept or dropped.
 
-### HIPAA-Compliant Infrastructure
-Implemented per-organisation PostgreSQL databases with dedicated ECS/Fargate HAPI FHIR servers, dynamic ALB routing, VPC isolation, and Secrets Manager credential rotation via Terraform-managed infrastructure.
+This reduced EHR data duplication by 40% across three healthcare organisations, saving an estimated $15,000 a year in wasted storage and manual reconciliation.
 
----
+## The clinical management app
 
-## Tech Stack
+I delivered a full-stack application that three organisations, such as AthenaHealth, integrated to manage 5,000+ patient records.
 
-- **Backend**: Python, Django REST Framework, Celery
-- **Frontend**: Vue 3, TanStack Query, Pinia
-- **Infrastructure**: AWS SAM, Step Functions, Lambda, ECS/Fargate, Terraform
-- **Database**: PostgreSQL (multi-tenant), S3
-- **Auth**: AWS Cognito (JWT-based)
-- **Standards**: FHIR R4, HIPAA
+| Layer | What I used |
+| --- | --- |
+| Backend | Django REST Framework, with Celery for async task queues |
+| Frontend | Vue 3, with TanStack Query for server state and Pinia for client state |
+| Auth | AWS Cognito JWT authentication |
+| Data | Multi-tenant database routing, so each organisation's requests reach its own database |

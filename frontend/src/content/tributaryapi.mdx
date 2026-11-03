@@ -1,61 +1,49 @@
-## Overview
+## What it is
 
-The Tributary API project is a framework designed to implement Event-Driven Architecture (EDA). It enables producers and consumers to interact asynchronously through logically grouped topics, partitions, and messages. This framework allows for scalable and efficient message-driven systems.
+Tributary is a UNSW assignment that models how an event streaming system like Kafka is put together. It runs in one JVM with everything held in memory, and you drive it from a command line. The repository also has my final UML diagram.
 
----
+## The model
 
-## Functionality
+| Part | What it does |
+| --- | --- |
+| Topic | A named stream of one event type, split into partitions |
+| Partition | A queue of events in the order they arrived |
+| Producer | Publishes events to a topic, choosing the partition randomly or manually |
+| Consumer group | A set of consumers subscribed to a topic |
+| Consumer | Takes events from the partitions allocated to it |
+| Event | A generic `Event<T>` with an ID, creation time, payload type, key and value |
 
-The fundamental premise of the Tributary API is to facilitate communication between producers and consumers via:
+## The command line
 
-- **Topics:** Logical groupings of events, similar to database tables or file system folders.
-- **Partitions:** Queues within topics where events are appended sequentially.
-- **Messages:** Units of data with headers, optional keys, and payloads.
+| Command | What it does |
+| --- | --- |
+| `create topic <id> <type>` | Creates a topic for `Integer` or `String` events |
+| `create partition <topic> <id>` | Adds a partition to a topic |
+| `create consumer group <id> <topic> <rebalancing>` | Creates a group on a topic |
+| `create consumer <group> <id>` | Adds a consumer and allocates partitions to it |
+| `delete consumer <consumer>` | Removes a consumer and frees its partitions |
+| `create producer <id> <type> <allocation>` | Creates a random or manual producer |
+| `produce event <producer> <topic> <event> [partition]` | Publishes an event loaded from a JSON file |
+| `consume event <consumer> <partition>` | Consumes one event |
+| `consume events <consumer> <partition> <n>` | Consumes the next `n` events |
+| `show topic <topic>` | Prints partitions, their events and connected consumers |
+| `show consumer group <group>` | Prints consumers and their partitions |
+| `parallel produce (...)` and `parallel consume (...)` | Run several operations on separate threads |
 
----
+## How it's put together
 
-## Features
+The CLI calls an `API` class for its operations, which keeps command parsing apart from the core. Inside the core:
 
-The Tributary API offers the following features:
+- **`Producer` is an interface** with `RandomProducer` and `ManualProducer` implementations, so a new allocation method only needs a new class.
+- **`ComponentFactory` creates components.** It picks a producer from the allocation method and a typed event from the payload type.
+- **Type checks happen at publish time.** A producer refuses an event that doesn't match its own type or the topic's type.
 
-- Support for both **Random** and **Manual** message allocation methods.
-- Parameterised topics to handle generic event payloads.
-- Consumer groups to manage message consumption across partitions.
-- Dynamic rebalancing strategies: **Range**.
+## Concurrency
 
----
+Parallel commands start one thread per operation, using `MultiThreadProducer` and `MultiThreadConsumer`. Shared state is guarded with `synchronized` methods on the paths where threads meet: appending to a partition, sending events through a topic and consuming from a consumer.
 
-## Message Lifecycle
+## What I'd change
 
-When a producer generates an event, it is assigned to a topic and appended to one of its partitions. Consumers process these events in sequential order. Messages may be allocated to partitions randomly or based on a key provided by the producer.
-
----
-
-## Rebalancing Strategies
-
-The Tributary API supports two rebalancing strategies:
-
-- **Range:** Partitions are evenly divided among consumers, with any extra partitions assigned to the first consumer.
-
----
-
-## CLI Commands
-
-The TributaryCLI provides a command-line interface for interacting with the Tributary system. See the full table of commands, descriptions and outputs.
-| Command                                            | Description                                                                                                                                                                                                                                                                                                   | Output                                                                                                   |
-|----------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| `create topic <id> <type>`                         | Creates a new topic in the tributary.`<id>` is the topic’s identifier.`<type>` is the type of event (Integer or String in the CLI).                                                                                                                             | A message confirming topic creation (shows id, type, etc.).                                             |
-| `create partition <topic> <id>`                    | Creates a new partition in topic `<topic>`.`<id>` is the partition’s identifier.                                                                                                                                                                                  | A message confirming the partition’s creation.                                                           |
-| `create consumer group <id> <topic> <rebalancing>` | Creates a new consumer group with identifier `<id>`.`<topic>` is the subscribed topic.`<rebalancing>` is the initial method (Range or RoundRobin).                                                                                                 | A message confirming the consumer group’s creation.                                                      |
-| `create consumer <group> <id>`                     | Creates a new consumer within consumer group `<group>`.                                                                                                                                                                                                     | A message confirming the consumer’s creation.                                                            |
-| `delete consumer <consumer>`                       | Deletes the consumer with identifier `<consumer>`.                                                                                                                                                                                                           | A message confirming deletion and showing the group’s new partition assignments.                        |
-| `create producer <id> <type> <allocation>`         | Creates a new producer that emits events of type `<type>`.`<allocation>` is either Random or Manual.                                                                                                                                                     | A message confirming the producer’s creation.                                                            |
-| `produce event <producer> <topic> <event> [partition]` | Produces an event from `<producer>` to `<topic>`.`<event>` is a JSON filename containing the payload.`[partition]` (optional) overrides partition selection.                                                                                       | The event id and its partition id.                                                                       |
-| `consume event <consumer> <partition>`             | `<consumer>` consumes one event from `<partition>`.Precondition: consumer must be allocated to that partition.                                                                                                                                                | The event’s id and contents.                                                                             |
-| `consume events <consumer> <partition> <n>`        | `<consumer>` consumes the next `<n>` events from `<partition>` in order.                                                                                                                                                                                      | The ids and contents of each event received.                                                             |
-| `show topic <topic>`                               | Prints a visual display of `<topic>`, its partitions, and current events.                                                                                                                                                                                     | —                                                                                                        |
-| `show consumer group <group>`                      | Shows all consumers in `<group>` and which partitions they’re consuming from.                                                                                                                                                                                 | —                                                                                                        |
-| `parallel produce (<producer>, <topic>, <event>), …` | Produces multiple events in parallel to test concurrent publishing.                                                                                                                                                                                              | For each event: its id and partition id.                                                                 |
-| `parallel consume (<consumer>, <partition>)`       | Consumes events in parallel to test concurrent consumption.                                                                                                                                                                                                  | For each event: its id and contents.                                                                     |
-| `set consumer group rebalancing <group> <method>`  | Updates `<group>`’s rebalancing method to `Range` or `RoundRobin`.                                                                                                                                                                                              | A message confirming the updated rebalancing method.                                                     |
-| `playback <consumer> <partition> <offset>`         | Replays events for `<consumer>` from the given `<offset>`.                                                                                                                                                                                                    | The ids and contents of each replayed event.                                                             |
+- A consumer group stores its rebalancing method, but allocation is simple: a new consumer takes every partition that doesn't have a consumer yet. Partitions don't get redistributed when the group changes.
+- Consuming removes the event from the partition queue, so there's no offset to replay from.
+- Test coverage is one end-to-end JUnit test that feeds commands into the CLI. I'd test the core directly as well.

@@ -1,69 +1,38 @@
+## What it is
 
-A modular Java REST API application providing user authentication, user management, and resource management for itinerary, book, and review entities.
+Datespot is a Spring Boot REST API for an app where people review date spots. It's backend only. The repository has an Angular folder, but it's still the default scaffold.
 
----
+## What works
 
-## Overview
+| Area | Endpoints |
+| --- | --- |
+| Auth | Register, authenticate, refresh token, log out |
+| Users | Change password, edit profile, list a user's posts |
+| Social | Follow, unfollow, list followers and following |
+| Reviews | Paginated list, read, create, partial update, delete |
 
-The DateSpot API is built with Spring Boot and delivers a clean, layered architecture for handling:
+Each area is its own package with a controller, service and repository. Swagger UI is generated from OpenAPI annotations.
 
-- **User Authentication**: register and authenticate users via JSON Web Tokens (JWT)
-- **User & Security Management**: user profile operations, password changes, role/permission enforcement, and token revocation
-- **Itinerary Management**: CRUD operations for itineraries
-- **Book Management**: CRUD operations for books
-- **Review Management**: create, read, update, and delete reviews for locations
+## Authentication
 
-Each functional area is separated into its own package, leveraging Spring Data JPA repositories, service classes, and REST controllers. Entity auditing automatically captures creation and modification metadata. Lombok annotations reduce boilerplate, and Spring Security/JWT provide stateless protection.
+Sessions are stateless and requests carry a JWT, checked by a filter that runs before Spring's username and password filter.
 
----
+A plain JWT stays valid until it expires, so you can't really log someone out. To get that control back, I store issued tokens in a `Token` table:
 
-## Functionality
+1. Logging in or refreshing revokes all of the user's existing tokens, then saves the new one.
+2. Logging out marks the stored token as expired and revoked.
+3. The filter is meant to reject anything marked that way.
 
-### Authentication Module
+Step 3 is written but currently commented out, so today the filter only checks the signature, the expiry and that the user exists. Turning it on is the next change I'd make.
 
-- **Register**: `POST /api/v1/auth/register` accepts a `RegisterRequest` and persists a new user
-- **Login**: `POST /api/v1/auth/authenticate` verifies credentials and returns a JWT token
-- **Token Handling**: JWTs are stored in the `Token` entity; expired or revoked tokens are filtered out for security
+Access is controlled by `USER`, `MANAGER` and `ADMIN` roles, each with a set of fine-grained permissions such as `ADMIN_DELETE`.
 
-### User & Security Module
+## Reviews and following
 
-- **Get Current User**: `GET /api/v1/users/me` returns the authenticated user's profile
-- **Change Password**: `PATCH /api/v1/users` accepts a `ChangePasswordRequest` (current, new, confirmation) to update user password
-- **Role & Permission Enforcement**: `Role` enum defines `USER`, `MANAGER`, `ADMIN` with associated `Permission` sets; Spring Security ensures only authorised roles can access protected endpoints
+A review has a title, text, location and rating. Updates apply only the fields you send, and changing a review you didn't write returns a 403.
 
-### Itinerary Module
+Followers are a many-to-many relationship from `User` to itself through a `user_following` join table. A review's visibility comes from its author: new reviews inherit the user's public setting, and a repository query can update all of a user's reviews when that setting changes.
 
-- Work in progress
+## What isn't finished
 
-### Posts Module
-
-- Work in progress
-
-### Review Module
-
-- Work in progress
-
----
-
-## Features
-
-- **Layered Architecture**: separation of concerns between controllers, services, and repositories for maintainability
-- **Spring Data JPA**: repository interfaces for rapid CRUD operations
-- **Entity Auditing**: automatic population of `@CreatedDate`, `@LastModifiedDate`, `@CreatedBy`, and `@LastModifiedBy`
-- **Lombok**: reduces boilerplate with `@Data`, `@Builder`, `@RequiredArgsConstructor`, and more
-- **Spring Security & JWT**: stateless authentication with token persistence and revocation support
-- **Role-Based Access Control**: fine-grained permissions via `Role` and `Permission` enums
-- **RESTful Design**: consistent HTTP methods and URL patterns
-
----
-
-## Tech Stack
-
-- **Language**: Java 17
-- **Frameworks & Libraries**:
-  - Spring Boot (Web, Data JPA, Security, Auditing)
-  - Spring Security (JWT Authentication)
-  - Lombok
-  - Jakarta Persistence (JPA)
-- **Build Tool**: Maven
-- **Database**: PostgreSQL
+The itinerary and location packages have controllers and repositories, but their entities still carry placeholder fields (author and ISBN), so they don't model real places yet. A review's location is a plain text field for now.

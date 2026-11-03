@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "bridges",
+  "order": 12,
+  "title": "Bridges",
+  "option": "(FULLSTACK) Bridges - DevSoc Projects",
+  "tagline": "A planned platform to help UNSW student societies find sponsors and show off their events.",
+  "category": "Full stack",
+  "period": "2025",
+  "role": "DevSoc team project, subcommittee member",
+  "stack": ["Next.js", "React", "TypeScript", "Express", "PostgreSQL", "Kysely", "NextAuth", "Docker"],
+  "links": [{ "label": "View code", "href": "https://github.com/devsoc-unsw/bridges" }]
+}

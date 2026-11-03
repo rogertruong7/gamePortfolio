@@ -1,0 +1,50 @@
+## What it does
+
+Partyroom runs the door at a party with teams. Each guest uses the same page from the invite through to the night itself:
+
+1. **Before the party**, they say going or not going, see the headcount and get the house rules with a "bringing drinks?" question.
+2. **At the venue**, from the start time on the day, the page asks "Are you at the venue?". Saying yes checks them in and deals them a team.
+3. **At the door**, they're told their colour (red, yellow, green, blue, purple or white) and grab the matching nametag.
+4. **During the party**, they see the itinerary and can add to a shared photo album.
+
+Hosts get a password-protected admin area for parties, guests and teams, plus a printable QR poster.
+
+## Dealing teams during a rush at the door
+
+The interesting problem is that everyone scans at the same moment. If two guests both read the team counts, both see blue as the smallest and both join it, the teams drift apart.
+
+There's no single row to lock here, because the decision reads counts across all of a party's guests. So each assignment runs in a transaction that first takes a Postgres advisory lock keyed on the party:
+
+```sql
+select pg_advisory_xact_lock(hashtext(partyId))
+```
+
+Team decisions for one party happen one at a time, parties don't block each other, and the lock releases itself at commit. The rule inside the lock is short: join the team your friend or plus one is already on, otherwise join the smallest.
+
+I also made one product decision that keeps the numbers right. Signing in counts as going but deals no team. Teams go only to people who confirm they've turned up, so no-shows can't leave a team short, and saying you can't make it frees any spot you had. If the balance still drifts, the host can press Rebalance, which re-deals everyone with pairs kept together.
+
+## "The day" doesn't end at midnight
+
+Parties run late, so a calendar date is the wrong definition of party day. Here the day runs from midnight on the party date until 6am the next morning, in the party's own time zone, not the server's or the guest's. `Intl.DateTimeFormat` works out the local wall-clock time for that zone.
+
+These rules are pure functions in one module shared by the server and the browser, so both always agree on the current phase. Hosts can force the page into either phase to preview what guests will see.
+
+## No passwords for guests
+
+Nobody wants to create an account while standing at a door. A guest's identity is an id in `localStorage`, and signing out clears it. That's a deliberate trade-off for something this low stakes.
+
+The admin side is stricter: a password checked with a timing-safe comparison, and a cookie holding an HMAC derived from that password, so changing the password signs everyone out.
+
+## Photos in Postgres
+
+Keeping images in the database is usually the wrong call. It works here because the app stays on one datastore and the design keeps the database out of the serving path:
+
+- Phones shrink each image and make a thumbnail before upload, with server caps of 3.5 MB for the full image and 400 KB for the thumbnail.
+- Uploads are one photo per request.
+- Photos never change once uploaded, so `/api/photos/<id>` responds with `public, max-age=31536000, immutable` and the CDN absorbs repeat views.
+
+## Small touches
+
+Each party picks a look, either Bliss sky or Halloween night. The Halloween theme simply re-points the colour tokens under one CSS class. Each party's link also gets its own generated preview card for iMessage, Slack and Instagram, using its theme and first event photo.
+
+The production database started on my laptop behind a tunnel. It now runs on Neon in Sydney with Vercel functions in the same region, so every hop stays in Australia.

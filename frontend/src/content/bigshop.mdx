@@ -1,0 +1,53 @@
+## What it does
+
+Big Shop is for working out what the week's dinners will cost before you walk into the supermarket. You plan dinners over a span of days for a headcount. It finds each recipe with a photo, adds up the ingredients, prices them at Woolworths and Coles, and gives you one shopping list. Anyone with the link can tick items off, without an account. Each recipe also gets nutrition per serve and, where one exists, a matching YouTube video.
+
+## AI only where it has to be
+
+Claude Haiku 5.5 runs on each user's own API key, so every extra search costs them money. I kept it to the two jobs that need reading the web, and everything else is plain code that costs nothing to run again.
+
+| Job | Done by |
+| --- | --- |
+| Finding a recipe | Claude, with web and YouTube search |
+| Looking up a price it hasn't seen | Claude, with web search |
+| Deciding which ingredient lines are the same thing | Claude |
+| Adding up quantities | `mergeIntoShopItems` |
+| Choosing the cheapest pack mix | `cheapestCover` |
+| Working out nutrition per serve | `nutrition.ts` |
+| A dish you've already found | Copied from your earlier search |
+| A price seen in the last 7 days | The `price_offer` catalogue |
+
+The third and fourth rows are the important split. Claude groups the lines, but the sums happen in code, so a shopping quantity is never a number the model made up. Any line a group doesn't claim becomes its own item, so nothing silently falls off the list.
+
+## Finding the cheapest packs
+
+Buying what a recipe needs is a small covering problem, and a greedy choice of the best unit price isn't always the cheapest total. `cheapestCover` does a bounded search:
+
+1. Sort the pack options by unit price.
+2. Try each product on its own first, which guarantees an answer and gives the search a cost to beat.
+3. Walk the combinations, pruning anything already dearer than the best so far, and stop at 200,000 nodes so an odd set of products can't hang a request.
+4. Break cost ties by least left over, then fewest packs.
+
+Scaling a recipe also leaves noise like `15.000000000000002`, which would otherwise round up to an extra pack, so quantities are cleaned first.
+
+## Being honest about prices
+
+Woolworths and Coles offer no public price API and both block automated requests, and Big Shop doesn't try to get around that. Prices come from Claude's web search instead. Each one shows its source and the date it was checked, and anything without a visible price stays marked as unpriced. Totals are a guide, not a receipt.
+
+A `PriceFeed` interface and a daily cron job already exist, but the list of feeds is empty on purpose, ready for a licensed feed to plug in as one object.
+
+## Treating model output as untrusted
+
+The model reads arbitrary web pages, and what it returns ends up in links and images on a page other people open. So:
+
+- The system prompt says page text is reference material, never an instruction.
+- `safeHttpsUrl` rejects `javascript:` and `data:` URLs, embedded credentials, IP addresses and private network names.
+- Product links on a shared list can only point at the two stores.
+- Every YouTube link is checked against the public oEmbed endpoint, so an invented video is dropped.
+- Each task must finish in one validated tool call, under a 270 second deadline that sits inside the route's 300 second limit, so a slow run fails with a clear message and doesn't get killed.
+
+## Storing the user's API key
+
+Searches run on the server and can take minutes, so unlike my other app, [Parlo](/projects/parlo), the server has to hold the key. It is encrypted with AES-256-GCM under a per-user key derived with HKDF, from a master key that lives outside the database. Ciphertext is bound to the user id, so a row copied onto another user fails to open.
+
+One module can decrypt, and it hands callers an Anthropic client for the length of a callback, never the key itself. No procedure returns a stored key. The public share router selects named columns and has no path to anything that spends the key.

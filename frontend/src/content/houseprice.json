@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "houseprice",
+  "order": 15,
+  "title": "House Price and Type Predictor",
+  "option": "(BACKEND) House price and type predictor (Python Scikit ML)",
+  "tagline": "Predicts a property's sale price and its type from housing and suburb data.",
+  "category": "Backend",
+  "period": "2025",
+  "role": "University assignment",
+  "stack": ["Python", "scikit-learn", "XGBoost", "pandas", "NumPy", "SciPy"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/house-price-type-predictor" }]
+}

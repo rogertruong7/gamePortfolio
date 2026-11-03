@@ -9,9 +9,10 @@ Built with React 18, react-three-fiber, and styled-components. Deployed on Verce
 - **Framework:** React 18 (Vite, JSX)
 - **3D Rendering:** react-three-fiber + drei (Three.js)
 - **Styling:** styled-components
-- **Content:** Markdown files rendered via react-markdown + remark-gfm
+- **Content:** MDX pages plus JSON metadata in `frontend/src/content`
+- **Demo films:** HyperFrames click-through videos, see `videos/README.md`
 - **Routing:** react-router-dom v7
-- **Fonts:** Pixelify Sans (game UI), Open Sans (body text)
+- **Fonts:** Pixelify Sans (game UI), Zen Kaku Gothic New (body text)
 - **Deployment:** Vercel with SPA rewrites
 
 ## Project Structure
@@ -24,13 +25,15 @@ scripts/               # Shell utilities (run from repo root)
 frontend/
 ├── public/
 │   ├── models/          # GLB 3D models (buildings, character, trees, floor)
-│   ├── pageMarkdown/    # Markdown content for project pages
+│   ├── videos/          # Click-through demo films and posters
 │   └── fonts/           # PixelifySans font JSON for three.js Text
 ├── src/
 │   ├── Game/            # 3D game layer (character, buildings, camera, collisions)
 │   ├── Pages/           # Content pages (About, Projects, Experiences, Skills)
-│   │   ├── ProjectPages/  # Individual project page components
-│   │   └── ShowcaseStatic.jsx  # Dialog scripts and project list data
+│   │   ├── catalog.js     # Builds menus and routes from src/content
+│   │   ├── DocumentPage.jsx  # The one template for every project and experience
+│   │   └── ShowcaseStatic.json  # Dialog scripts
+│   ├── content/         # One <slug>.json and <slug>.mdx per project or experience
 │   ├── UserInterface/   # HUD overlays (loading screen, popups, buttons, menu)
 │   ├── Helpers/         # Utilities (redirect component)
 │   ├── assets/          # Pixel art images for page backgrounds
@@ -45,16 +48,8 @@ The main game view is a Three.js canvas where the player controls a character wi
 
 Entering a building transitions to a content page (scene system managed by `MainPage.jsx`). The 3D canvas is hidden via `display:none` rather than unmounted, preserving state.
 
-Each project has a shareable direct URL (e.g. `/projects/balatro`) and renders its content from a Markdown file in `public/pageMarkdown/`.
-
-## Projects Showcased
-
-Balatro Clone, Bridges, Countries Visited, DateSpot, Discord Bot, Forum Site, Game Portfolio, House Price Predictor, Presto, Quiz Website, RSheet, TikTok Speed Extension, Tributary API
+Each project has a shareable direct URL (e.g. `/projects/balatro`) and renders its content from `src/content/`.
 
 ## Adding a New Project
 
-1. Create a Markdown file in `public/pageMarkdown/<slug>.md`
-2. Create a page component in `src/Pages/ProjectPages/`
-3. Add the project to the `pages` object in `src/Pages/Projects.jsx`
-4. Add it to the `projects` array in `src/Pages/ShowcaseStatic.jsx`
-5. Add a route in `src/App.jsx`
+Add `<slug>.json` and `<slug>.mdx` to `frontend/src/content/`. That creates the menu option, the page and the route; copy an existing entry for the JSON shape. To film a demo, see `videos/README.md`.

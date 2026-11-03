@@ -1,77 +1,40 @@
-A Python script to train, evaluate, and save predictions for two machine learning tasks on housing data:
+## What it does
 
-1. **Price Prediction**: regression using XGBoost
-2. **Type Classification**: classification using Random Forests
+A single Python script that takes a training CSV and a test CSV, then solves two problems in a row:
 
-Built with pandas, NumPy, scikit-learn, and XGBoost, it includes data cleaning, feature engineering, preprocessing pipelines, and model evaluation.
+| Task | Type | Model | Metric | Output file |
+| --- | --- | --- | --- | --- |
+| Sale price | Regression | XGBoost | Mean absolute error | `houses.regression.csv` |
+| Property type | Classification | Random Forest | Weighted F1 | `houses.classification.csv` |
 
----
+The repository includes the data: 5,016 training rows and 1,067 test rows. Each one combines facts about the property (bedrooms, bathrooms, parking, size, date sold) with facts about its suburb (median income, median prices and rents, distance from the CBD, public housing share) and wider figures such as the cash rate.
 
-## Overview
+## Cleaning the data
 
-The `housing_price_type_ml.py` script performs two sequential stages:
+Both tasks share the same cleaning steps:
 
-- **Part 1 – Price Modelling**: load training and test CSVs; clean, impute, scale, and log-transform skewed features; then train an XGBoost regressor with hyperparameters for mean absolute error (MAE) loss, outputting predictions to `houses.regression.csv`.
+1. **Fix formats.** Percentages stored as text, like `"15%"`, become decimals.
+2. **Drop sparse columns.** A column goes if more than 40% of its values are missing or effectively missing, which includes `0` and `0%`.
+3. **Drop sparse rows.** A row goes if more than 60% of its values are missing in the same sense.
+4. **Reduce skew.** Numeric features with an absolute skew above 0.3 get a `log1p` transform.
 
-- **Part 2 – Type Modelling**: load the same CSVs; apply similar cleaning and sparse-value removal; log-transform numeric skew; then train a Random Forest classifier on numerical features, outputting classification results to `houses.classification.csv` and printing the weighted F1 score.
+## Predicting price
 
-Each stage includes functions for data loading, cleaning, sparse row/column removal, skew transformation, preprocessing pipelines, training, evaluation, and CSV export.
+Numeric columns get mean imputation and standard scaling. Categorical columns get a constant fill value and one-hot encoding, ignoring categories that weren't in the training data. Identifiers and a few low-value suburb columns are removed first.
 
----
+The regressor optimises absolute error directly with `reg:absoluteerror`, matching the metric the script reports:
 
-## Functionality
+| Setting | Value |
+| --- | --- |
+| Trees | 900 |
+| Learning rate | 0.07 |
+| Max depth | 4 |
+| Min child weight | 12 |
+| Row and column sampling | 0.8 and 0.9 |
+| L1 and L2 regularisation | 0.8 and 4 |
 
-1. **Data Loading & Cleaning**
-   - Reads CSV via `pd.read_csv()`.
-   - Cleans percentage strings (e.g. `"15%"` → `0.15`).
-   - Drops sparse columns and rows above predefined thresholds.
-   - Applies log1p transform to features with absolute skew > 0.3.
+The shallow depth, regularisation and sampling all work against overfitting.
 
-2. **Price Prediction Pipeline**
-   - Drops irrelevant columns (`price`, IDs, suburb metadata).
-   - Builds a `ColumnTransformer` with:
-     - **Numerical**: mean imputation + standard scaling
-     - **Categorical**: constant imputation + one-hot encoding
-   - Uses `XGBRegressor` with tuned hyperparameters (900 estimators, learning rate 0.07, max depth 4, etc.).
-   - Evaluates MAE on test set and writes predictions CSV.
+## Predicting type
 
-3. **Type Classification Pipeline**
-   - Drops irrelevant columns (`type`, IDs, sparse metadata).
-   - Restricts to numerical features.
-   - Builds a `ColumnTransformer` with mean imputation + scaling.
-   - Trains a `RandomForestClassifier` (105 trees, min samples split=3).
-   - Evaluates weighted F1 score and writes classification CSV.
-
-4. **Command-line Interface**
-   - Script expects two arguments: `<train_csv> <test_csv>`.
-   - Runs price modelling then type modelling, printing status and metrics.
-
----
-
-## Features
-
-- **Modular Design**: distinct functions for each preprocessing and modelling step.
-- **Sparse Data Handling**: custom logic to drop rows/columns with >60%/40% missing or irrelevant values.
-- **Skew Correction**: automatic log transforms for highly skewed features.
-- **Preprocessing Pipelines**: use of `ColumnTransformer` and `Pipeline` for reproducible workflows.
-- **Hyperparameter Configuration**: explicit settings for XGBoost and Random Forest.
-- **Evaluation & Export**: prints MAE and F1 metrics; saves prediction CSVs for submission.
-
----
-
-## Tech Stack
-
-- **Language**: Python 3
-- **Libraries**:
-  - pandas, NumPy for data manipulation
-  - SciPy for skew calculation
-  - scikit-learn for imputation, encoding, scaling, pipelines, and Random Forest
-  - XGBoost for regression modelling
-
----
-
-## Getting Started
-
-1. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
+The classifier uses numeric features only, with mean imputation and scaling, and a Random Forest of 105 trees with a minimum of 3 samples to split. Both models are scikit-learn pipelines, so the same preprocessing runs at training and prediction.

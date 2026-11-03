@@ -1,0 +1,13 @@
+{
+  "kind": "experience",
+  "slug": "cognimark",
+  "order": 4,
+  "title": "Cognimark",
+  "option": "Cognimark - Full Stack Engineer",
+  "tagline": "Clinical software that turns the records healthcare practices already keep into follow-ups a care team can act on.",
+  "category": "Full stack",
+  "period": "Oct to Dec 2025",
+  "role": "Software Engineer (FDE @ Lyra)",
+  "stack": ["Python", "Django", "Vue.js", "AWS SAM", "AWS Step Functions", "AWS Lambda", "PostgreSQL", "Celery", "AWS Cognito", "FHIR R4"],
+  "links": [{ "label": "Visit Cognimark", "href": "https://www.cognimark.ai/" }]
+}

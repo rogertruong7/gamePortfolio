@@ -1,0 +1,28 @@
+{
+  "kind": "project",
+  "slug": "parlo",
+  "order": 1,
+  "title": "Parlo",
+  "option": "(FULLSTACK) Parlo: Speak a language with AI role-play (Next.js + tRPC)",
+  "tagline": "Practise speaking a new language by role-playing real conversations with Claude, on your own API key.",
+  "category": "Full stack",
+  "period": "Oct 2026",
+  "role": "Solo project",
+  "stack": [
+    "Next.js",
+    "TypeScript",
+    "tRPC",
+    "Drizzle",
+    "Postgres",
+    "Better Auth",
+    "Claude API",
+    "WebAssembly"
+  ],
+  "links": [
+    {
+      "label": "Try it live",
+      "href": "https://parlo-eta.vercel.app"
+    }
+  ],
+  "video": true
+}

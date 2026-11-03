@@ -1,0 +1,55 @@
+## What it does
+
+RankedTodo puts something at stake on your to-do list. Each day you have 25 MMR (matchmaking rating) on the line: finish your tasks and you earn it, leave them undone and you lose it. Your rank moves up and down a ladder of eight tiers, each with three divisions of 100 MMR, with Radiant at the top. A Career tab records every day.
+
+The app looks like Apple Notes, down to backspace at the start of a line outdenting or merging into the row above. There's also an opt-in Ranked mode that pairs you against an opponent for the day.
+
+## Scoring nested tasks fairly
+
+`total_rr` is the single source of truth, and rank is always derived from it.
+
+Nesting raises a fairness question: breaking one task into ten subtasks shouldn't make it worth ten times as much. So `LeafWeightedFraction` divides the day by a recursive equal split: top-level tasks share the day equally, each parent hands its share to its children, and only leaves carry weight. Indenting tasks under a parent divides that parent's MMR among them and never adds any. A flat list reduces exactly to completed over total.
+
+The day's result then comes from one symmetric formula:
+
+```
+delta = round((2 × fraction − 1) × 25)
+```
+
+| Day | MMR change |
+| --- | --- |
+| Everything done | +25 |
+| Half done | 0 |
+| Nothing done | -25 |
+| Nothing scheduled | 0 |
+
+## Settling days without a cron job
+
+There is no scheduled job for the daily reset. The app sends its local date, and the backend settles any earlier days on the next fetch. It applies the MMR and writes a career row, and days you never opened the app log as rest days with no change. This avoids running a global midnight job across every time zone, because each user's day ends when their own date changes.
+
+## Ranked mode
+
+Turning Ranked on takes effect the next day. Matchmaking compares recent to-do counts, so you're paired with someone carrying a similar workload, not just a similar rank. The search widens through three bands, excludes you from your own waiting match, and otherwise creates a pending match.
+
+A background sweeper fills pending matches with a bot, force-settles abandoned matches and purges chat from earlier days. Bots are generated deterministically from a hash of the match id: a name like TangoBot, a rank near yours, a target completion between 40% and 100%, and a few canned tasks.
+
+Scoring splits a 40-point pool by completion share, with a floor of +10 and a cap of +30. Finishing nothing costs 25.
+
+Two properties mattered most here:
+
+- **Settlement is two-sided and idempotent.** Whichever player's next fetch comes first settles both sides inside one transaction. The other player's fetch finds the match already settled and returns the stored result, so nobody can be paid twice.
+- **The client never supplies a score.** The server recomputes each completion fraction from saved tasks, so a modified client can't send its own rank change.
+
+## Live matches over WebSockets
+
+A small hub keeps per-match subscriber sets for progress and chat, with polling on the client to reconcile anything missed. The first version passed the token in `?token=`, which can leak into access logs. It now travels in the `Sec-WebSocket-Protocol` header and is checked before the upgrade. The match comes from the authenticated user and never from a client parameter, so nobody can subscribe to someone else's match.
+
+## Keeping a security register
+
+I kept a running register of risks in the repo, with each finding, its severity and its fix. Three examples:
+
+- A client-sent `X-Device-Id` header was being trusted as identity. It's gone, and every install now bootstraps a server-signed guest session.
+- Refresh-token rotation failed open under concurrency, because revoking zero rows didn't count as an error. Two simultaneous refreshes could both mint a session. A zero-row revoke is now treated as a lost race, which revokes the whole token family.
+- A delayed `EXPIRATION` webhook from RevenueCat could revoke a paying user after a newer `RENEWAL`. Events older than a stored watermark are now ignored.
+
+CI runs the Go tests under the race detector, lints and type-checks the mobile app, runs its Jest tests and builds the backend image.

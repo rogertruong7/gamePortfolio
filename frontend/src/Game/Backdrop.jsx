@@ -41,6 +41,8 @@ const GLOBE = {
   tint: "#a9d0f0",
   opacity: 0.45,
 };
+// How far the chrome stars are washed towards white
+const STAR_WHITENESS = "0.55";
 const LINE_SEGMENTS = 256;
 const LINE_SIDES = 5;
 
@@ -158,9 +160,15 @@ function chromeMaterial(matcap, uTime) {
     matcap,
     side: THREE.DoubleSide,
     toneMapped: false,
+    fog: false, // fog would tint the distant stars blue instead of white
   });
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uTime = uTime;
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <opaque_fragment>",
+      `outgoingLight = mix(outgoingLight, vec3(1.0), ${STAR_WHITENESS});
+      #include <opaque_fragment>`
+    );
     shader.vertexShader = shader.vertexShader
       .replace(
         "#include <common>",
@@ -312,7 +320,7 @@ function farStars(uTime, random) {
       uniform float uTime;
       varying float vTwinkle;
       void main() {
-        vTwinkle = 0.55 + 0.45 * sin(uTime * 1.4 + aPhase);
+        vTwinkle = 0.8 + 0.2 * sin(uTime * 1.4 + aPhase);
         vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
         gl_PointSize = aSize * (620.0 / -viewPosition.z) * (0.75 + 0.25 * vTwinkle);
         gl_Position = projectionMatrix * viewPosition;

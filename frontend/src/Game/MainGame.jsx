@@ -17,6 +17,8 @@ import { labels } from "./Static.jsx";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
+// PlayerShadow needs the stencil buffer, which three.js leaves off by default
+const RENDERER_OPTIONS = { stencil: true };
 
 function ResizeHandler() {
   // gl is renderer
@@ -122,6 +124,7 @@ function MainGame({
         id="gameCanvas"
         shadows={{ type: THREE.PCFShadowMap }}
         dpr={[1, 1.5]}
+        gl={RENDERER_OPTIONS}
         frameloop={currentScene === 0 ? "always" : "never"}
       >
         <ResizeHandler />

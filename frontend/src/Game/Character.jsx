@@ -253,7 +253,7 @@ const Character = React.forwardRef(
       scene.traverse((child) => {
         if (child.isMesh) {
           // The town's shadows are only drawn once, so the character would leave a
-          // frozen shadow at its start spot. PlayerShadow follows it around instead.
+          // frozen shadow at its start spot. PlayerShadow draws its shadow instead.
           child.castShadow = false;
           child.receiveShadow = true;
         }

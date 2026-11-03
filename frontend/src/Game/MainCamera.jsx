@@ -6,7 +6,7 @@ import * as THREE from "three";
 const CAMERA_OFFSET = new THREE.Vector3(140, 90, 140);
 const CAMERA_ROTATION_SPEED = 0.0012;
 
-// When nobody's touched anything for a while, the camera slowly sways side to side
+// When nobody's touched anything, including the cursor, the camera slowly sways side to side
 const IDLE_AFTER_SECONDS = 8;
 const IDLE_SWAY_RANGE = 0.42;
 const IDLE_SWAY_SPEED = 0.22;
@@ -24,6 +24,7 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
   const isDraggingRef = useRef(false);
   const previousMousePosition = useRef({ x: 0, y: 0 });
   const lastPlayerPos = useRef(playerPos.clone());
+  const cursorMoved = useRef(false);
   const idle = useRef({ seconds: 0, swayTime: 0, swayStrength: 0 });
 
   useEffect(() => {
@@ -81,6 +82,15 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
     };
   }, []);
 
+  useEffect(() => {
+    // On the window, so the cursor counts when it's over the buttons too
+    const onCursorMove = () => {
+      cursorMoved.current = true;
+    };
+    window.addEventListener("mousemove", onCursorMove);
+    return () => window.removeEventListener("mousemove", onCursorMove);
+  }, []);
+
   useFrame((_, delta) => {
     if (!ref.current) return;
     const camera = ref.current;
@@ -93,7 +103,10 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
     const playerMoved = lastPlayerPos.current.distanceToSquared(playerPos) > 0.0001;
     lastPlayerPos.current.copy(playerPos);
 
-    if (playerMoved || isDraggingRef.current) {
+    const active = playerMoved || isDraggingRef.current || cursorMoved.current;
+    cursorMoved.current = false;
+
+    if (active) {
       // Stop right where the sway has got to, so the view doesn't jump
       rot.y += swayAngle();
       state.seconds = 0;

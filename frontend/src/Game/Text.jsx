@@ -13,7 +13,6 @@ const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").mat
 const SHIMMER_SECONDS = 2.4;
 const SHIMMER_REST_SECONDS = 0.6;
 const SHIMMER_OFF = -3;
-const LABEL_ORANGE = "#ff7a4d";
 const EDGE_BRIGHTNESS = "0.5";
 
 let sharedChrome = null;
@@ -27,9 +26,9 @@ function liquidChromeTexture() {
 
 // Chrome reflects what's around it, but the front of a letter is flat and would come
 // out as one solid colour. Tilting the surface from the top of the letters to the
-// bottom gives them a chrome look. That chrome is then tinted orange and mostly flattened
-// so the letters aren't too glossy, and the bevelled edges are darkened into an outline so
-// they stand out from the sky. The shimmer is added on top.
+// bottom gives them a chrome look. That chrome is then mostly flattened into white, kept
+// just under full brightness so the shimmer still shows on top, and the bevelled edges
+// are darkened into an outline so the letters stand out from the sky.
 function chromeTextMaterial(size, uShimmer) {
   const material = new THREE.MeshMatcapMaterial({
     matcap: liquidChromeTexture(),
@@ -37,33 +36,34 @@ function chromeTextMaterial(size, uShimmer) {
   });
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uShimmer = uShimmer;
-    shader.uniforms.uTint = { value: new THREE.Color(LABEL_ORANGE) };
     shader.uniforms.uHalfSize = { value: new THREE.Vector2(size.x / 2, size.y / 2) };
     shader.vertexShader = shader.vertexShader
       .replace(
         "#include <common>",
         `#include <common>
-        varying vec3 vLabelPosition;`
+        varying vec3 vLabelPosition;
+        varying float vFacesFront;`
       )
       .replace(
         "#include <begin_vertex>",
         `#include <begin_vertex>
-        vLabelPosition = position;`
+        vLabelPosition = position;
+        vFacesFront = abs(normal.z);`
       );
     shader.fragmentShader = shader.fragmentShader
       .replace(
         "#include <common>",
         `#include <common>
         varying vec3 vLabelPosition;
+        varying float vFacesFront;
         uniform float uShimmer;
-        uniform vec3 uTint;
         uniform vec2 uHalfSize;`
       )
       .replace(
         "#include <normal_fragment_maps>",
         `#include <normal_fragment_maps>
         vec2 across = vLabelPosition.xy / uHalfSize;
-        float facesViewer = smoothstep(0.8, 0.98, abs(normal.z));
+        float isFront = smoothstep(0.8, 0.98, vFacesFront);
         normal = normalize(normal + vec3(
           0.06 * sin(across.x * 7.0),
           0.6 * across.y + 0.2 + 0.05 * sin(across.x * 4.0),
@@ -73,8 +73,8 @@ function chromeTextMaterial(size, uShimmer) {
       .replace(
         "#include <opaque_fragment>",
         `float reflection = dot(outgoingLight, vec3(0.3, 0.59, 0.11));
-        outgoingLight = uTint * (0.8 + 0.28 * reflection);
-        outgoingLight *= mix(${EDGE_BRIGHTNESS}, 1.0, facesViewer);
+        outgoingLight = vec3(0.8 + 0.18 * reflection);
+        outgoingLight *= mix(${EDGE_BRIGHTNESS}, 1.0, isFront);
         outgoingLight += vec3(smoothstep(0.26, 0.0, abs(across.x + across.y * 0.25 - uShimmer)));
         #include <opaque_fragment>`
       );

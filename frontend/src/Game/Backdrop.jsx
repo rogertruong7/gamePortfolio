@@ -12,14 +12,18 @@ import { paintLiquidChrome } from "../Helpers/liquidChrome.js";
 
 // The middle of the island, measured from the floor model
 const TOWN_CENTRE = new THREE.Vector3(118.5, 0, -124.8);
-// Darker blue at the top of the screen, through light blue, to white at the bottom
+// Runs diagonally across the screen: white in two corners, through light blue, to
+// darker blue along the middle
 const SKY_GRADIENT = [
-  [0, "#3f8fd6"],
-  [0.5, "#a9dcf7"],
+  [0, "#ffffff"],
+  [0.14, "#a9dcf7"],
+  [0.5, "#3f8fd6"],
+  [0.86, "#a9dcf7"],
   [1, "#ffffff"],
 ];
-// Far-off things fade towards the middle of the sky
-const FOG_COLOUR = "#a9dcf7";
+const SKY_TEXTURE_SIZE = 512;
+// Far-off things fade towards a blue between the light and dark ones
+const FOG_COLOUR = "#74b6e7";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // Every layer sits further out than the camera can reach, so stars never get in the way.
@@ -50,13 +54,12 @@ function seededRandom(start) {
 
 function paintSky() {
   const canvas = document.createElement("canvas");
-  canvas.width = 4;
-  canvas.height = 512;
+  canvas.width = canvas.height = SKY_TEXTURE_SIZE;
   const ctx = canvas.getContext("2d");
-  const gradient = ctx.createLinearGradient(0, 0, 0, 512);
+  const gradient = ctx.createLinearGradient(0, 0, SKY_TEXTURE_SIZE, SKY_TEXTURE_SIZE);
   SKY_GRADIENT.forEach(([position, colour]) => gradient.addColorStop(position, colour));
   ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 4, 512);
+  ctx.fillRect(0, 0, SKY_TEXTURE_SIZE, SKY_TEXTURE_SIZE);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;

@@ -1,23 +1,18 @@
 import styled from "styled-components";
 import { useAudio } from "../Audio/AudioContext.jsx";
+import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 
 const Button = styled.button`
-  background-color: white;
-  border: none;
+  ${chromeButton}
+  position: relative;
   border-radius: 50%;
   width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   padding: 0;
-  color: #666;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
 
   svg {
     width: 18px;
@@ -47,6 +42,7 @@ const MuteButton = () => {
   return (
     <Button onClick={() => setMuted(!muted)} title={muted ? "Unmute" : "Mute"}>
       {muted ? <MutedIcon /> : <SpeakerIcon />}
+      <ChromeFrame barbs={false} />
     </Button>
   );
 };

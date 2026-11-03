@@ -1,6 +1,7 @@
 import { useRef, useEffect } from "react";
 import styled from "styled-components";
 import { Howl } from "howler";
+import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 
 // Styled-components for the different elements
 const EntrancePopupContainer = styled.div`
@@ -22,7 +23,6 @@ const EntrancePopupContainer = styled.div`
   justify-content: center;
   align-items: center;
   text-align: center;
-  border: 4px dashed white;
 `;
 
 const OptionText = styled.p`
@@ -34,32 +34,20 @@ const EnterButtonsContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   width: 100%;
 `;
 
 const EnterButton = styled.button`
-  border: 4px dashed white;
+  ${chromeButton}
+  position: relative;
   width: 45%;
   text-align: center;
-  font-family: "Pixelify Sans", serif;
   z-index: 102;
-  background-color: rgba(0, 0, 0, 0.5);
-  border: none;
-  border-radius: 20px;
   padding: 10px 15px;
   font-size: 18px;
   font-weight: bold;
-  color: white;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
   cursor: pointer;
-
-  &:hover,
-  &:focus {
-    background-color: rgba(0, 0, 0, 0.9);
-    outline: 2px solid white;
-    outline-offset: 2px;
-  }
 `;
 
 const EnterPopup = ({
@@ -112,11 +100,13 @@ const EnterPopup = ({
         {aboutButton && (
           <EnterButton id="aboutme_button" onClick={() => enterScene(1)}>
             Enter About Me
+            <ChromeFrame />
           </EnterButton>
         )}
         {projectButton && (
           <EnterButton id="projects_button" onClick={() => enterScene(2)}>
             Enter Projects
+            <ChromeFrame />
           </EnterButton>
         )}
         {experiencesButton && (
@@ -125,11 +115,13 @@ const EnterPopup = ({
             onClick={() => enterScene(3)}
           >
             Enter Experience
+            <ChromeFrame />
           </EnterButton>
         )}
         {skillsButton && (
           <EnterButton id="skills_button" onClick={() => enterScene(4)}>
             Enter Skills
+            <ChromeFrame />
           </EnterButton>
         )}
       </EnterButtonsContainer>

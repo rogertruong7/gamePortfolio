@@ -1,11 +1,30 @@
+import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+
+// The town doesn't move, so its shadows are drawn once instead of every frame.
+// A few frames gives every model time to mount first.
+const SHADOW_DRAW_FRAMES = 3;
+
 function Lights() {
+  const sunRef = useRef();
+  const shadowFrames = useRef(0);
+
+  useFrame(() => {
+    if (shadowFrames.current >= SHADOW_DRAW_FRAMES) return;
+    shadowFrames.current++;
+    sunRef.current.shadow.autoUpdate = false;
+    sunRef.current.shadow.needsUpdate = true;
+  });
+
   return (
     <>
       <directionalLight
+        ref={sunRef}
         color={0xf5d1ab}
         intensity={1.5}
         position={[-100, 300, 200]}
         castShadow
+        shadow-mapSize={[1024, 1024]}
         shadow-camera-near={0.5}
         shadow-camera-far={1200}
         shadow-camera-left={-200}

@@ -18,7 +18,27 @@ npm install
 npm run dev
 ```
 
-Vite starts at `http://localhost:5173` with hot module replacement. The dev server has `historyApiFallback` enabled so client-side routes work on refresh.
+Vite starts at `http://localhost:5173` with hot module replacement. The dev server has `historyApiFallback` enabled so client-side routes work on refresh. It also serves the `api/` functions through `devApi.js`, so `/admin` works locally.
+
+## Environment Variables
+
+Copy `frontend/.env.example` to `frontend/.env` to use `/admin` and tracking locally. The game runs fine without it.
+
+| Variable         | Purpose                                  |
+| ---------------- | ---------------------------------------- |
+| `ADMIN_PASSWORD` | The password for `/admin`                |
+| `DATABASE_URL`   | Neon connection string for the analytics |
+
+Never give these a `VITE_` prefix, because Vite would publish them in the site's public JavaScript.
+
+Vercel doesn't read `.env`, so production and preview have their own copies. Local and preview use the Neon `dev` branch, so testing never touches real visitor data.
+
+**To change the password**, update `.env`, then run this from `frontend/` and redeploy:
+
+```bash
+npx vercel env rm ADMIN_PASSWORD production --yes
+npx vercel env add ADMIN_PASSWORD production --sensitive
+```
 
 ## Available Scripts
 
@@ -30,6 +50,7 @@ All commands run from the `frontend/` directory:
 | `npm run build`   | Production build to `frontend/dist/`     |
 | `npm run preview` | Serve the production build locally       |
 | `npm run lint`    | Run ESLint (flat config, React 18 rules) |
+| `npm test`        | Run the API unit tests                   |
 
 ## Building for Production
 

@@ -1,7 +1,10 @@
 import "./App.css";
 
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainPage from "./MainPage.jsx";
+import RouteTracker from "./Analytics/RouteTracker.jsx";
+import Privacy from "./Pages/Privacy.jsx";
 import BalatroClone from "./Pages/ProjectPages/BalatroClone.jsx";
 import Bridges from "./Pages/ProjectPages/Bridges.jsx";
 import CountryAPI from "./Pages/ProjectPages/CountryAPI.jsx";
@@ -23,11 +26,24 @@ import Corveris from "./Pages/ExperiencePages/Corveris.jsx";
 import Cognimark from "./Pages/ExperiencePages/Cognimark.jsx";
 import RedirectToHome from "./Helpers/Redirect.jsx";
 
+// Loaded on demand so that none of the admin code ships to normal visitors.
+const AdminPage = lazy(() => import("./Admin/AdminPage.jsx"));
+
 const App = () => {
   return (
     <BrowserRouter>
+      <RouteTracker />
       <Routes>
         <Route path="/" element={<MainPage />} />
+        <Route
+          path="/admin"
+          element={
+            <Suspense fallback={null}>
+              <AdminPage />
+            </Suspense>
+          }
+        />
+        <Route path="/privacy" element={<Privacy />} />
         <Route path="/projects/balatro" element={<BalatroClone />} />
         <Route path="/projects/bridges" element={<Bridges />} />
         <Route path="/projects/countriesvisited" element={<CountryAPI />} />

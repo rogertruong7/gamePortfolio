@@ -42,7 +42,7 @@ const MuteButton = () => {
   return (
     <Button onClick={() => setMuted(!muted)} title={muted ? "Unmute" : "Mute"}>
       {muted ? <MutedIcon /> : <SpeakerIcon />}
-      <ChromeFrame barbs={false} />
+      <ChromeFrame spikes={false} />
     </Button>
   );
 };

@@ -1,21 +1,50 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { paintLiquidChrome } from "../Helpers/liquidChrome.js";
 
-// Dusk sky and three layers of chrome stars around the town.
+// Blue sky, a far-off globe of chrome lines around the town and three layers of chrome stars.
 //
 // Built to cost almost nothing per frame: each layer is one draw call, the chrome
 // comes from a painted texture rather than lights or reflections, and the tumbling
 // runs on the graphics card so star count doesn't add any CPU work.
 
-const TOWN_CENTRE = new THREE.Vector3(110, 0, -130);
-const FOG_COLOUR = "#7d68ad";
+// The middle of the island, measured from the floor model
+const TOWN_CENTRE = new THREE.Vector3(118.5, 0, -124.8);
+// Runs diagonally across the screen: white in two corners, through light blue, to
+// darker blue along the middle
+const SKY_GRADIENT = [
+  [0, "#ffffff"],
+  [0.14, "#a9dcf7"],
+  [0.5, "#3f8fd6"],
+  [0.86, "#a9dcf7"],
+  [1, "#ffffff"],
+];
+const SKY_TEXTURE_SIZE = 512;
+// Far-off things fade towards a blue between the light and dark ones
+const FOG_COLOUR = "#74b6e7";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // Every layer sits further out than the camera can reach, so stars never get in the way.
 const NEAR_LAYER = { count: 18, minRadius: 480, maxRadius: 720, minSize: 12, maxSize: 34, spin: 0.35 };
 const MID_LAYER = { count: 110, minRadius: 820, maxRadius: 1150, minSize: 6, maxSize: 15, spin: 0.6 };
 const FAR_LAYER = { count: 260, minRadius: 1200, maxRadius: 1650 };
+
+// Thin blue chrome lines drawn on a huge sphere around the town, like the grid on a
+// globe. Latitudes in degrees, chosen so lines cross both the top and bottom of the view.
+const GLOBE = {
+  radius: 1800,
+  latitudes: [-60, -35, -12, 10, 35],
+  meridians: 4,
+  thickness: 2.5,
+  tint: "#a9d0f0",
+  opacity: 0.45,
+};
+// How far the chrome stars are washed towards white
+const STAR_WHITENESS = "0.55";
+const LINE_SEGMENTS = 256;
+const LINE_SIDES = 5;
 
 function seededRandom(start) {
   let seed = start;
@@ -25,15 +54,14 @@ function seededRandom(start) {
   };
 }
 
-function paintGradient(height, stops) {
+function paintSky() {
   const canvas = document.createElement("canvas");
-  canvas.width = 4;
-  canvas.height = height;
+  canvas.width = canvas.height = SKY_TEXTURE_SIZE;
   const ctx = canvas.getContext("2d");
-  const gradient = ctx.createLinearGradient(0, 0, 0, height);
-  stops.forEach(([position, colour]) => gradient.addColorStop(position, colour));
+  const gradient = ctx.createLinearGradient(0, 0, SKY_TEXTURE_SIZE, SKY_TEXTURE_SIZE);
+  SKY_GRADIENT.forEach(([position, colour]) => gradient.addColorStop(position, colour));
   ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 4, height);
+  ctx.fillRect(0, 0, SKY_TEXTURE_SIZE, SKY_TEXTURE_SIZE);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   return texture;
@@ -132,9 +160,15 @@ function chromeMaterial(matcap, uTime) {
     matcap,
     side: THREE.DoubleSide,
     toneMapped: false,
+    fog: false, // fog would tint the distant stars blue instead of white
   });
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uTime = uTime;
+    shader.fragmentShader = shader.fragmentShader.replace(
+      "#include <opaque_fragment>",
+      `outgoingLight = mix(outgoingLight, vec3(1.0), ${STAR_WHITENESS});
+      #include <opaque_fragment>`
+    );
     shader.vertexShader = shader.vertexShader
       .replace(
         "#include <common>",
@@ -188,6 +222,66 @@ function scatterStars(geometry, material, layer, random) {
   return mesh;
 }
 
+function globeRing(ringRadius, makePoint) {
+  const points = [];
+  for (let i = 0; i < 64; i++) makePoint(points, (i / 64) * Math.PI * 2, ringRadius);
+  const curve = new THREE.CatmullRomCurve3(points, true);
+  return new THREE.TubeGeometry(curve, LINE_SEGMENTS, GLOBE.thickness, LINE_SIDES, true);
+}
+
+function chromeGlobe() {
+  const { radius, latitudes, meridians } = GLOBE;
+  const rings = [];
+
+  latitudes.forEach((latitude) => {
+    const angle = THREE.MathUtils.degToRad(latitude);
+    const height = radius * Math.sin(angle);
+    rings.push(
+      globeRing(radius * Math.cos(angle), (points, around, ringRadius) => {
+        points.push(
+          new THREE.Vector3(ringRadius * Math.cos(around), height, ringRadius * Math.sin(around))
+        );
+      })
+    );
+  });
+
+  // Each meridian is a full circle through both poles, so it only needs half a turn
+  for (let i = 0; i < meridians; i++) {
+    const heading = (i / meridians) * Math.PI;
+    rings.push(
+      globeRing(radius, (points, around, ringRadius) => {
+        const flat = ringRadius * Math.cos(around);
+        points.push(
+          new THREE.Vector3(
+            flat * Math.cos(heading),
+            ringRadius * Math.sin(around),
+            flat * Math.sin(heading)
+          )
+        );
+      })
+    );
+  }
+
+  const geometry = mergeGeometries(rings);
+  rings.forEach((ring) => ring.dispose());
+
+  const matcap = new THREE.CanvasTexture(paintLiquidChrome());
+  matcap.colorSpace = THREE.SRGBColorSpace;
+  const mesh = new THREE.Mesh(
+    geometry,
+    new THREE.MeshMatcapMaterial({
+      matcap,
+      color: GLOBE.tint,
+      transparent: true,
+      opacity: GLOBE.opacity,
+      toneMapped: false,
+      fog: false, // at this distance fog would erase the lines completely
+    })
+  );
+  mesh.frustumCulled = false;
+  return mesh;
+}
+
 function farStars(uTime, random) {
   const { count, minRadius, maxRadius } = FAR_LAYER;
   const positions = new Float32Array(count * 3);
@@ -226,7 +320,7 @@ function farStars(uTime, random) {
       uniform float uTime;
       varying float vTwinkle;
       void main() {
-        vTwinkle = 0.55 + 0.45 * sin(uTime * 1.4 + aPhase);
+        vTwinkle = 0.8 + 0.2 * sin(uTime * 1.4 + aPhase);
         vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
         gl_PointSize = aSize * (620.0 / -viewPosition.z) * (0.75 + 0.25 * vTwinkle);
         gl_Position = projectionMatrix * viewPosition;
@@ -247,7 +341,7 @@ function farStars(uTime, random) {
 }
 
 function Backdrop() {
-  const scene = useThree((state) => state.scene);
+  const linesRef = useRef();
   const nearRef = useRef();
   const midRef = useRef();
   const farRef = useRef();
@@ -270,25 +364,15 @@ function Backdrop() {
       random
     );
     const far = farStars(uTime, random);
-    return { near, mid, far, uTime, matcap };
+    const lines = chromeGlobe();
+    return { sky: paintSky(), lines, near, mid, far, uTime, matcap };
   }, []);
-
-  useEffect(() => {
-    const sky = paintGradient(512, [
-      [0, "#232765"],
-      [0.5, FOG_COLOUR],
-      [1, "#f2a7b6"],
-    ]);
-    scene.background = sky;
-    return () => {
-      scene.background = null;
-      sky.dispose();
-    };
-  }, [scene]);
 
   useEffect(
     () => () => {
-      [layers.near, layers.mid, layers.far].forEach((layer) => {
+      layers.sky.dispose();
+      layers.lines.material.matcap.dispose();
+      [layers.lines, layers.near, layers.mid, layers.far].forEach((layer) => {
         layer.geometry.dispose();
         layer.material.dispose();
       });
@@ -301,6 +385,7 @@ function Backdrop() {
     if (REDUCED_MOTION) return;
     const time = (elapsed.current += delta);
     layers.uTime.value = time;
+    linesRef.current.rotation.y = -time * 0.004;
     nearRef.current.rotation.y = time * 0.012;
     nearRef.current.rotation.x = Math.sin(time * 0.05) * 0.03;
     midRef.current.rotation.y = -time * 0.006;
@@ -309,7 +394,11 @@ function Backdrop() {
 
   return (
     <>
+      <primitive attach="background" object={layers.sky} />
       <fog attach="fog" args={[FOG_COLOUR, 700, 1600]} />
+      <group ref={linesRef} position={TOWN_CENTRE}>
+        <primitive object={layers.lines} />
+      </group>
       <group ref={nearRef}>
         <primitive object={layers.near} />
       </group>

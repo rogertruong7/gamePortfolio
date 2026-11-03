@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import { sunPosition } from "./Static";
 
 // The town doesn't move, so its shadows are drawn once instead of every frame.
 // A few frames gives every model time to mount first.
@@ -22,7 +23,7 @@ function Lights() {
         ref={sunRef}
         color={0xf5d1ab}
         intensity={1.5}
-        position={[-100, 300, 200]}
+        position={sunPosition}
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-camera-near={0.5}

@@ -1,9 +1,11 @@
-// Draws the chrome frame for a button: a rim, optionally with four corner barbs and
-// two small points. The outline gets inflated into a rounded 3D surface and shaded with a
+// Draws the chrome frame for a button: a rim, optionally with four small spikes at
+// the top, bottom, left and right. The outline gets inflated into a rounded 3D surface and shaded with a
 // painted chrome texture. Each button size is worked out once and saved as an image,
 // so the frames add nothing to the cost of a game frame.
 
-const PADDING_WITH_BARBS = 14;
+import { paintLiquidChrome } from "../Helpers/liquidChrome.js";
+
+const PADDING_WITH_SPIKES = 14;
 const PADDING_RIM_ONLY = 4;
 const SCALE = 3; // pixels per CSS pixel, so the frames stay sharp on high-res screens
 const CORNER_RADIUS = 20;
@@ -13,52 +15,6 @@ const NORMAL_STRENGTH = 1.35;
 const frames = new Map();
 let chrome = null;
 
-function wave(baseline, amplitude, frequency, phase) {
-  return (x) => baseline + amplitude * Math.sin((x / 512) * Math.PI * 2 * frequency + phase);
-}
-
-// Liquid chrome: hard black and white reflections around a wavy horizon
-function paintChrome() {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 512;
-  const ctx = canvas.getContext("2d");
-
-  const sky = ctx.createLinearGradient(0, 0, 0, 280);
-  sky.addColorStop(0, "#ffffff");
-  sky.addColorStop(0.55, "#dfe5ef");
-  sky.addColorStop(1, "#7f8797");
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, 512, 512);
-
-  const fillBelow = (edge, paint) => {
-    ctx.beginPath();
-    ctx.moveTo(0, 512);
-    for (let x = 0; x <= 512; x += 4) ctx.lineTo(x, edge(x));
-    ctx.lineTo(512, 512);
-    ctx.closePath();
-    ctx.fillStyle = paint;
-    ctx.fill();
-  };
-
-  fillBelow(wave(232, 26, 1.5, 0.6), "#07080c");
-  const ground = ctx.createLinearGradient(0, 280, 0, 512);
-  ground.addColorStop(0, "#ffffff");
-  ground.addColorStop(0.32, "#c6ccd8");
-  ground.addColorStop(0.62, "#4c5362");
-  ground.addColorStop(1, "#0b0c11");
-  fillBelow(wave(286, 22, 1.2, 2.4), ground);
-  fillBelow(wave(404, 14, 2.1, 1), "#10121a");
-  fillBelow(wave(438, 12, 1.7, 3), "#aeb5c3");
-
-  const highlight = ctx.createRadialGradient(170, 120, 4, 170, 120, 100);
-  highlight.addColorStop(0, "rgba(255,255,255,1)");
-  highlight.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = highlight;
-  ctx.fillRect(0, 0, 512, 512);
-
-  return { size: 512, pixels: ctx.getImageData(0, 0, 512, 512).data };
-}
-
 function pointPath(cx, cy, rx, ry) {
   const k = 0.13; // how tight the waist is
   return (
@@ -67,16 +23,6 @@ function pointPath(cx, cy, rx, ry) {
     `Q${cx + rx * k} ${cy - ry * k} ${cx + rx} ${cy}` +
     `Q${cx + rx * k} ${cy + ry * k} ${cx} ${cy + ry}` +
     `Q${cx - rx * k} ${cy + ry * k} ${cx - rx} ${cy}Z`
-  );
-}
-
-// sx and sy mirror the barb into each corner
-function barbPath(x, y, sx, sy) {
-  return (
-    `M${x} ${y + sy * 9}` +
-    `C${x + sx} ${y + sy * 2} ${x + sx * 2} ${y - sy * 7} ${x - sx * 13} ${y - sy * 15}` +
-    `C${x - sx * 3} ${y - sy * 13} ${x + sx * 7} ${y - sy * 8} ${x + sx * 13} ${y + sy}` +
-    `C${x + sx * 7} ${y - sy} ${x + sx * 3} ${y + sy * 2} ${x} ${y + sy * 9}Z`
   );
 }
 
@@ -156,14 +102,22 @@ function boxBlur(source, width, height, radius) {
   return result;
 }
 
-export function bakeChromeFrame(buttonWidth, buttonHeight, barbs) {
-  const key = `${buttonWidth}x${buttonHeight}:${barbs}`;
+export function bakeChromeFrame(buttonWidth, buttonHeight, spikes) {
+  const key = `${buttonWidth}x${buttonHeight}:${spikes}`;
   if (frames.has(key)) return frames.get(key);
-  if (!chrome) chrome = paintChrome();
+  if (!chrome) {
+    const chromeCanvas = paintLiquidChrome();
+    chrome = {
+      size: chromeCanvas.width,
+      pixels: chromeCanvas
+        .getContext("2d")
+        .getImageData(0, 0, chromeCanvas.width, chromeCanvas.height).data,
+    };
+  }
 
   const w = buttonWidth;
   const h = buttonHeight;
-  const PADDING = barbs ? PADDING_WITH_BARBS : PADDING_RIM_ONLY;
+  const PADDING = spikes ? PADDING_WITH_SPIKES : PADDING_RIM_ONLY;
   const width = (w + PADDING * 2) * SCALE;
   const height = (h + PADDING * 2) * SCALE;
   const canvas = document.createElement("canvas");
@@ -173,20 +127,18 @@ export function bakeChromeFrame(buttonWidth, buttonHeight, barbs) {
   ctx.setTransform(SCALE, 0, 0, SCALE, PADDING * SCALE, PADDING * SCALE);
   ctx.fillStyle = ctx.strokeStyle = "#fff";
 
-  // The silhouette: rim, then four barbs and the top and bottom points
+  // The silhouette: rim, then the four spikes
   const radius = Math.min(CORNER_RADIUS, h / 2);
   ctx.lineWidth = 5.2;
   ctx.beginPath();
   ctx.roundRect(1, 1, w - 2, h - 2, radius - 1);
   ctx.stroke();
-  if (barbs) {
+  if (spikes) {
     [
-      barbPath(8, 6, 1, 1),
-      barbPath(w - 8, 6, -1, 1),
-      barbPath(8, h - 6, 1, -1),
-      barbPath(w - 8, h - 6, -1, -1),
       pointPath(w / 2, -1, 5, 10),
       pointPath(w / 2, h + 1, 5, 10),
+      pointPath(-1, h / 2, 10, 5),
+      pointPath(w + 1, h / 2, 10, 5),
     ].forEach((path) => ctx.fill(new Path2D(path)));
   }
 

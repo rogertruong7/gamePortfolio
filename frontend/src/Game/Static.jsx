@@ -73,11 +73,14 @@ export const invisWalls = [
   ),
 ];
 
+// Where the main shadow-casting light sits, relative to the middle of the scene
+export const sunPosition = [-100, 300, 200];
+
 export const labels = [
-  { text: "projects", position: [38, 90, -90], fontSize: 10 },
-  { text: "about me", position: [38, 70, -164], fontSize: 10 },
-  { text: "experience", position: [92, 75, -210], fontSize: 8 },
-  { text: "skills", position: [170, 75, -210], fontSize: 10 },
+  { text: "projects", position: [38, 90, -90], fontSize: 10, showcaseName: "projects" },
+  { text: "about me", position: [38, 70, -164], fontSize: 10, showcaseName: "aboutMe" },
+  { text: "experience", position: [92, 75, -210], fontSize: 8, showcaseName: "experiences" },
+  { text: "skills", position: [170, 75, -210], fontSize: 10, showcaseName: "skills" },
 ];
 
 export const showcases = [

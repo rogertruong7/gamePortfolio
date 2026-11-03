@@ -1,6 +1,6 @@
 ## What it does
 
-Big Shop is for working out what the week's dinners will cost before you walk into the supermarket. You plan dinners over a span of days for a headcount. It finds each recipe with a photo, adds up the ingredients, prices them at Woolworths and Coles, and gives you one shopping list. Anyone with the link can tick items off, without an account. Each recipe also gets nutrition per serve and, where one exists, a matching YouTube video.
+F***Woolies is for working out what the week's dinners will cost before you walk into the supermarket. You plan dinners over a span of days for a headcount. It finds each recipe with a photo, adds up the ingredients, prices them at Woolworths, Coles, ALDI and IGA, and gives you one shopping list. Anyone with the link can tick items off, without an account. Each recipe also gets nutrition per serve and, where one exists, a matching YouTube video.
 
 ## AI only where it has to be
 
@@ -16,6 +16,7 @@ Claude Haiku 5.5 runs on each user's own API key, so every extra search costs th
 | Working out nutrition per serve | `nutrition.ts` |
 | A dish you've already found | Copied from your earlier search |
 | A price seen in the last 7 days | The `price_offer` catalogue |
+| A price on a public tracker | Plain code reading its search page |
 
 The third and fourth rows are the important split. Claude groups the lines, but the sums happen in code, so a shopping quantity is never a number the model made up. Any line a group doesn't claim becomes its own item, so nothing silently falls off the list.
 
@@ -32,9 +33,15 @@ Scaling a recipe also leaves noise like `15.000000000000002`, which would otherw
 
 ## Being honest about prices
 
-Woolworths and Coles offer no public price API and both block automated requests, and Big Shop doesn't try to get around that. Prices come from Claude's web search instead. Each one shows its source and the date it was checked, and anything without a visible price stays marked as unpriced. Totals are a guide, not a receipt.
+Each item at each store goes through the cheapest source first and stops as soon as it has a price:
 
-A `PriceFeed` interface and a daily cron job already exist, but the list of feeds is empty on purpose, ready for a licensed feed to plug in as one object.
+1. **The catalogue:** a price already seen in the last 7 days.
+2. **A public price tracker:** its search page, read by plain code at a slow pace, at most once a day per ingredient on a live list.
+3. **Web search:** Claude on the user's key, only for what's left at Woolworths and Coles.
+
+ALDI and IGA never spend an AI search, so an item the tracker doesn't have stays marked as unpriced there. Each price shows its source and the date it was checked, and totals are a guide, not a receipt.
+
+Adding a source is one object in the `PRICE_FEEDS` list, and removing a line switches it off everywhere.
 
 ## Treating model output as untrusted
 
@@ -42,7 +49,7 @@ The model reads arbitrary web pages, and what it returns ends up in links and im
 
 - The system prompt says page text is reference material, never an instruction.
 - `safeHttpsUrl` rejects `javascript:` and `data:` URLs, embedded credentials, IP addresses and private network names.
-- Product links on a shared list can only point at the two stores.
+- Product links on a shared list can only point at the stores' own domains.
 - Every YouTube link is checked against the public oEmbed endpoint, so an invented video is dropped.
 - Each task must finish in one validated tool call, under a 270 second deadline that sits inside the route's 300 second limit, so a slow run fails with a clear message and doesn't get killed.
 

@@ -1,29 +1,50 @@
-// Runs against a throwaway copy of Big Shop with a fresh demo database and mock-anthropic.mjs in this
+// Runs against a throwaway copy of the app with a fresh demo database and mock-anthropic.mjs in this
 // folder. Recipes, the recipe site and all prices are fixtures; no real key or account is involved.
+// Run it through film.sh, which sets all of that up.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 
 const USER = { name: "demo.household", password: "not-a-real-password-1" };
 const FAKE_KEY = "sk-ant-film-fixture-not-a-real-key-0000";
 const DISHES = "Prawn laksa, butter chicken, penne bolognese, chicken tacos, Thai red curry, lemon salmon";
+// Only the app and the food photos. Anything else the browser asks for is refused and logged.
+const BROWSER_ALLOWS = new Set(["127.0.0.1", "images.unsplash.com"]);
 
 const iso = (days) => {
   const d = new Date();
   d.setDate(d.getDate() + days);
   return d.toLocaleDateString("en-CA");
 };
+const row = (name) => `li:has(span.strike:text-is("${name}"))`;
+const NAME_FIELD = 'input[placeholder="Next fortnight"]';
+const STORE = (name) => `#shop label:has-text("${name}")`;
+
+// Glides the page until the target sits this far from the top of the window.
+async function scrollTo(d, target, top = 110) {
+  const y = await d.page.locator(target).first().evaluate((el) => el.getBoundingClientRect().top);
+  await d.scroll(y - top, 500);
+}
 
 export default {
-  title: "Big Shop",
+  title: "F***Woolies",
   tagline: "Plan your dinners, then see the cheapest way to buy everything for them.",
   url: "http://127.0.0.1:4111",
-  addressBar: "bigshop / next fortnight",
   viewport: { width: 1440, height: 810 },
   contextOptions: { colorScheme: "light" },
+  async setup({ context }) {
+    await context.route("**/*", (route) => {
+      const { hostname } = new URL(route.request().url());
+      const allowed = BROWSER_ALLOWS.has(hostname);
+      if (process.env.FILM_BROWSER_LOG) {
+        fs.appendFileSync(process.env.FILM_BROWSER_LOG, `${JSON.stringify({ host: hostname, allowed })}\n`);
+      }
+      return allowed ? route.continue() : route.abort();
+    });
+  },
   async before(d) {
     const { page } = d;
     // Each take starts as a brand-new account in the throwaway demo database.
-    execFileSync("docker", ["exec", "-i", "portfolio-demo-pg", "psql", "-q", "-U", "postgres", "-d", "bigshop"], {
+    execFileSync("docker", ["exec", "-i", "portfolio-demo-pg", "psql", "-q", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", "bigshop"], {
       input: fs.readFileSync(new URL("./seed.sql", import.meta.url)),
     });
     page.setDefaultTimeout(120000);
@@ -40,66 +61,91 @@ export default {
     await page.waitForSelector(':text("Key ending")', { timeout: 60000 });
 
     await page.goto(`${d.opts.url}/plans`, { waitUntil: "networkidle" });
-    await page.fill('input[placeholder="Next fortnight"]', "warm up");
+    await page.fill(NAME_FIELD, "warm up");
     await page.click('button:has-text("Create plan")');
     await page.waitForURL("**/plans/*", { timeout: 120000 });
     await page.waitForSelector("#dish", { timeout: 120000 });
-    const token = await page.locator('a:has-text("Open the list")').getAttribute("href");
-    await page.goto(`${d.opts.url}${token}`, { waitUntil: "networkidle" });
+    const list = await page.locator('a:has-text("Open the list")').getAttribute("href");
+    await page.goto(`${d.opts.url}${list}`, { waitUntil: "networkidle" });
     await page.goBack({ waitUntil: "networkidle" });
     page.once("dialog", (dialog) => dialog.accept());
     await page.click('button:has-text("Delete plan")');
     await page.waitForURL("**/plans", { timeout: 60000 });
   },
   async run(d) {
+    // Creating the plan.
     await d.goto("/plans");
-    await d.waitFor('input[placeholder="Next fortnight"]');
-    await d.popup("A plan covers whatever span of dates you're shopping for, at one supermarket or the cheapest of each.");
-    await d.type('input[placeholder="Next fortnight"]', "Next fortnight");
+    await d.waitFor(NAME_FIELD);
+    await d.type(NAME_FIELD, "Next fortnight");
     await d.cut(async () => {
       await d.page.fill('input[type="date"] >> nth=0', iso(4));
       await d.page.fill('input[type="date"] >> nth=1', iso(17));
+      await d.page.evaluate(() => document.activeElement?.blur());
     });
+    await d.popup("A plan covers the dates you're shopping for, at one supermarket or the cheapest of each.", { on: "form fieldset" });
     await d.clickThrough('button:has-text("Create plan")', "#dish");
 
+    // Dishes in, recipes back.
     await d.type("#dish", DISHES, { delay: 22 });
-    await d.click('button:has-text("Add to plan")', { after: 900 });
-    await d.waitFor(':text("Searching YouTube"), :text("Working out ingredients")');
-    await d.popup("Each dinner typed in goes to Claude, which looks up a published recipe on the user's own API key.");
+    await d.clickThrough('button:has-text("Add to plan")', ':text("Searching YouTube")');
+    await d.wait(1000);
     await d.cut(async () => {
-      await d.page.waitForFunction(() => document.querySelectorAll("#recipes img[data-loaded='true']").length >= 6, null, { timeout: 90000 });
+      await d.page.waitForFunction(() => document.querySelectorAll("#recipes img[data-loaded='true']").length >= 6, null, { timeout: 120000 });
       await d.wait(700);
     });
-    await d.scroll(320);
-    await d.popup("Six dishes come back with a photo, a method and calories per serve, scaled to four people.");
+    await d.scroll(320, 500);
+    await d.popup("Claude finds a published recipe for each dish, with a photo, on the user's own API key.");
 
-    await d.click('button:has(h3:has-text("Butter chicken"))', { after: 900 });
-    await d.page.locator("dialog h3:has-text('Nutrition per serve')").scrollIntoViewIfNeeded();
-    await d.wait(500);
-    await d.popup("Calories and nutrients are added up in plain code from each ingredient, and the panel says when they're estimates.", { on: "dialog h3:has-text('Nutrition per serve')" });
-    await d.click('button[aria-label="Close recipe"]', { after: 700 });
+    // One recipe's nutrition.
+    await d.click('button:has(h3:has-text("Butter chicken"))', { after: 600 });
+    await d.page.locator("dialog h3:has-text('Nutrition per serving')").scrollIntoViewIfNeeded();
+    await d.wait(250);
+    await d.popup("Nutrition is added up in plain code from each ingredient, and the panel says when the figures are estimates.", { on: "dialog section > p" });
+    await d.click('button[aria-label="Close recipe"]', { after: 400 });
 
+    // The merged list.
     await d.waitFor('button:has-text("Find prices for")');
-    await d.page.locator('h2:has-text("Shopping list")').evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: "instant" }));
-    await d.wait(600);
-    await d.popup("The list adds up every ingredient across all six recipes in plain code, with no AI involved.", { on: 'li:has(span.strike:text-is("Chicken thigh fillet"))' });
-    await d.click('button:has-text("Find prices for")', { popup: "Prices come from a web search on the user's key, because neither store offers a public price feed.", after: 1400 });
-    await d.cut(async () => {
-      await d.page.waitForFunction(() => !document.querySelector('[role="progressbar"]') && !/Not priced yet/.test(document.body.innerText), null, { timeout: 120000 });
-      await d.wait(800);
-    });
-    await d.page.locator('h2:has-text("Shopping list")').evaluate((el) => window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: "instant" }));
-    await d.wait(700);
-    await d.popup("Both stores now show a total for the whole list, and the headline price takes the cheaper store for each item.", { on: '#shop p:text-matches("^\\$[0-9]")', zoom: 1.4 });
-    await d.popup("Packs are chosen by arithmetic too: the cheapest mix that supplies enough of every item.", { on: 'li:has(span.strike:text-is("Chicken thigh fillet"))', zoom: 1.5 });
+    await scrollTo(d, row("Chicken thigh fillet"), 300);
+    await d.popup("Ingredients from all six recipes merge through a dictionary and plain arithmetic, with no AI involved.", { on: row("Chicken thigh fillet") });
 
+    // Pricing.
+    await scrollTo(d, 'h2:has-text("Shopping list")', 90);
+    await d.click('button:has-text("Find prices for")', {
+      popup: "Prices try a 7-day catalogue first, then a public price tracker, then a web search at Woolworths and Coles only.",
+      hold: 4000,
+      after: 900,
+    });
+    await d.cut(async () => {
+      await d.page.waitForFunction(() => !document.querySelector('[role="progressbar"]') && !/Not priced yet/.test(document.body.innerText), null, { timeout: 240000 });
+      await d.page.evaluate(() => {
+        const heading = [...document.querySelectorAll("h2")].find((el) => el.textContent === "Shopping list");
+        window.scrollTo({ top: heading.getBoundingClientRect().top + window.scrollY - 90, behavior: "instant" });
+      });
+      await d.wait(900);
+    });
+    await d.popup("The headline buys each item at whichever of the four stores is cheapest, and each store shows its own total.", { on: d.page.locator("#shop p").filter({ hasText: /^\$\d/ }), zoom: 1.3 });
+
+    // A gap the web search filled, and the cheapest packs, on rows that sit together.
+    await scrollTo(d, row("Red curry paste"), 170);
+    await d.popup("The price tracker doesn't list this item, so a web search on the user's key filled the gap.", { on: row("Red curry paste"), zoom: 1.4 });
+    await d.popup("Packs are chosen by arithmetic too: here, one of each size is the cheapest way to get enough.", { on: row("Tomato passata"), zoom: 1.4 });
+
+    // A gap that stays a gap.
+    await scrollTo(d, 'h2:has-text("Shopping list")', 90);
+    await d.click(STORE("ALDI"), { after: 700 });
+    await d.popup("ALDI and IGA have no web search, so anything the tracker doesn't list stays marked as unpriced.", { on: '#shop p:has-text("not in this total")' });
+
+    // The shared list. The plan goes back to the cheapest of each off camera, and that's what it shows.
     const share = await d.page.locator('a:has-text("Open the list")').getAttribute("href");
+    await d.cut(async () => {
+      await d.page.locator(STORE("Cheapest of each")).click();
+      await d.wait(1500);
+    });
     await d.goto(share);
     await d.waitFor('[role="status"]:has-text("ticked")');
-    await d.popup("One link goes to the household, with no account needed, and it can't touch the plan or the API key.", { on: 'p:has-text("about $")' });
-    await d.click('li:has(span.strike:text-is("Brown onion")) input[type="checkbox"]', { after: 450 });
-    await d.click('li:has(span.strike:text-is("Coconut milk")) input[type="checkbox"]', { after: 450 });
-    await d.click('li:has(span.strike:text-is("Garlic")) input[type="checkbox"]', { after: 450 });
-    await d.popup("Everyone ticks off the same list in the supermarket, and each phone picks up the others' ticks within seconds.", { on: '[role="status"]:has-text("ticked")' });
+    const tick = (n) => `main li input[type="checkbox"] >> nth=${n}`;
+    await d.click(tick(0), { after: 400 });
+    await d.click(tick(1), { after: 400 });
+    await d.popup("Anyone with the link can tick the same list without an account, but can't change the plan or use the API key.", { on: '[role="status"]:has-text("ticked")' });
   },
 };

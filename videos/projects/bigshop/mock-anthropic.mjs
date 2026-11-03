@@ -1,9 +1,16 @@
-// A stand-in for the Anthropic API with realistic fixtures, for the portfolio film only.
+// A stand-in for the Anthropic API and the public price tracker, for the portfolio film only.
 // Everything here is made up: recipes, the source site, and every price.
-// Run: node projects/bigshop/mock-anthropic.mjs   then start Big Shop with ANTHROPIC_BASE_URL=http://127.0.0.1:4110
+// film.sh runs this and starts the app with ANTHROPIC_BASE_URL and CUUGO_BASE_URL pointing here.
+// Every request is logged, one JSON object a line, to the file named by MOCK_LOG.
+import fs from "node:fs";
 import { createServer } from "node:http";
 
 const PORT = 4110;
+const log = (entry) => {
+  const line = JSON.stringify({ at: new Date().toISOString(), ...entry });
+  console.log(line);
+  if (process.env.MOCK_LOG) fs.appendFileSync(process.env.MOCK_LOG, `${line}\n`);
+};
 const photo = (id) => `https://images.unsplash.com/photo-${id}?w=900`;
 const nutrients = ([energyKj, protein, fat, saturatedFat, carbohydrate, sugars, fibre, sodium]) => ({
   energyKj, protein, fat, saturatedFat, carbohydrate, sugars, fibre, sodium,
@@ -90,43 +97,82 @@ const RECIPES = {
   },
 };
 
-// name: { pack label: [units in pack, Woolworths price, Coles price] }, all made up for the film.
+// What the web search finds, for the gaps the tracker leaves at Woolworths and Coles.
+// name: { pack label: [units in pack, Woolworths price or null, Coles price or null] }
 const PACKS = {
   "laksa paste": { "185 g jar": [185, 4.5, 4.2], "370 g jar": [370, 7.8, 7.5] },
-  "coconut milk": { "400 ml tin": [400, 1.75, 1.9], "1 L carton": [1000, 4.8, 4.5] },
-  "chicken stock": { "1 L carton": [1000, 2.6, 2.4] },
-  "raw prawns": { "500 g pack": [500, 16, 15.5] },
-  "rice vermicelli": { "250 g pack": [250, 2.2, 2.4] },
-  "bean sprouts": { "200 g bag": [200, 2.5, 2.3] },
-  lime: { "each": [1, 0.9, 1.1], "500 g bag": [8, 5, 4.5] },
-  coriander: { "bunch": [1, 3, 2.9] },
-  "fish sauce": { "200 ml bottle": [200, 3.5, 3.2] },
-  "chicken thigh fillet": { "500 g tray": [500, 6.5, 6.9], "1 kg tray": [1000, 12, 11.5] },
-  "brown onion": { "each": [1, 0.6, 0.65], "1 kg bag": [7, 2.9, 3] },
-  garlic: { "single bulb": [10, 1.2, 1.3], "3 pack": [30, 3, 2.9] },
-  ginger: { "100 g piece": [100, 1.8, 2] },
-  "greek yoghurt": { "500 g tub": [500, 4, 3.8] },
-  "tomato passata": { "700 ml bottle": [700, 2.2, 2.3], "400 ml jar": [400, 1.6, 1.5] },
-  "thickened cream": { "300 ml tub": [300, 2.6, 2.7], "600 ml tub": [600, 4.4, 4.5] },
-  butter: { "250 g block": [250, 4.5, 4.6] },
-  "basmati rice": { "1 kg bag": [1000, 3.2, 3.5] },
-  "beef mince": { "500 g tray": [500, 7, 6.8] },
-  carrot: { "each": [1, 0.4, 0.35] },
-  penne: { "500 g pack": [500, 1.5, 1.3] },
-  parmesan: { "200 g wedge": [200, 6, 6.3] },
-  "flour tortilla": { "8 pack": [8, 3, 2.8] },
-  avocado: { "each": [1, 2, 2.2] },
-  tomato: { "each": [1, 0.9, 0.85] },
-  "red onion": { "each": [1, 0.8, 0.75] },
-  "sour cream": { "300 g tub": [300, 2.8, 2.9] },
   "red curry paste": { "114 g jar": [114, 3.2, 3.5] },
-  "red capsicum": { "each": [1, 1.9, 2] },
-  "green beans": { "250 g bag": [250, 3, 2.8] },
-  "salmon fillet": { "2 pack, 280 g": [280, 12.5, 13], "4 pack, 560 g": [560, 23, 24] },
-  lemon: { "each": [1, 1, 0.95] },
-  "baby spinach": { "120 g bag": [120, 3, 3.2] },
-  "chat potatoes": { "1 kg bag": [1000, 3.5, 3.3] },
+  "fish sauce": { "200 ml bottle": [200, 3.5, 3.2] },
+  "bean sprouts": { "200 g bag": [200, 2.5, 2.3] },
+  "rice vermicelli": { "250 g pack": [250, 2.2, null] },
+  "green beans": { "250 g bag": [250, null, 2.8] },
 };
+
+// The tracker's listings. term: [product, [size, Woolworths, Coles, ALDI, IGA], ...]. A null means
+// that store isn't listed, and a term that's absent gets a results page with no cards, so the app's
+// next step is real: web search at Woolworths and Coles, and no price at ALDI and IGA.
+const TRACKER = {
+  prawn: ["Raw Prawns", ["500g", 16, 15.5, 14.5, 17]],
+  "coconut milk": ["Coconut Milk", ["400ml", 1.75, 1.9, 1.44, 2.2], ["1L", 4.8, 4.5, null, null]],
+  "chicken stock": ["Chicken Stock", ["1L", 2.6, 2.4, 1.99, 3.1]],
+  "rice vermicelli": ["Rice Vermicelli", ["250g", null, 2.4, 1.89, null]],
+  lime: ["Limes", ["each", 0.9, 1.1, 0.79, 1.2]],
+  coriander: ["Fresh Coriander", ["each", 3, 2.9, 2.49, 3.5]],
+  "chicken thigh fillet": ["Chicken Thigh Fillets", ["500g", 6.5, 6.9, 6.2, 7.5], ["1kg", 12, 11.5, 11.9, 14]],
+  "brown onion": ["Brown Onions", ["each", 0.6, 0.65, 0.55, 0.8], ["1kg", 2.9, 3, 2.49, 3.5]],
+  garlic: ["Garlic", ["50g", 1.2, 1.3, 0.99, 1.6]],
+  ginger: ["Fresh Ginger", ["100g", 1.8, 2, 1.69, 2.4]],
+  "greek yoghurt": ["Greek Yoghurt", ["500g", 4, 3.8, 3.49, 4.6]],
+  "tomato passata": ["Tomato Passata", ["400ml", 1.6, 1.6, null, 2.1], ["700ml", 2.24, 2.31, 2.15, 3.01]],
+  "thickened cream": ["Thickened Cream", ["300ml", 2.6, 2.7, 2.35, null], ["600ml", 4.4, 4.5, 4.2, null]],
+  butter: ["Salted Butter", ["250g", 4.5, 4.6, 4.29, 5.2]],
+  "basmati rice": ["Basmati Rice", ["1kg", 3.2, 3.5, 2.99, 4.2]],
+  "beef mince": ["Beef Mince", ["500g", 7, 6.8, 6.99, 8]],
+  carrot: ["Carrots", ["each", 0.4, 0.35, 0.39, 0.5]],
+  penne: ["Penne", ["500g", 1.5, 1.3, 1.25, 2.2]],
+  parmesan: ["Parmesan", ["200g", 6, 6.3, 5.49, null]],
+  "flour tortilla": ["Flour Tortillas", ["8pack", 3, 2.8, 2.49, 3.6]],
+  avocado: ["Avocado", ["each", 2, 2.2, 1.79, 2.5]],
+  tomato: ["Tomatoes", ["each", 0.9, 0.85, 0.89, 1.1]],
+  "red onion": ["Red Onions", ["each", 0.8, 0.75, 0.79, 1]],
+  "sour cream": ["Sour Cream", ["300g", 2.8, 2.9, 2.49, 3.4]],
+  "red capsicum": ["Red Capsicum", ["each", 1.9, 2, 1.99, 2.5]],
+  "green bean": ["Green Beans", ["250g", 3, null, 2.59, 3.6]],
+  "salmon fillet": ["Salmon Fillets", ["280g", 12.5, 13, null, 14.5], ["560g", 23, 24, null, 27]],
+  lemon: ["Lemons", ["each", 1, 0.95, 0.89, 1.3]],
+  "baby spinach": ["Baby Spinach", ["120g", 3, 3.2, 2.69, 3.8]],
+  "chat potato": ["Chat Potatoes", ["1kg", 3.5, 3.3, 3.29, 4.2]],
+};
+const STORES = [["woolworths", "Woolworths"], ["coles", "Coles"], ["aldi", "ALDI"], ["iga", "IGA"]];
+
+/** The unit price a card prints: the app works out a pack's size from this and the shelf price. */
+function unitPriceText(size, price) {
+  const [, amount, unit] = /^(\d*)(kg|g|L|ml|each|pack)$/.exec(size);
+  const n = Number(amount || 1);
+  const money = (value) => `$${value.toFixed(2)}`;
+  if (unit === "kg") return `${money(price / n)} per kg`;
+  if (unit === "g") return `${money((price / n) * 1000)} per kg`;
+  if (unit === "L") return `${money(price / n)} per litre`;
+  if (unit === "ml") return `${money((price / n) * 1000)} per litre`;
+  return `${money(price / n)} per 1ea`;
+}
+
+/** The same markup parseSearchPage in src/lib/cuugo.ts reads off a real results page. */
+function trackerPage(term) {
+  const [product, ...packs] = TRACKER[term] ?? [null];
+  const cards = packs.flatMap(([size, ...prices]) =>
+    STORES.flatMap(([id, name], index) => {
+      const price = prices[index];
+      if (price == null) return [];
+      const label = `${name} ${product}`;
+      return [
+        `<div class="su-product-card"><a href="/product/${id}/${slug(`${product} ${size}`)}"><img alt="${label}" src="/fixture.png"/><h3>${label}</h3></a>` +
+          `<span class="su-card-price">$${price.toFixed(2)}</span><span class="su-card-unit">${unitPriceText(size, price)}</span></div>`,
+      ];
+    }),
+  );
+  return { html: `<!doctype html><html><body><main>${cards.join("\n")}</main></body></html>`, cards: cards.length };
+}
 
 const slug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 
@@ -155,20 +201,17 @@ function pricesFor(prompt, system) {
   const items = JSON.parse(/<items>(.*)<\/items>/s.exec(prompt)[1]);
   const coles = system.includes("at Coles");
   const shop = coles ? "Coles" : "Woolworths";
-  const domain = coles ? "www.coles.com.au" : "www.woolworths.com.au";
+  const domain = coles ? "coles.example" : "woolworths.example";
   const title = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase());
   return {
     results: items.map((item) => ({
       itemId: item.itemId,
-      options: Object.entries(PACKS[item.name.toLowerCase()] ?? {}).map(([packLabel, [qty, wool, col]]) => ({
-        productName: `${shop} ${title(item.name.toLowerCase())}`,
-        packLabel,
-        qtyInItemUnit: qty,
-        priceAud: coles ? col : wool,
-        productUrl: `https://${domain}/product/${slug(item.name.toLowerCase())}-${slug(packLabel)}`,
-        sourceUrl: `https://${domain}/product/${slug(item.name.toLowerCase())}-${slug(packLabel)}`,
-        per100g: null,
-      })),
+      options: Object.entries(PACKS[item.name.toLowerCase()] ?? {}).flatMap(([packLabel, [qty, wool, col]]) => {
+        const price = coles ? col : wool;
+        if (price == null) return [];
+        const url = `https://${domain}/product/${slug(item.name.toLowerCase())}-${slug(packLabel)}`;
+        return [{ productName: `${shop} ${title(item.name.toLowerCase())}`, packLabel, qtyInItemUnit: qty, priceAud: price, productUrl: null, sourceUrl: url, per100g: null }];
+      }),
     })),
   };
 }
@@ -188,9 +231,25 @@ function send(res, name, input) {
 }
 
 createServer((req, res) => {
-  if (req.method === "GET" && req.url.startsWith("/v1/models")) {
+  const url = new URL(req.url, `http://127.0.0.1:${PORT}`);
+  if (req.method === "GET" && url.pathname === "/search/r") {
+    const term = url.searchParams.get("q") ?? "";
+    const { html, cards } = trackerPage(term);
+    log({ service: "tracker", method: "GET", path: url.pathname, term, cards });
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+    res.end(html);
+    return;
+  }
+  if (req.method === "GET" && url.pathname.startsWith("/v1/models")) {
+    log({ service: "anthropic", method: "GET", path: url.pathname, purpose: "key check" });
     res.writeHead(200, { "content-type": "application/json" });
     res.end(JSON.stringify({ data: [], has_more: false, first_id: null, last_id: null }));
+    return;
+  }
+  if (req.method !== "POST" || url.pathname !== "/v1/messages") {
+    log({ service: "unknown", method: req.method, path: url.pathname });
+    res.writeHead(404);
+    res.end();
     return;
   }
   let body = "";
@@ -199,6 +258,10 @@ createServer((req, res) => {
     const request = JSON.parse(body);
     const tool = request.tools.at(-1).name;
     const prompt = request.messages[0].content;
+    const detail = tool === "submit_prices"
+      ? { store: /at (Woolworths|Coles|ALDI|IGA) in Australia/.exec(request.system)?.[1], items: JSON.parse(/<items>(.*)<\/items>/s.exec(prompt)[1]).map((item) => item.name) }
+      : { dish: /<dish>(.*)<\/dish>/.exec(prompt)?.[1] };
+    log({ service: "anthropic", method: "POST", path: url.pathname, tool, ...detail });
     // Long enough for the progress steps to be seen, short enough not to drag.
     const delay = tool === "submit_video" ? 900 : tool === "submit_recipe" ? 2600 : 900;
     setTimeout(() => {
@@ -213,4 +276,4 @@ createServer((req, res) => {
       }
     }, delay);
   });
-}).listen(PORT, "127.0.0.1", () => console.log(`film mock on :${PORT}`));
+}).listen(PORT, "127.0.0.1", () => console.log(`film mocks on :${PORT}`));

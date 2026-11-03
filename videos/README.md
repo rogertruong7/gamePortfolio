@@ -34,6 +34,10 @@ Keep films to 30 to 75 seconds with 6 to 10 popups. Popup copy says what the per
 
 Recording and rendering take turns through `.turn-lock`, because a render running alongside a recording makes the footage stutter.
 
+## One-command films
+
+A project that needs its own app running can have a `projects/<slug>/film.sh`. It works from any directory and does the whole job: copies the app to a throwaway folder, starts its database and mocks, records and composes, then stops everything it started, even on failure. `projects/bigshop/film.sh` is the example; pass `--draft` for a quick render.
+
 ## Data rules
 
 Films are public. Run apps from a throwaway copy with made-up data and mocked AI responses; never point one at a production database, a real account or a real API key.

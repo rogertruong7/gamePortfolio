@@ -2,8 +2,8 @@
   "kind": "project",
   "slug": "bigshop",
   "order": 2,
-  "title": "Big Shop",
-  "option": "(FULLSTACK) Big Shop: Dinners to a priced shopping list (Next.js + tRPC)",
+  "title": "F***Woolies",
+  "option": "(FULLSTACK) F***Woolies: Dinners to a priced shopping list (Next.js + tRPC)",
   "tagline": "Plan your dinners for a span of days and get one priced shopping list that anyone with the link can tick off.",
   "category": "Full stack",
   "period": "Nov 2026",
@@ -20,7 +20,7 @@
   "links": [
     {
       "label": "Try it live",
-      "href": "https://bigshop-zeta.vercel.app"
+      "href": "https://fuckwoolies.vercel.app/"
     }
   ],
   "video": true

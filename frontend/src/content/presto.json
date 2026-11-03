@@ -8,6 +8,20 @@
   "category": "Frontend",
   "period": "2024",
   "role": "University team project",
-  "stack": ["React", "React Router", "Material UI", "styled-components", "Axios", "highlight.js", "Vitest"],
-  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/Slides-Frontend" }]
+  "stack": [
+    "React",
+    "React Router",
+    "Material UI",
+    "styled-components",
+    "Axios",
+    "highlight.js",
+    "Vitest"
+  ],
+  "links": [
+    {
+      "label": "View code",
+      "href": "https://github.com/rogertruong7/Slides-Frontend"
+    }
+  ],
+  "video": true
 }

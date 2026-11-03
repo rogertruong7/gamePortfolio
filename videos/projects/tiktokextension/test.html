@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Extension test page</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; height: 100vh; background: #15171c; color: #eef0f4; font: 16px/1.45 system-ui, sans-serif; display: flex; flex-direction: column; }
+  header { padding: 14px 28px; background: #23262e; border-bottom: 1px solid #343843; font-size: 15px; }
+  header b { color: #ffd166; }
+  main { flex: 1; display: flex; gap: 56px; justify-content: center; align-items: center; min-height: 0; }
+  #xgwrapper-demo { position: relative; height: 730px; aspect-ratio: 9 / 16; background: #000; border-radius: 10px; overflow: hidden; cursor: pointer; }
+  video { width: 100%; height: 100%; display: block; }
+  aside { width: 420px; display: flex; flex-direction: column; gap: 18px; }
+  .row { display: flex; gap: 18px; }
+  .card { flex: 1; background: #23262e; border: 1px solid #343843; border-radius: 10px; padding: 16px 22px; }
+  .label { font-size: 13px; color: #a5abb8; }
+  .value { font-size: 58px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .fast { color: #5fe08f; }
+  iframe { width: 100%; height: 262px; border: 1px solid #343843; border-radius: 10px; background: #0f0f0f; display: block; }
+</style>
+</head>
+<body>
+  <header><b>Test page, not TikTok.</b> A generated clip in the player markup the extension looks for, with the extension's own scripts loaded.</header>
+  <main>
+    <div id="xgwrapper-demo">
+      <video data-xgplayerid="demo" src="/clip.webm" autoplay muted playsinline loop></video>
+    </div>
+    <aside>
+      <div class="row">
+        <div class="card">
+          <div class="label">video.playbackRate</div>
+          <div id="rate" class="value">1x</div>
+        </div>
+        <div class="card">
+          <div class="label">video.currentTime</div>
+          <div id="clock" class="value">0.0</div>
+        </div>
+      </div>
+      <div>
+        <div class="label" style="margin-bottom:8px">The extension's popup</div>
+        <iframe id="ext-popup" src="/ext/html/popup.html" title="Extension popup"></iframe>
+      </div>
+    </aside>
+  </main>
+  <script>
+    const video = document.querySelector("video");
+    const rate = document.getElementById("rate");
+    const clock = document.getElementById("clock");
+    const tick = () => {
+      const r = video.playbackRate;
+      rate.textContent = `${r}x`;
+      rate.classList.toggle("fast", r > 1);
+      clock.textContent = video.currentTime.toFixed(1);
+      clock.classList.toggle("fast", r > 1);
+      requestAnimationFrame(tick);
+    };
+    tick();
+  </script>
+</body>
+</html>

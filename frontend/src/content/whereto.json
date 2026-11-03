@@ -8,6 +8,17 @@
   "category": "Mobile",
   "period": "2026",
   "role": "Solo project",
-  "stack": ["React Native", "Expo", "TypeScript", "TanStack Query", "Go", "Fiber", "GORM", "PostgreSQL", "Docker"],
-  "links": []
+  "stack": [
+    "React Native",
+    "Expo",
+    "TypeScript",
+    "TanStack Query",
+    "Go",
+    "Fiber",
+    "GORM",
+    "PostgreSQL",
+    "Docker"
+  ],
+  "links": [],
+  "video": true
 }

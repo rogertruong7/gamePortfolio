@@ -8,6 +8,16 @@
   "category": "Full stack",
   "period": "Aug 2026",
   "role": "Solo project",
-  "stack": ["React", "TypeScript", "Vite", "TanStack Router", "FastAPI", "SQLAlchemy", "Postgres", "Claude API"],
-  "links": []
+  "stack": [
+    "React",
+    "TypeScript",
+    "Vite",
+    "TanStack Router",
+    "FastAPI",
+    "SQLAlchemy",
+    "Postgres",
+    "Claude API"
+  ],
+  "links": [],
+  "video": true
 }

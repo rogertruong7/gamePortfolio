@@ -8,9 +8,27 @@
   "category": "Full stack",
   "period": "2025 to 2026",
   "role": "Solo project",
-  "stack": ["Next.js", "React", "TypeScript", "tRPC", "Prisma", "PostgreSQL", "NextAuth", "TanStack Table", "TanStack Virtual", "Tailwind CSS"],
+  "stack": [
+    "Next.js",
+    "React",
+    "TypeScript",
+    "tRPC",
+    "Prisma",
+    "PostgreSQL",
+    "NextAuth",
+    "TanStack Table",
+    "TanStack Virtual",
+    "Tailwind CSS"
+  ],
   "links": [
-    { "label": "Try it live", "href": "https://airclone-roger-truong.vercel.app" },
-    { "label": "View code", "href": "https://github.com/rogertruong7/airtable-clone-rt" }
-  ]
+    {
+      "label": "Try it live",
+      "href": "https://airclone-roger-truong.vercel.app"
+    },
+    {
+      "label": "View code",
+      "href": "https://github.com/rogertruong7/airtable-clone-rt"
+    }
+  ],
+  "video": true
 }

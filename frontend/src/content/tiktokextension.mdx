@@ -34,4 +34,4 @@ A listener on `document` hears every press on the page, so it has to decide whet
 
 ### Reacting to the toggle
 
-The content script listens to `chrome.storage.sync.onChanged`, so the popup's toggle takes effect in an open tab without a refresh.
+The content script listens to `chrome.storage.sync.onChanged`, so switching the extension on takes effect in an open tab without a refresh. Switching it off is only half done: the mouse listeners already attached don't check the setting, so an open tab keeps its 2x hold until the page reloads.

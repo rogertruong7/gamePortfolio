@@ -1,6 +1,6 @@
 ## What it does
 
-RankedTodo puts something at stake on your to-do list. Each day you have 25 RR (rank rating) on the line: finish your tasks and you earn it, leave them undone and you lose it. Your rank moves up and down a ladder of eight tiers, each with three divisions of 100 RR, with Radiant at the top. A Career tab records every day.
+RankedTodo puts something at stake on your to-do list. Each day you have 25 MMR (matchmaking rating) on the line: finish your tasks and you earn it, leave them undone and you lose it. Your rank moves up and down a ladder of eight tiers, each with three divisions of 100 MMR, with Radiant at the top. A Career tab records every day.
 
 The app looks like Apple Notes, down to backspace at the start of a line outdenting or merging into the row above. There's also an opt-in Ranked mode that pairs you against an opponent for the day.
 
@@ -8,7 +8,7 @@ The app looks like Apple Notes, down to backspace at the start of a line outdent
 
 `total_rr` is the single source of truth, and rank is always derived from it.
 
-Nesting raises a fairness question: breaking one task into ten subtasks shouldn't make it worth ten times as much. So `LeafWeightedFraction` divides the day by a recursive equal split: top-level tasks share the day equally, each parent hands its share to its children, and only leaves carry weight. Indenting tasks under a parent divides that parent's RR among them and never adds any. A flat list reduces exactly to completed over total.
+Nesting raises a fairness question: breaking one task into ten subtasks shouldn't make it worth ten times as much. So `LeafWeightedFraction` divides the day by a recursive equal split: top-level tasks share the day equally, each parent hands its share to its children, and only leaves carry weight. Indenting tasks under a parent divides that parent's MMR among them and never adds any. A flat list reduces exactly to completed over total.
 
 The day's result then comes from one symmetric formula:
 
@@ -16,7 +16,7 @@ The day's result then comes from one symmetric formula:
 delta = round((2 × fraction − 1) × 25)
 ```
 
-| Day | RR change |
+| Day | MMR change |
 | --- | --- |
 | Everything done | +25 |
 | Half done | 0 |
@@ -25,7 +25,7 @@ delta = round((2 × fraction − 1) × 25)
 
 ## Settling days without a cron job
 
-There is no scheduled job for the daily reset. The app sends its local date, and the backend settles any earlier days on the next fetch. It applies the RR and writes a career row, and days you never opened the app log as rest days with no change. This avoids running a global midnight job across every time zone, because each user's day ends when their own date changes.
+There is no scheduled job for the daily reset. The app sends its local date, and the backend settles any earlier days on the next fetch. It applies the MMR and writes a career row, and days you never opened the app log as rest days with no change. This avoids running a global midnight job across every time zone, because each user's day ends when their own date changes.
 
 ## Ranked mode
 

@@ -169,7 +169,7 @@ export async function record(slug) {
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(path.join(outDir, "frames"), { recursive: true });
 
-  const browser = await chromium.launch({ args: spec.chromeArgs ?? [] });
+  const browser = await chromium.launch({ args: ["--mute-audio", ...(spec.chromeArgs ?? [])] });
   const scale = 1; // screencast frames are CSS pixels whatever the device scale, so compose.mjs scales up
   const context = await browser.newContext({ viewport, ...(spec.contextOptions ?? {}) });
   await context.addInitScript(CURSOR);

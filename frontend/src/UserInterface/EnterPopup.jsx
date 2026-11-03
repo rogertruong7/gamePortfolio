@@ -34,7 +34,7 @@ const EnterButtonsContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 20px;
+  gap: 26px;
   width: 100%;
 `;
 

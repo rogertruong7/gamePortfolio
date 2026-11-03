@@ -84,7 +84,7 @@ const Sheen = styled.span`
 `;
 
 // Measures the button it sits in and wraps it in a matching chrome frame
-const ChromeFrame = ({ barbs = true }) => {
+const ChromeFrame = ({ spikes = true }) => {
   const sheenRef = useRef(null);
   const [frame, setFrame] = useState(null);
 
@@ -92,13 +92,13 @@ const ChromeFrame = ({ barbs = true }) => {
     const button = sheenRef.current.parentElement;
     const update = () => {
       const { offsetWidth: width, offsetHeight: height } = button;
-      if (width && height) setFrame(bakeChromeFrame(width, height, barbs));
+      if (width && height) setFrame(bakeChromeFrame(width, height, spikes));
     };
     update();
     const observer = new ResizeObserver(update);
     observer.observe(button);
     return () => observer.disconnect();
-  }, [barbs]);
+  }, [spikes]);
 
   const place = frame && {
     left: -frame.padding,

@@ -127,7 +127,7 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
       fov={60}
       aspect={aspect}
       near={1}
-      far={2000}
+      far={2400}
     />
   );
 });

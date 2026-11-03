@@ -151,15 +151,16 @@ function MainGame({
           currentScene={currentScene}
         />
         <PlayerShadow characterRef={characterRef} />
-        {labels.map(({ text, position, fontSize }, index) => (
+        {labels.map(({ text, position, fontSize, showcaseName }) => (
           <Text
             key={text}
             text={text}
             position={position}
             fontPath="fonts/PixelifySans_Regular.json"
             fontSize={fontSize}
-            color="#ff8080"
             cameraRef={cameraRef}
+            characterRef={characterRef}
+            showcaseName={showcaseName}
           />
         ))}
         {darkSpot && <DarkSpot darkSpotPos={darkSpotPos} />}

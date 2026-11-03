@@ -4,7 +4,6 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainPage from "./MainPage.jsx";
 import RouteTracker from "./Analytics/RouteTracker.jsx";
-import Privacy from "./Pages/Privacy.jsx";
 import BalatroClone from "./Pages/ProjectPages/BalatroClone.jsx";
 import Bridges from "./Pages/ProjectPages/Bridges.jsx";
 import CountryAPI from "./Pages/ProjectPages/CountryAPI.jsx";
@@ -43,7 +42,6 @@ const App = () => {
             </Suspense>
           }
         />
-        <Route path="/privacy" element={<Privacy />} />
         <Route path="/projects/balatro" element={<BalatroClone />} />
         <Route path="/projects/bridges" element={<Bridges />} />
         <Route path="/projects/countriesvisited" element={<CountryAPI />} />

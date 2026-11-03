@@ -20,7 +20,7 @@ const BackButton = ({ setCurrentScene }) => {
     <>
       <Button onClick={() => setCurrentScene(0)}>
         home
-        <ChromeFrame />
+        <ChromeFrame spikes={false} />
       </Button>
     </>
   );

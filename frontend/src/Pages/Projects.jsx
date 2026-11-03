@@ -136,6 +136,7 @@ const Projects = () => {
         </GameContainer>
         {pageToShow && (
           <DocumentPage
+            key={projectEntries[pageToShow - 1].slug}
             entry={projectEntries[pageToShow - 1]}
             onBack={() => {
               setPageToShow(null);

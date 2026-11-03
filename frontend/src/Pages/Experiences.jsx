@@ -132,6 +132,7 @@ const Experiences = ({ setCurrentScene }) => {
         </GameContainer>
         {pageToShow && (
           <DocumentPage
+            key={experienceEntries[pageToShow - 1].slug}
             entry={experienceEntries[pageToShow - 1]}
             onBack={() => {
               setPageToShow(null);

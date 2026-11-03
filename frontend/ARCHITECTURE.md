@@ -163,12 +163,28 @@ HTML elements positioned absolutely over the 3D canvas.
 
 ## Routing (`App.jsx`)
 
-Two types of routes:
+Four types of routes:
 
 1. **`/`** — MainPage with the game + all content pages managed by scene state
 2. **`/projects/<slug>`** — Direct-access project pages. These render the project component standalone (no game), making project pages shareable as URLs.
+3. **`/admin`** — The password-protected analytics page. It is not linked from anywhere and is lazy-loaded, so its code doesn't ship to normal visitors.
+4. **`/privacy`** — Explains what the site records.
 
-Unknown routes redirect to `/` via `Helpers/Redirect.jsx` (uses `<Navigate to="/" />`). Vercel's `vercel.json` rewrites all paths to `index.html` for SPA support.
+Unknown routes redirect to `/` via `Helpers/Redirect.jsx` (uses `<Navigate to="/" />`). Vercel's `vercel.json` rewrites all paths except `/api/*` to `index.html` for SPA support.
+
+## Analytics
+
+The site records visits in a Neon Postgres database, and `/admin` displays them.
+
+1. `src/Analytics/tracker.js` starts before React renders. It reads any `?ref=` tag, removes it from the URL, and sends batches of events with `sendBeacon`.
+2. `api/game-events.js` validates each batch (`api/_lib/payload.js`) and adds what only the server knows: IP address, Vercel's location headers, the parsed user agent, the traffic source (`api/_lib/classify.js`) and the network owner from ipwho.is (`api/_lib/ipLookup.js`).
+3. `src/Admin/` reads the data back through `api/admin/overview.js` and `api/admin/sessions.js`, which both require the login cookie.
+
+To track something new, call `track(type, name)` from `tracker.js` and add the type to `EVENT_TYPES` in `api/_lib/payload.js`. The server drops any type that isn't listed there. Add wording for it in `describeEvent` in `src/Admin/format.js`.
+
+**Login:** `api/admin/login.js` compares the password against `ADMIN_PASSWORD` on the server and sets a signed, HttpOnly cookie that lasts 7 days. Ten wrong attempts from one IP address block it for 15 minutes. If `ADMIN_PASSWORD` is missing, nobody can log in. Logging in also marks that browser so its visits aren't counted.
+
+**Schema:** `db/schema.sql`. Run it against the database by hand when it changes, as nothing applies it automatically.
 
 ## Assets
 

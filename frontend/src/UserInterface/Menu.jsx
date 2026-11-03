@@ -51,6 +51,22 @@ const DefaultButton = styled.button`
   }
 `;
 
+const PrivacyLink = styled.a`
+  font-family: "Pixelify Sans", serif;
+  font-size: 12px;
+  color: #666;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  padding: 2px 8px;
+  margin-right: 5px;
+  align-self: flex-end;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const HamburgerMenuButton = styled.button`
   background: none;
   border: none;
@@ -143,6 +159,9 @@ const Menu = () => {
             </a>
             <MuteButton />
           </MenuRow>
+          <PrivacyLink href="/privacy" target="_blank">
+            privacy
+          </PrivacyLink>
         </MenuContainer>
       )}
       {lessThan1100 && isMenuOpen && (
@@ -165,6 +184,9 @@ const Menu = () => {
             <DefaultButton>download cv</DefaultButton>
           </a>
           <MuteButton />
+          <PrivacyLink href="/privacy" target="_blank">
+            privacy
+          </PrivacyLink>
         </SmallMenuContainer>
       )}
     </>

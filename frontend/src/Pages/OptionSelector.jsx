@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
+import { track } from "../Analytics/tracker.js";
 
 // Data is an array of strings
-const OptionSelector = ({ setPageToShow, data }) => {
+const OptionSelector = ({ setPageToShow, data, section }) => {
   const [currentPage, setCurrentPage] = useState(0); // Current page index
   const [selectedIndex, setSelectedIndex] = useState(0); // Default: Top Left
 
@@ -95,6 +96,7 @@ const OptionSelector = ({ setPageToShow, data }) => {
   };
 
   const handleClickOption = (index) => {
+    track("open_item", `${section}: ${currentOptions[index]}`);
     setPageToShow(currentPage * 4 + (index + 1));
   };
 

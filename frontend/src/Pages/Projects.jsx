@@ -161,7 +161,11 @@ const Projects = () => {
               {optionCount === 1 && <Text>Hello world</Text>}
             </TextContainer>
             {optionsVisible && (
-              <OptionSelector setPageToShow={setPageToShow} data={projects} />
+              <OptionSelector
+                setPageToShow={setPageToShow}
+                data={projects}
+                section="Project"
+              />
             )}
           </SelectionContainer>
         </GameContainer>

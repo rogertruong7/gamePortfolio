@@ -128,7 +128,11 @@ const Experiences = ({ setCurrentScene }) => {
               )}
             </TextContainer>
             {optionsVisible && (
-              <OptionSelector setPageToShow={setPageToShow} data={experiences} />
+              <OptionSelector
+                setPageToShow={setPageToShow}
+                data={experiences}
+                section="Experience"
+              />
             )}
           </SelectionContainer>
         </GameContainer>

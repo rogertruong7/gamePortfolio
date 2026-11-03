@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MainGame from "./Game/MainGame.jsx";
 import LoadingScreen from "./UserInterface/LoadingScreen.jsx";
 import Menu from "./UserInterface/Menu.jsx";
@@ -15,6 +15,14 @@ import Experiences from "./Pages/Experiences.jsx";
 import HelpPopup from "./UserInterface/HelpPopup.jsx";
 import { AudioProvider, useAudio } from "./Audio/AudioContext.jsx";
 import { AudioManager } from "./Audio/AudioManager.jsx";
+import { track } from "./Analytics/tracker.js";
+
+const SCENE_NAMES = {
+  1: "About Me",
+  2: "Projects",
+  3: "Experiences",
+  4: "Skills",
+};
 
 const AutoAudioReady = ({ loading }) => {
   const { audioReady, setAudioReady } = useAudio();
@@ -53,6 +61,22 @@ const MainPage = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
+  const hasMovedRef = useRef(false);
+
+  useEffect(() => {
+    if (SCENE_NAMES[currentScene]) track("scene_enter", SCENE_NAMES[currentScene]);
+  }, [currentScene]);
+
+  useEffect(() => {
+    if (!loading) track("game_loaded");
+  }, [loading]);
+
+  useEffect(() => {
+    if (isMoving && !hasMovedRef.current) {
+      hasMovedRef.current = true;
+      track("first_move");
+    }
+  }, [isMoving]);
 
   useEffect(() => {
     if (currentScene === 0) {

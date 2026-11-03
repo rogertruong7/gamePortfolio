@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "presto",
+  "order": 19,
+  "title": "Presto",
+  "option": "(FRONTEND) Google Slides Frontend Site (React)",
+  "tagline": "A slide deck editor in the browser: make an account, build presentations from text, images, video and code, then present them.",
+  "category": "Frontend",
+  "period": "2024",
+  "role": "University team project",
+  "stack": ["React", "React Router", "Material UI", "styled-components", "Axios", "highlight.js", "Vitest"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/Slides-Frontend" }]
+}

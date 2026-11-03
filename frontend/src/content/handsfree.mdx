@@ -1,0 +1,56 @@
+## What it does
+
+hands-free is wake-word dictation for macOS. The good open-source dictation apps, such as VoiceInk, Handy and OpenWhispr, are all hotkey-driven, and the wake-word projects that do exist mostly launch an assistant. I wanted to say a phrase and start talking to whatever app I was in, with no account and no network at runtime.
+
+| You say | What happens |
+| --- | --- |
+| "hey computer" | A tick plays, a listening pill appears and it starts listening |
+| Anything | Typed into the focused app, phrase by phrase, as you pause |
+| 10 seconds of silence | Return is pressed and it goes back to waiting |
+| "finish" or "send" | The same, immediately |
+| "stop" or "cancel" | Stops listening without pressing Return |
+
+## How it works
+
+Three models from sherpa-onnx run on one microphone stream:
+
+1. An 18 MB keyword spotter runs all the time, listening only for the wake phrase.
+2. Once it fires, a voice activity detector splits your speech on 0.8 seconds of silence.
+3. Parakeet TDT 0.6B transcribes each phrase, and the text is typed as keystrokes straight away.
+
+The stream has two consumers but never feeds both at once. While waiting, audio reaches only the spotter, and during a session it reaches only the segmenter. That keeps idle cost low and keeps the wake phrase out of your text.
+
+The spotter is open-vocabulary, so a wake phrase is a line of config compiled into tokens, with no model training.
+
+## The interesting problems
+
+### Commands that don't eat your sentences
+
+"Finish", "stop" and "cancel" are ordinary words. Matching them mid-dictation would swallow the end of "tell them to stop", and you could never dictate those words at all. So a command only counts as a whole utterance, with a beat of silence either side.
+
+The wake phrase needed its own handling. The spotter fires on the phrase's last syllable while that frame is still ahead of the segmenter, so "computer" can lead the first transcript, depending on how fast you said it. Dropping audio isn't enough, so `strip_wake_phrase` removes the whole phrase or its tail from the front of the text.
+
+### Timing on an audio clock
+
+Every timeout is measured in seconds of samples consumed, not wall-clock time. This has two benefits. Tests can replay a full recorded session through the daemon instantly, and time spent transcribing can never be mistaken for silence.
+
+### A window that can't own the main thread
+
+AppKit needs the window to own the main thread and run an event loop, but the daemon's main thread is blocked reading audio. So the listening pill lives in a child process fed one line at a time, which also means a fault in the drawing code can't take dictation down.
+
+Spawning that process per session put about 630 ms between the wake phrase and the pill. Starting it once at boot and sending `show` and `hide` brought that to about 30 ms.
+
+### Typing into any app
+
+Synthesised keystrokes leave your clipboard alone, but some Electron and Java apps ignore synthetic Unicode events. Pasting works almost everywhere but borrows the clipboard for a moment, so both exist behind a config option.
+
+### Tuning on real speech
+
+`tune` records you saying the phrase, then records you deliberately not saying it. It scores every candidate setting on both and recommends the most conservative one that catches everything without firing on ordinary speech. Tuning on sensitivity alone gets you a wake word that fires at the television.
+
+## Honest limits
+
+- It's Apple silicon macOS only, and English only with these models.
+- It uses about 700 MB of memory. The recogniser loads at startup on purpose, because lazy loading would add about 1.8 seconds right when you've started talking.
+- The microphone is open whenever the daemon runs, so the orange dot stays lit. Wake-word spotting needs continuous audio.
+- Wake detection can't be tested with synthesised speech, because the model doesn't detect keywords in macOS `say` output. The tests use the recorded human speech that ships with the models instead.

@@ -1,0 +1,27 @@
+{
+  "kind": "project",
+  "slug": "bigshop",
+  "order": 2,
+  "title": "Big Shop",
+  "option": "(FULLSTACK) Big Shop: Dinners to a priced shopping list (Next.js + tRPC)",
+  "tagline": "Plan your dinners for a span of days and get one priced shopping list that anyone with the link can tick off.",
+  "category": "Full stack",
+  "period": "Nov 2026",
+  "role": "Solo project",
+  "stack": [
+    "Next.js",
+    "TypeScript",
+    "tRPC",
+    "Drizzle",
+    "Postgres",
+    "Claude API",
+    "Tailwind CSS"
+  ],
+  "links": [
+    {
+      "label": "Try it live",
+      "href": "https://bigshop-zeta.vercel.app"
+    }
+  ],
+  "video": true
+}

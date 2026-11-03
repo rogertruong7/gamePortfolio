@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "rsheet",
+  "order": 17,
+  "title": "RSheet",
+  "option": "(BACKEND) Simple Math Spreadsheet w/ Thread Concurrency (Rust)",
+  "tagline": "A spreadsheet server several clients can connect to at once, where changing a cell recalculates everything that depends on it.",
+  "category": "Backend",
+  "period": "2025",
+  "role": "Solo project",
+  "stack": ["Rust", "std::thread", "mpsc channels", "chrono", "rsheet_lib"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/Multithread-Math-Spreadsheet" }]
+}

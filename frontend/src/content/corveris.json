@@ -1,0 +1,13 @@
+{
+  "kind": "experience",
+  "slug": "corveris",
+  "order": 3,
+  "title": "Corveris",
+  "option": "Corveris - Full Stack Engineer",
+  "tagline": "AI that takes police reports directly from the public, then prepares them for officers under each department's rules.",
+  "category": "Full stack",
+  "period": "Jan to Aug 2026",
+  "role": "Software Engineer (FDE @ Lyra)",
+  "stack": ["Python", "FastAPI", "React", "Next.js", "PostgreSQL", "TanStack Query", "TanStack Virtual", "Twilio", "Terraform"],
+  "links": [{ "label": "Visit Corveris", "href": "https://www.corveris.com/" }]
+}

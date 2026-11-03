@@ -1,73 +1,47 @@
-A social mobile app for sharing and discovering date plans and activity itineraries. Users create structured Plans with ordered steps linked to real places, execute them in real-time, and publish posts about their experiences for others to discover and follow.
+## What it is
 
----
+Whereto is a mobile app for planning dates and days out. You build a plan as an ordered list of stops, each tied to a place with notes and an estimated time. Once you've been, you can publish a post about it with photos and a caption, and other people can browse it, save it and comment on it.
 
-## Overview
+It's a solo project and still in progress. The code is private for now, so this page is the best description of how it's built.
 
-Whereto is a full-stack mobile application that combines itinerary planning with social sharing. Think of it as a social network for curated date ideas and activity plans. Users build step-by-step Plans (each step tied to a real location with notes and estimated duration), track their progress through a plan in real-time, then publish a Post about the experience — complete with images and captions — for their followers to see and save.
+## How it works
 
----
+The app has tabs for the feed, explore, creating a plan, your plans, your profile and settings. A typical run through it looks like this:
 
-## Features
+1. **Create a plan.** Give it a title, description, city and tags, then add stops. Stops have a position, so the order is explicit.
+2. **Start the plan.** The backend creates an execution with a status of active, completed or abandoned, and records each stop as you finish it.
+3. **Publish a post.** A post is built from the plan and adds a caption and images. The same plan can have several posts.
+4. **Browse.** The feed has a "for you" scope and a "following" scope, which only shows posts from people you follow.
 
-- **Plan Creation**: build structured itineraries with ordered steps, each linked to a place with notes and estimated duration
-- **Plan Execution**: start a plan and track progress through each step in real-time, marking steps as complete as you go
-- **Social Feed**: browse posts from people you follow on a personalised home feed
-- **Explore Page**: discover new plans and posts from the broader community
-- **Post Publishing**: turn completed plans into shareable posts with images and captions
-- **Comments**: engage with posts through a comment system
-- **Post Saving**: bookmark posts to revisit later
-- **Follow System**: follow and unfollow other users to curate your feed
-- **User Profiles**: view profiles with post history and follower/following counts
-- **Tag System**: categorise plans and posts with tags for easier discovery
-- **Authentication**: secure JWT-based auth powered by Amazon Cognito
+## Separating plans from posts
 
----
+The biggest design change so far was untangling two ideas. At first a single `Plan` entity held both the itinerary and the social content, so routes like `/plans/:id/comments` were really operating on posts. I wrote a design doc, then split it into two models and moved primary keys to UUIDs:
 
-## Architecture
+| | Plan | Post |
+| --- | --- | --- |
+| What it holds | Title, description, city, ordered steps, tags | Caption, cover image, images that can be pinned to a step |
+| Purpose | The itinerary, which can stay a draft | The published piece the feed shows |
+| Social features | None | Saves and comments |
 
-The project follows a clean layered architecture on both the backend and mobile sides:
+## The Go backend
 
-### Backend (Go)
-- **Handlers**: HTTP request/response handling with input validation
-- **Services**: business logic layer orchestrating operations
-- **Repositories**: data access layer with GORM ORM queries
-- **Models**: User, Plan, PlanStep, Post, Comment, Follow, Tag, PostSave, PlanExecution
+The API is written with Fiber and GORM over PostgreSQL, and requests only travel one way: handler, then service, then repository. Handlers deal with HTTP, services hold the rules and repositories hold the queries. DTOs are kept separate from the GORM models, and services return typed errors that handlers turn into status codes.
 
-### Mobile (React Native)
-- **Expo Router**: file-based routing with tab navigation (Home, Explore, Create, Plans, Profile, Settings)
-- **TanStack Query**: server state management with caching and background refetching
-- **API Layer**: typed API client with auth token injection
+A few of the rules that live in the service and database layers:
 
----
+- A plan with no steps can't be started.
+- A step can only be completed once per execution, enforced by a unique index. When the completions reach the plan's step count, the execution moves to completed.
+- Only the user who started an execution can complete steps on it or abandon it.
+- Save counts are updated with a SQL expression rather than read and written back, and a decrement can't take a count below zero.
 
-## Functionality
+Auth is my own: bcrypt password hashes with JWT access and refresh tokens. Routes use either required or optional auth middleware, so anyone can read a post while saving one needs an account. Editing or deleting a user goes through an owner-or-admin check.
 
-### Plans
-- Create plans with a title, description, and ordered list of steps
-- Each step includes a place name, notes, and estimated duration
-- Browse and manage your saved plans
-- Execute a plan step-by-step in real-time
+## The mobile app
 
-### Posts
-- Publish a post from a completed plan with images and captions
-- View posts on your home feed or the explore page
-- Comment on posts
-- Save/bookmark posts for later
+The app uses Expo Router for file-based navigation and TanStack Query for server state. An Axios interceptor attaches the access token to each request, and tokens persist in AsyncStorage across launches.
 
-### Social
-- Follow and unfollow users
-- View user profiles with their posts and stats
-- Personalised feed based on who you follow
+## What isn't finished
 
----
-
-## Tech Stack
-
-- **Mobile**: React Native (Expo), TypeScript, TanStack Query, Expo Router
-- **Backend**: Go (Fiber framework), GORM ORM
-- **Database**: PostgreSQL, Redis (caching)
-- **Auth**: Amazon Cognito (JWT-based)
-- **Storage**: Amazon S3 (images)
-- **Infrastructure**: Docker, Docker Compose
-
+- The step-by-step execute screen still runs on placeholder stops. The backend execution API is there, and the plan screen already calls it.
+- Cover images are pasted in as URLs. There's no upload yet.
+- The config has settings for Cognito, S3 and Redis from the original scaffold, but nothing uses them.

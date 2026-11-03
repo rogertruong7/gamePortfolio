@@ -11,7 +11,7 @@ This is a React portfolio website disguised as a 3D isometric game. A player cha
 - **styled-components** for CSS-in-JS
 - **react-router-dom v7** for client-side routing
 - **typewriter-effect** for RPG-style dialog text
-- **react-markdown** + **remark-gfm** for rendering project descriptions
+- **MDX** + **remark-gfm** for project and experience pages
 
 ## Application Layers
 
@@ -111,36 +111,33 @@ All content pages share an RPG dialog box aesthetic: pixel art image on top, whi
 
 ### Dialog System
 
-AboutMe, Experiences, and Skills pages use `typewriter-effect` to type out text character-by-character. The dialog scripts are defined in `ShowcaseStatic.jsx`.
+AboutMe, Experiences, and Skills pages use `typewriter-effect` to type out text character-by-character. The dialog scripts are defined in `ShowcaseStatic.json`.
 
 - **Click/tap** on the text area instantly finishes the current typing animation
 - **Click/Space/Enter** after typing completes advances to the next line
 - An animated arrow-down gif indicates when text is ready to advance
 - Font size is dynamically adjusted based on window width via resize listeners
 
-### Projects Page (`Projects.jsx`)
+### Projects and Experiences menus
 
-After the typewriter intro, displays an `OptionSelector` — a paginated 2x2 grid (single column on mobile) of project options. Projects are organized in pages of 4, navigable with arrow keys or click. The project list is defined in `ShowcaseStatic.jsx` as nested arrays (one sub-array per page).
+After the typewriter intro, `Projects.jsx` and `Experiences.jsx` display an `OptionSelector`: a paginated 2x2 grid (single column on mobile) navigable with arrow keys or click. Selecting an option renders its `DocumentPage`. On narrow screens (< 1700px) the selector hides and only the document is shown.
 
-Selecting a project renders the corresponding component from the `pages` object. On narrow screens (< 1700px), the selector hides and only the project detail is shown with a back button.
+### Content catalog (`catalog.js`)
 
-**Adding a new project requires changes in 4 places:**
-1. Create `Pages/ProjectPages/NewProject.jsx`
-2. Add to `pages` object in `Projects.jsx` and import it
-3. Add to `projects` array in `ShowcaseStatic.jsx`
-4. Add a route in `App.jsx`
+Each project or experience is two files in `src/content/`:
 
-### Project Page Pattern (`Pages/ProjectPages/`)
+- `<slug>.json`: `kind`, `order`, `title`, menu `option`, `tagline`, `category`, `period`, `role`, `stack`, `links`, and `video: true` when a film exists
+- `<slug>.mdx`: the page body, starting at an `##` heading
 
-Each project page follows the same pattern:
-- Fetches markdown from `public/pageMarkdown/<slug>.md` in `useEffect`
-- Renders via `MarkdownSection.jsx` (maps markdown elements to styled-components)
-- Includes a "View Repo" link and "Open in new tab" button
-- Uses shared styled-components from `PageComponents.jsx`
+Adding those two files adds the menu option, the page and the route (`/projects/<slug>` or `/experiences/<slug>`). Nothing else needs changing.
 
-### MarkdownSection (`MarkdownSection.jsx`)
+### Document page (`DocumentPage.jsx`, `MdxComponents.jsx`)
 
-Wraps `react-markdown` with `remark-gfm` and custom component mappings that replace standard HTML elements with styled-components (Title, Subtitle, Paragraph, List, StyledTable, etc.). Shows a spinner while markdown is loading.
+One template renders every entry: a sky-coloured header with the title, links and demo film in front of the town's rooftops, then the facts column and the MDX body. It uses container queries because it sits beside the menu on wide screens and alone on narrow ones. Colours come from the 3D town; headings use Pixelify Sans and body text uses Zen Kaku Gothic New.
+
+### Demo films
+
+Films live in `public/videos/<slug>.{mp4,jpg}` and are produced by the pipeline in `/videos` (see `videos/README.md`).
 
 ### Page Transitions
 
@@ -166,7 +163,7 @@ HTML elements positioned absolutely over the 3D canvas.
 Four types of routes:
 
 1. **`/`** — MainPage with the game + all content pages managed by scene state
-2. **`/projects/<slug>`** — Direct-access project pages. These render the project component standalone (no game), making project pages shareable as URLs.
+2. **`/projects/<slug>`** and **`/experiences/<slug>`** — Direct-access document pages generated from the catalog. These render standalone (no game), making them shareable as URLs.
 3. **`/admin`** — The password-protected analytics page. It is not linked from anywhere and is lazy-loaded, so its code doesn't ship to normal visitors.
 4. **`/privacy`** — Explains what the site records.
 
@@ -191,7 +188,7 @@ To track something new, call `track(type, name)` from `tracker.js` and add the t
 ```
 public/
   models/          — GLB 3D models (buildings, character, floor, cherry trees)
-  pageMarkdown/    — Markdown content files for each project
+  videos/          — Click-through demo films and posters
   fonts/           — PixelifySans JSON font for three.js Text geometry
 
 src/assets/
@@ -204,6 +201,6 @@ src/assets/
 ## Key Conventions
 
 - **Styling**: styled-components for all component-level CSS. Global styles in `App.css` and `index.css` (minimal — just body/root reset and font-family).
-- **Fonts**: Pixelify Sans (game UI, headings) loaded via Google Fonts with preload. Open Sans (markdown body text). Roboto imported via @fontsource for some page sections.
+- **Fonts**: Pixelify Sans (game UI, headings) loaded via Google Fonts with preload. Zen Kaku Gothic New (document body text) via @fontsource.
 - **State management**: React useState/useEffect only, no external state library. All game state flows through MainPage props.
 - **Responsive breakpoints**: 1700px (project detail sidebar), 1108px (page containers), 1100px (hamburger menu), 950px/800px/650px/600px/500px/400px (font size and layout adjustments).

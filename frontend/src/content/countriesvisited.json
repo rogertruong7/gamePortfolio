@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "countriesvisited",
+  "order": 14,
+  "title": "Countries Visited API",
+  "option": "(BACKEND) Countries Visited Python API w/ SQLite database",
+  "tagline": "Log the countries you've been to and the years you went, then filter them or get your travel history back as charts.",
+  "category": "Backend",
+  "period": "2025",
+  "role": "University assignment",
+  "stack": ["Python", "Flask", "Flask-RESTX", "SQLite", "GraphQL", "Matplotlib"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/countries_visited_api" }]
+}

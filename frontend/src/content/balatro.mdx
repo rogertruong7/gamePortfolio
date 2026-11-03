@@ -1,66 +1,41 @@
-A Rust-based command-line tool for calculating poker-hand scores in the Balatro Clone game. It parses a YAML description of a single round, applies poker and joker rules, and outputs the final score, with optional explanatory output.
+## What it does
 
----
+Balatro is a poker-themed game where your score depends on chips, multipliers and a set of jokers that bend the rules. This project is the scoring engine, not the full game. It takes one round, written as YAML, and prints the final score:
 
-## Overview
+```yaml
+cards_played: [K♥, Q♠, J♦, 10♣, 9♥]
+cards_held_in_hand: [K♠, Q♣]
+jokers: [Sock And Buskin, Scary Face, Smiley Face, Mime, Baron]
+```
 
-Balatro Clone is a poker-themed scoring engine that evaluates a single round of play. Players combine standard playing cards and special Jokers to maximise their score. This tool focuses solely on computing the score of one hand based on card plays, held cards, and Joker effects.
+Run it with a file path, or `-` to read from stdin. Adding `--explain` prints each step of the calculation.
 
----
+I later added a small web calculator. You pick cards, modifiers and jokers on a page, and a Node server spawns the Rust binary and passes it the round as YAML through stdin.
 
-## Features
+## How a round is scored
 
-- **YAML Input**: Accepts a YAML file describing:
-  - `cards_played`: list of played cards (1–5)
-  - `cards_held_in_hand`: list of held cards (0–5)
-  - `jokers`: list of Joker cards (0–5)
-- **Standard Poker Hands**: Calculates base chips and multiplier for hands such as:
-  - High Card, Pair, Two Pair, Three of a Kind
-  - Straight, Flush, Full House, Four of a Kind, Straight Flush
-- **Extended Hands**: Supports "illegal" hands unique to Balatro:
-  - Five of a Kind, Flush House, Flush Five
-- **Joker Effects**: Applies special rules for Jokers (e.g., Raised Fist, Zany Joker) that modify chips or multiplier in sequence order
-- **Explain Mode**: Optional `--explain` flag outputs step-by-step breakdown of scoring components
+The order matters, because the multiplier is applied to whatever has built up so far:
 
----
+1. **Find the best poker hand.** This sets the base chips and multiplier, and which cards score. As well as the standard hands, it covers Five of a Kind, Flush House and Flush Five.
+2. **Set up jokers that change the rules.** Splash makes every played card score, Pareidolia makes every card a face card, and Blueprint resolves which joker it copies.
+3. **Score each scoring card.** Add its rank, enhancement and edition, then apply jokers that react to played cards.
+4. **Score held cards.** Steel cards and jokers like Baron and Raised Fist act on what's left in your hand.
+5. **Apply independent jokers.** The remaining jokers and their editions go in order, left to right.
 
-## Usage
+## Modelling 34 jokers
 
-### Basic score calculation
-cargo run example_round.yml
+The engine handles 34 jokers. I split them with a Rust trait, `JokerCardCalculator`, based on when an effect fires:
 
-### With explanation
-cargo run example_round.yml --explain
+| Method | When it runs | Example |
+| --- | --- | --- |
+| `calculate_independent_cards` | After all cards | Zany Joker |
+| `calculate_on_played_cards` | For each scored card | Smiley Face |
+| `calculate_on_held_cards` | For each held card | Baron |
 
+The awkward ones don't fit that pattern, because they change the rules for everything else:
 
-## Input Format
-cards_played:
-  - 10♥
-  - 10♠
-  - 10♦
-  - A♣
-  - J♥
+- **Hand detection.** Four Fingers, Shortcut and Smeared Joker change what counts as a straight or flush, so `evaluate_hand` checks for them before it decides on a hand.
+- **Retriggers.** Sock And Buskin replays face cards and Mime replays held cards, so a card's scoring has to be runnable more than once.
+- **Blueprint.** It copies the joker to its right, and can be chained. Walking the jokers from right to left means each Blueprint copies something that's already resolved.
 
-cards_held_in_hand:
-  - 2♥
-  - 5♦
-  - 9♦
-
-jokers:
-  - Joker
-  - Mad Joker
-  - Zany Joker
-  - Raised Fist
-
-
-Cards may repeat and include optional editions or enhancements.
-
-Jokers activate in defined order, with special ranking rules.
-
-## Getting Started
-
-1. **Install dependencies**:
-   ```bash
-   git clone https://github.com/rogertruong7/balatro_clone.git
-   cargo run example_round.yml
-   pip install -r requirements.txt
+Card enhancements (Bonus, Mult, Wild, Glass, Steel) are handled as well. Editions (Foil, Holographic, Polychrome) have their own functions in `modifiers.rs`, because both cards and jokers can have them.

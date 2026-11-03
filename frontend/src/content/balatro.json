@@ -1,0 +1,25 @@
+{
+  "kind": "project",
+  "slug": "balatro",
+  "order": 16,
+  "title": "Balatro Clone",
+  "option": "(BACKEND) Balatro Clone (Rust)",
+  "tagline": "Give it a hand of cards and a set of jokers, and it works out the Balatro score, step by step if you ask.",
+  "category": "Backend",
+  "period": "2025 to 2026",
+  "role": "Solo project",
+  "stack": [
+    "Rust",
+    "clap",
+    "serde_yaml",
+    "Node.js",
+    "JavaScript"
+  ],
+  "links": [
+    {
+      "label": "View code",
+      "href": "https://github.com/rogertruong7/balatro_clone"
+    }
+  ],
+  "video": true
+}

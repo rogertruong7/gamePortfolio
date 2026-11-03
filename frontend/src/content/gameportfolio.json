@@ -1,0 +1,16 @@
+{
+  "kind": "project",
+  "slug": "gameportfolio",
+  "order": 21,
+  "title": "This Portfolio",
+  "option": "(FRONTEND) This Portfolio!",
+  "tagline": "Walk a character around a small 3D town and go through its doors to read about my work.",
+  "category": "Frontend",
+  "period": "2025 to now",
+  "role": "Solo project",
+  "stack": ["React", "Three.js", "react-three-fiber", "drei", "Vite", "styled-components", "MDX"],
+  "links": [
+    { "label": "Try it live", "href": "https://roger-was-here.com" },
+    { "label": "View code", "href": "https://github.com/rogertruong7/gamePortfolio" }
+  ]
+}

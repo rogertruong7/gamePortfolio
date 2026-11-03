@@ -1,46 +1,45 @@
-An AI-powered crime reporting platform used by 8+ law enforcement departments including Sacramento PD, Laredo PD, Citrus Heights, and Campbell. Built with Python, FastAPI, React, Next.js, and Terraform on AWS.
+## About Corveris
 
----
+Corveris, based in San Francisco, builds an AI crime reporting platform. Residents call or message it directly, and it asks follow-up questions, collects evidence and prepares a report for the police department to review.
 
-## Overview
+I worked there for eight months as a forward-deployed engineer through Lyra, and as the primary full-stack engineer during my first few months. I worked across the FastAPI backend, the React officer dashboard, the Next.js citizen app and the Terraform infrastructure, as the platform was deployed to 8+ law enforcement departments.
 
-Corveris is an AI crime reporting platform that enables citizens to file police reports through a conversational interface. Reports are processed by an LLM-powered pipeline that classifies incidents, resolves jurisdiction-specific penal codes, and routes them to officers for review. The platform supports multiple law enforcement departments across California and Texas.
+## One-click checks on AI summaries
 
----
+An officer shouldn't have to take an AI summary on trust. I made each summary verifiable in one click by linking its statements back to the conversation they came from:
 
-## Impact
+- **Typed citation schemas** give summaries a structured way to point at their sources.
+- **Transcript turn IDs** map a citation to the exact turn in the conversation.
+- **Unicode-aware text-span matching** finds the precise words to highlight, including in transcripts that aren't in English.
+- **Memoised reverse indexes** make navigation work in both directions: from summary to transcript, and from transcript back to summary.
 
-- **200+ pull requests** shipped across 4 repositories (backend, dashboard, reporter app, infrastructure) in 5 months
-- Serving **8+ law enforcement departments** across multiple states
-- Improved report accuracy by **25%** and reduced officer review time by **30 minutes per incident**
-- Reduced anonymous report fraud by **70%**
-- Enabled **real-time emergency intervention** for high-risk reports (averaging 3 escalations/week)
-- Expanded accessibility to **20 locales** for non-English-speaking communities
+This works across both the English and original-language transcripts in the dashboard.
 
----
+## Penal codes by jurisdiction
 
-## Key Contributions
+The same incident maps to different law depending on where it happened. A vehicle break-in needs both a national NIBRS classification and the right section of the state's penal code. I built jurisdiction-specific penal code resolution for California and Texas:
 
-### Jurisdiction-Specific Penal Code Resolution
-Built classification systems for California Penal Code and Texas Penal Code via YAML-based config systems, NIBRS-compliant classification overrides, and LLM-powered sub-classifiers for theft, fraud, vandalism, assault, and hit-and-run incidents.
+1. YAML configuration holds each jurisdiction's rules.
+2. NIBRS-compliant overrides correct the classification where needed.
+3. LLM-powered sub-classifiers handle the harder distinctions within theft, fraud, vandalism, assault and hit-and-run incidents.
 
-### Dashboard Performance
-Increased dashboard load performance by 45% for tables with 100+ active reports by migrating crime heatmaps from Google Street View API to deck.gl, implementing TanStack Virtual for virtualised table rendering, and adding URL-synced query-based filtering.
+This improved report accuracy by 25% and cut officer review time by 30 minutes per incident.
 
-### Anti-Fraud SMS Verification
-Implemented a claim-via-SMS workflow using Twilio OTP verification, rate-limited claim tokens (72-hour expiry, single-use), and constant-time comparison for urlsafe base64 identity binding.
+## Dashboard performance
 
-### Real-Time Crisis Detection
-Created a background async agent that monitors citizen messages in parallel with the main DAG pipeline, detecting crisis keywords and triggering instant 911 referrals with officer notifications.
+Tables with 400+ active reports were slow to load. I improved load performance by 45% with changes on both sides:
 
-### Full i18n Support
-Implemented full internationalisation across the Next.js reporter app using next-intl, translating all hardcoded UI strings, and integrating auto-translation of non-English submissions via Claude before LLM processing.
+- **Queries.** Paginated report queries no longer depend on full-table metadata scans.
+- **Database.** I added PostgreSQL indexes and server-side aggregation caching.
+- **Client data.** TanStack Query caches results and keeps page data while the next page loads.
+- **Rendering.** TanStack Virtual only renders the table rows on screen.
 
----
+## Claiming a report by SMS
 
-## Tech Stack
+Anonymous reporting keeps the process easy for citizens, but it also opens the door to fraud. I built a claim-via-SMS workflow that keeps reporting easy while tying a report to a verified phone:
 
-- **Backend**: Python, FastAPI
-- **Frontend**: React (Vite), Next.js
-- **Infrastructure**: Terraform, AWS
-- **Integrations**: Twilio, deck.gl, Claude API, next-intl
+- Twilio OTP verification
+- Rate-limited, single-use claim tokens that expire after 72 hours
+- Constant-time comparison for URL-safe Base64 identity binding
+
+This reduced anonymous report fraud by 70%.

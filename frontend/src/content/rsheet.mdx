@@ -1,61 +1,34 @@
-A Rust-based, multi-threaded spreadsheet engine exposing a simple TCP or terminal interface. It parses cell commands (`get`, `set`), evaluates expressions with dependencies, and broadcasts updates to recalculate dependent cells concurrently.
+## What it does
 
----
+RSheet is a spreadsheet with no interface, only a text protocol. Clients send two kinds of command:
 
-## Overview
+```text
+set A1 5
+set B1 A1 * 2
+get B1
+```
 
-This project implements a concurrent spreadsheet server in Rust, comprising two binaries:
+Pass an address and it listens for TCP connections from many clients. Leave it out and it reads commands from the terminal. Expressions can refer to single cells or to ranges like `A1_A3` and `A1_B2`, which become vectors and matrices. Parsing and evaluation come from the `rsheet_lib` crate, and the concurrency and dependency tracking on top are what I wrote.
 
-- **CLI Mode**: run in the terminal, reading commands and displaying cell values interactively.
-- **Server Mode**: listen on a TCP address, accept multiple client connections, and process commands in parallel.
+## How the threads fit together
 
-At its core is a `Sheet` model that stores cell data (value, expression, dependencies, timestamp) behind an `Arc<Mutex<...>>`, allowing safe shared access and mutation across threads.
+1. The main thread accepts connections and spawns one thread for each.
+2. All of those threads share the sheet, a `HashMap` of cells behind `Arc<Mutex<...>>`.
+3. After a `set`, a connection thread sends the cell's name down an `mpsc` channel.
+4. A single background thread reads that channel and recalculates dependants, so a client isn't held up waiting for that work.
 
----
+## Three problems worth solving
 
-## Functionality
+### Not holding the lock while evaluating
 
-### Command Parsing
+Evaluating an expression can be slow, and holding the sheet's mutex for it would freeze every other client. So `set` takes the lock briefly to read its inputs, releases it, evaluates, then takes it again to write the result.
 
-- Commands follow `rsheet_lib::Command` syntax:
-  - `get <Cell>` retrieves a cell’s current value.
-  - `set <Cell> <Expression>` assigns and evaluates a formula.
+### Out-of-order writes
 
-### Cell Evaluation
+Releasing the lock creates a race. If two clients set the same cell, the older command might finish last and overwrite the newer one. Each command is timestamped on its connection thread, and before writing, `set` checks whether the stored cell has a later timestamp. If it does, the older result is dropped.
 
-- `Sheet::set` parses expressions via `CellExpr`, identifies variable names, and builds an argument map by reading other cells (`get_cell_value_or_error`).
-- Supports ranges (`A1_B2`), row/column vectors, and matrices to pass arrays into functions.
-- Errors propagate: a cell depending on an error cell yields a `DependsOnErrorCell` error.
+### Recalculating dependants
 
-### Dependency Management & Concurrency
+Each cell stores its expression and the cells it reads. `process_dependencies` finds every cell that depends on the one that changed, rebuilds its inputs, evaluates it again and then recurses, so a change flows down the whole chain.
 
-- After setting a cell, its name is sent over an `mpsc::channel` to a background thread that re-evaluates all dependent cells via `Sheet::process_dependencies`.
-- Each client connection runs in its own thread, sharing the same `Arc<Sheet>` and `Sender<String>` for dependency notifications.
-- Uses `std::thread::spawn` and channel communication for scalable, non-blocking updates.
-
-### Server Loop
-
-- In `lib.rs`, `start_server` accepts new connections via a generic `Manager` trait (TCP or terminal).
-- For each `NewConnection`, spawns a handler thread executing `access_sheet`, reading commands, writing replies, and dispatching dependency messages.
-- Graceful shutdown when clients disconnect or on I/O errors.
-
----
-
-## Features
-
-- **Concurrency**: multi-threaded connection handling and background dependency processing.
-- **Thread-Safe State**: `Arc<Mutex<HashMap<...>>>` for shared cell storage.  
-- **Reactive Updates**: automatic recalculation of dependent cells triggered by channels.  
-- **Flexible Interface**: switch between terminal and TCP server modes via the `Manager` abstraction.  
-- **Expression Support**: arithmetic, built-in functions, cell ranges, vectors, and matrices.  
-- **Error Propagation**: concise errors for circular dependencies or invalid references.  
-
----
-
-## Tech Stack
-
-- **Language**: Rust 1.70+  
-- **Synchronisation**: `std::sync::{Arc, Mutex, mpsc}`  
-- **Date/Time**: `chrono::Utc` for timestamps  
-- **Logging**: `env_logger` and `log` for lifecycle events  
-
+Errors follow the same path. If a cell can't be evaluated, it stores a `DependsOnErrorCell` error and anything that reads it shows the error too, until the source is fixed.

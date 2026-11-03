@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "tributaryapi",
+  "order": 13,
+  "title": "Tributary API",
+  "option": "(BACKEND) Event-Driven Architecture Java API",
+  "tagline": "A small in-memory event system in Java, where producers publish to partitioned topics and consumer groups read from them through a command line.",
+  "category": "Backend",
+  "period": "2024",
+  "role": "University assignment",
+  "stack": ["Java", "Gradle", "JUnit", "org.json"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/tributary_api" }]
+}

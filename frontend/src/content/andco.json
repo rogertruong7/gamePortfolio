@@ -1,0 +1,13 @@
+{
+  "kind": "experience",
+  "slug": "andco",
+  "order": 2,
+  "title": "AndCo",
+  "option": "AndCo - Software Engineer (FDE @ Lyra)",
+  "tagline": "AI agents that retrieve police reports, open insurance claims, and collect medical records and bills for personal injury law firms.",
+  "category": "Full stack",
+  "period": "Sep 2026 to now",
+  "role": "Software Engineer (FDE @ Lyra)",
+  "stack": ["Python", "FastAPI", "React", "PostgreSQL", "Redis", "GCP Cloud Run", "GitHub Actions"],
+  "links": [{ "label": "Visit AndCo", "href": "https://www.useandco.com" }]
+}

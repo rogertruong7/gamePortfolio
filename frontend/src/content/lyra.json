@@ -1,0 +1,29 @@
+{
+  "kind": "experience",
+  "slug": "lyra",
+  "order": 1,
+  "title": "Lyra",
+  "option": "Lyra - Forward Deployed Engineer",
+  "tagline": "A Sydney and Melbourne product studio that partners with Silicon Valley startups, where I work as a forward-deployed engineer inside client teams.",
+  "category": "Full stack",
+  "period": "Oct 2025 to now",
+  "role": "Software Engineer (FDE @ Lyra)",
+  "stack": [
+    "Python",
+    "FastAPI",
+    "Django",
+    "React",
+    "Next.js",
+    "Vue.js",
+    "PostgreSQL",
+    "AWS",
+    "GCP",
+    "Terraform"
+  ],
+  "links": [
+    {
+      "label": "Visit Lyra",
+      "href": "https://lyratechnologies.com.au/"
+    }
+  ]
+}

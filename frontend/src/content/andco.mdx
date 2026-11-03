@@ -1,0 +1,57 @@
+## About AndCo
+
+AndCo (YC P26), based in San Francisco, is an AI personal injury legal platform. Much of a personal injury case is chasing paper: reports, records, bills and insurers. AndCo's agents do that work so firms can spend their time on the case itself.
+
+I joined in September 2026 as a forward-deployed engineer through Lyra, working across the backend, the browser agents and the deployment pipeline.
+
+## Getting browser agents past MFA
+
+Browser agents regularly need to sign in to government and records portals, and many of those portals ask for a second factor. An agent that stops at a code prompt has done nothing useful.
+
+I built a FastAPI MFA service that coordinates browser agents with Android devices, Redis-backed email code delivery and secure credential management. It handles four verification methods:
+
+- Email codes
+- SMS codes
+- TOTP
+- Authenticator-app approvals
+
+From the agent's side this is one request: it reaches the gate, asks for what it needs and waits for the answer. When an automatic route can't complete, a person can step in instead.
+
+## Stopping agents from acting too early
+
+AndCo runs AI request agents for medical records, police reports, insurance claims and insurance coverage. Each one follows up on requests that are waiting on someone else, which creates a timing problem. A document may already have arrived and be waiting for review, and a follow-up sent at that moment is premature.
+
+I prevented premature follow-ups across all four agents with three pieces of work:
+
+1. **Event-driven coordination**, so agents respond to what has happened on a case instead of working from a stale view.
+2. **Pending-document review gates**, so an agent holds its follow-up while a document is still waiting to be reviewed.
+3. **A shared, validated tool-call contract**, so all four agents propose actions in the same checked shape.
+
+Later work built on this. The agents working on the same insurance policy can now see each other's activity, so they don't ask the same address the same question.
+
+## An Australian staging environment
+
+I established an Australian staging environment spanning three web applications, an API and a background worker. It's deployed through GitHub Actions workflows to GCP Cloud Run, with isolated Neon databases. Migrations get a rehearsal before they run for real, and automated readiness checks confirm a deployment is healthy.
+
+Much of my work since has been on the Australian instance, where the portals and the paperwork are different.
+
+## Browser agents for records portals
+
+I've written browser agents for government and records portals, covering sign-in, lodging a request and collecting what comes back. Most of the effort goes into the unglamorous cases. An empty search, for instance, needs to be recorded as a structured result, so a case says that no report has been published yet and doesn't look like a failed run. Requests submitted through a portal also need checking on that portal later, not chasing by other means.
+
+## Analytics and billing
+
+I've also worked on the product around the agents:
+
+- **Analytics:** cases opened are now counted on the admin overview, in the reader's time zone, and scoped per firm.
+- **Billing:** the case invoice now lists every request with its fee under its organisation.
+
+## Contribution so far
+
+| Area | Commits on main |
+| --- | --- |
+| Main product | 87 |
+| Australian instance | 208 |
+| MFA service | 73 |
+
+These count non-merge commits attributed to me on each main branch, as of November 2026.

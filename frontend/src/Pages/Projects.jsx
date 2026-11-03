@@ -4,47 +4,12 @@ import cat1 from "../assets/roomArt/projectsCat.png";
 import Typewriter from "typewriter-effect";
 import data from "./ShowcaseStatic.json";
 const projectsScript = data.projects.script;
-const projects = data.projects.options;
+const projects = toOptionPages(projectEntries);
 import OptionSelector from "./OptionSelector";
-import QuizPage from "./ProjectPages/QuizPage";
-import Presto from "./ProjectPages/Presto";
-import TikTokSpeed from "./ProjectPages/TikTokSpeed";
-import ForumPage from "./ProjectPages/ForumPage";
-import DiscordBot from "./ProjectPages/DiscordBot";
-import Portfolio from "./ProjectPages/Portfolio";
-import Datespot from "./ProjectPages/Datespot";
-import TributaryAPIPage from "./ProjectPages/TributaryPage";
-import Bridges from "./ProjectPages/Bridges";
-import HousePricePredictor from "./ProjectPages/HousePricePredictor";
-import BalatroClone from "./ProjectPages/BalatroClone";
-import CountryApi from "./ProjectPages/CountryAPI";
-import RustSpreadsheet from "./ProjectPages/RustSpreadsheet";
-import Whereto from "./ProjectPages/Whereto";
-import AirtableClone from "./ProjectPages/AirtableClone";
-import Shiftopia from "./ProjectPages/Shiftopia";
+import DocumentPage from "./DocumentPage";
+import { projects as projectEntries, toOptionPages } from "./catalog";
 
 const Projects = () => {
-  // To add more pages, add to this object and also to ShowcaseStatic.jsx
-  // Order is based on below
-  // Also change on App.jsx the routes
-  const pages = {
-    1: <Whereto />,
-    2: <AirtableClone />,
-    3: <Shiftopia />,
-    4: <Datespot />,
-    5: <Bridges />,
-    6: <TributaryAPIPage />,
-    7: <CountryApi />,
-    8: <HousePricePredictor />,
-    9: <BalatroClone />,
-    10: <RustSpreadsheet />,
-    11: <QuizPage />,
-    12: <Presto />,
-    13: <DiscordBot />,
-    14: <Portfolio />,
-    15: <TikTokSpeed />,
-    16: <ForumPage />,
-  };
   const twRef = useRef(null);
   const [cat1Visible, setCat1Visible] = useState(true);
   const [optionCount, setOptionCount] = useState(-1);
@@ -170,19 +135,13 @@ const Projects = () => {
           </SelectionContainer>
         </GameContainer>
         {pageToShow && (
-          <>
-            {pages[pageToShow]}
-            {lessThan1700 && (
-              <Button
-                onClick={() => {
-                  setPageToShow(null);
-                  setCameFromBack(true);
-                }}
-              >
-                &lt;&lt;
-              </Button>
-            )}
-          </>
+          <DocumentPage
+            entry={projectEntries[pageToShow - 1]}
+            onBack={() => {
+              setPageToShow(null);
+              setCameFromBack(true);
+            }}
+          />
         )}
       </Container>
     </>
@@ -195,30 +154,6 @@ const H1 = styled.h1`
   font-family: "Determination Mono", "Pixelify Sans", serif;
   font-size: ${({ fontSize }) => fontSize}rem;
   padding-right: 0;
-`;
-
-const Button = styled.button`
-  position: absolute;
-  top: 20px;
-  left: 95px;
-
-  font-family: "Pixelify Sans", serif;
-  background-color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 10px 15px;
-  margin: 0 5px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #666;
-  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  width: 70px;
-  text-align: center;
-
-  &:hover {
-    background-color: #f0f0f0;
-  }
 `;
 
 const arrowStyle = {

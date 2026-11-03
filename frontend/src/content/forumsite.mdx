@@ -1,67 +1,33 @@
-A full-stack Q&A forum website built entirely with vanilla JavaScript for the frontend, using DOM manipulation to handle all page transitions on a single HTML page. The backend runs on Node.js with a JSON-based data store.
+## What it is
 
----
+A Q&A forum built without a framework: one `index.html`, about 1,300 lines of JavaScript in `main.js` and plain CSS. My work is the frontend, which talks to the Express and JSON file API in the repository's `backend` folder. It isn't deployed, so you'd run it locally to try it.
 
-## Overview
+## What you can do
 
-The QandA Forum Website is a Stack Overflow-style platform where users can create discussion threads, post comments, and interact with other users. The frontend is notable for being built on a single HTML page — all view transitions (login, dashboard, thread view, profile) are handled through JavaScript DOM manipulation rather than page reloads or a framework router.
+- **Accounts.** Register, log in and log out, with the session kept across refreshes.
+- **Threads.** Create, edit, delete, like and watch. The sidebar shows five at a time with a "view more" button.
+- **Comments.** Reply to a thread or to another comment, like, edit, and see how long ago each was posted.
+- **Profiles.** See a user's threads and watched threads, and update your own email, password, name and picture.
+- **Admin.** Admins can edit or delete anything, and can change other users' permission level.
 
----
+## How it works
 
-## Features
+### One page, many screens
 
-- **Single-Page Architecture**: all views rendered on one HTML page via DOM manipulation — no framework, no router
-- **User Authentication**: registration and login system with session management
-- **Thread System**: create, view, edit, and delete discussion threads
-- **Comments**: post and manage comments on threads
-- **Like System**: like threads and comments
-- **User Profiles**: view and edit user profile pages
-- **Responsive Design**: fully mobile-responsive with dedicated CSS for different screen sizes
-- **Dashboard**: personalised feed of threads and activity
+All the screens are already in the HTML as sections with a `.screen` class. Switching means removing `active` from all of them and adding it to the new one. The current screen is saved in `localStorage`, so a refresh brings you back to it rather than to the login page.
 
----
+### Keeping fetches together
 
-## Functionality
+The API returns thread IDs, then details one at a time, and author names come from a separate call. So listing threads is a chain: get the IDs, `Promise.all` the details, then `Promise.all` the users. To decide whether to show "view more", the code asks for the next page and hides the button if it comes back empty.
 
-### Authentication
-- **Register**: create a new account with email and password
-- **Login**: authenticate and receive a session token
-- **Logout**: clear session and return to login view
+### Nested comments
 
-### Threads & Comments
-- **Create Thread**: post a new discussion topic with title and body
-- **View Thread**: see full thread content with all comments
-- **Edit/Delete**: modify or remove your own threads
-- **Comment**: reply to threads with threaded comments
-- **Like**: upvote threads and comments
+Each comment can have a `parentCommentId`. When rendering a reply, the code finds the parent's element and places the reply under it, building the tree directly in the DOM.
 
-### Profile
-- **View Profile**: see user activity and post history
-- **Edit Profile**: update display name and profile details
+### Permissions that can change
 
----
+A user can be promoted or demoted while using the site, so a poll runs every 60 seconds to refresh the admin flag. Edit and delete controls appear if you own the item or you're an admin.
 
-## Tech Stack
+### Images and layout
 
-- **Frontend**: Vanilla JavaScript, HTML, CSS (no framework)
-- **Backend**: Node.js with Babel
-- **Data Store**: JSON file-based persistence
-- **Architecture**: Single-page DOM manipulation
-
----
-
-## Getting Started
-
-1. **Clone & install**:
-   ```bash
-   git clone https://github.com/rogertruong7/QandA-Forum-Website.git
-   cd QandA-Forum-Website
-   npm install
-   ```
-
-2. **Start the backend**:
-   ```bash
-   npm start
-   ```
-
-3. **Open** `frontend/index.html` in a browser
+Profile pictures go through `FileReader` and are sent to the API as data URLs. The responsive layout lives in a dedicated `mobile.css` with its own breakpoints.

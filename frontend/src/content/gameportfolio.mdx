@@ -1,49 +1,50 @@
-An interactive 3D portfolio website built with Three.js where users control a character that walks through a stylised pixel-art town. Each building represents a section of the portfolio — walking to a doorway transitions into that section's content.
+## What it is
 
----
+You're probably reading this inside it. The site is a small 3D town where you steer a character to a building, stand in the doorway and go in to reach About Me, Projects, Experiences or Skills. Each project and job also has its own URL, so a page can be shared without the game.
 
-## Overview
+## Moving around
 
-This is the very portfolio you're browsing! It's built as a navigable 3D game world using Three.js and Vite. Players use keyboard or mouse controls to move a character through a town with buildings labelled "Projects", "About Me", "Experiences", and "Skills". Walking up to a building's doorway triggers a scene transition into the corresponding content page.
+You can move in two ways, and both run every frame inside `useFrame`:
 
----
+- **Keyboard.** WASD or the arrow keys move relative to where the camera is facing, so "up" always means away from you.
+- **Click to move.** Clicking the floor casts a ray against the floor mesh to set a target, and the character walks there. A marker shows the spot.
 
-## Features
+The floor has to tell a click from a camera drag, since both start with the mouse button going down. A press shorter than 150 milliseconds counts as a click.
 
-- **3D Game World**: fully rendered 3D town with buildings, trees, and a textured floor
-- **Character Controls**: WASD/arrow key movement and click-to-move navigation
-- **Orbiting Camera**: mouse drag to rotate the camera around the character
-- **Collision Detection**: wall sliding physics to prevent walking through buildings
-- **Doorway Transitions**: approaching a building entrance triggers a scene change into that section
-- **GLTF Model Loading**: 3D models exported from Blender (buildings, trees, animated character)
-- **Loading Screen**: asset preloading with a loading indicator
-- **First-Visit Tutorial**: popup instructions for new visitors
-- **Custom Pixel Font**: retro-styled typography matching the pixel art aesthetic
-- **React Integration**: project pages rendered as React components with MDX content
+Speed is multiplied by the frame's delta so the character moves at the same pace at any frame rate, and the character turns smoothly towards its direction of travel rather than snapping.
 
----
+## Collision
 
-## Tech Stack
+Walking through walls would ruin the illusion, but the buildings are detailed models, so I don't test against their geometry. `Static.jsx` holds a list of invisible `Box3` walls, and the character is treated as a sphere with a radius of 5.
 
-- **3D Engine**: Three.js
-- **Frontend**: React, Vite
-- **3D Models**: GLTF format (Blender exports)
-- **Content**: MDX (Markdown + JSX)
-- **Styling**: Styled Components
-- **Language**: JavaScript
+Stopping dead on contact feels bad, so the character slides instead:
 
----
+1. Find the closest point on the wall and work out the collision normal from it.
+2. Project the movement direction onto the plane of that normal, which removes the part going into the wall.
+3. Check the slide for a collision too, then apply it if it's clear.
 
-## Getting Started
+The pond needed more than axis-aligned boxes, so its edge has its own rotated hitboxes.
 
-1. **Clone & install**:
-   ```bash
-   git clone https://github.com/rogertruong7/gamePortfolio.git
-   cd gamePortfolio/frontend
-   npm install
-   ```
+## The camera
 
-2. **Run the dev server**:
-   ```bash
-   npm run dev
-   ```
+The camera sits at a fixed offset from the player and follows with a lerp. Dragging the mouse orbits it by rotating that offset with a quaternion. Vertical rotation is clamped so it can't flip, and it keeps a minimum height so it stays above the ground.
+
+## Doors
+
+Trigger zones are another list of `Box3` values in `Static.jsx`. Each frame, `Doorway.jsx` checks whether the character is inside one and shows an enter prompt if so. Where two zones overlap, the prompt offers both.
+
+When you go in, the canvas is hidden with `display: none` rather than unmounted, so the models don't reload when you come back. A black panel sliding off the screen covers the switch.
+
+## Keeping it fast
+
+The game loop runs every frame, so small costs add up. A later performance pass made these changes:
+
+- `Doorway` was calling seven state setters every frame. It now remembers the last zone and returns early if nothing changed.
+- Collision checks reuse a shared `Sphere` and `Vector3` instead of allocating new ones each time.
+- Camera rotation moved from React state to refs, so moving the mouse no longer causes a re-render.
+- `Buildings`, `Details` and `Text` are memoised, and text geometry is memoised too.
+- Shadows moved from `PCFSoftShadowMap` to the cheaper `PCFShadowMap`.
+
+## The rest of the site
+
+Inside the buildings, pages use a typewriter dialog box in the style of an RPG, with a menu you can drive with the arrow keys. Models are compressed GLB files, and a loading screen shows progress until the buildings are ready. First-time visitors get a tutorial that holds back keyboard controls until it's dismissed. There's also background music and sound effects with a mute button.

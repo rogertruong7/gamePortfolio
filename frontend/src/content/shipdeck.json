@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "shipdeck",
+  "order": 6,
+  "title": "Shipdeck",
+  "option": "(DESKTOP) Shipdeck: Worktree dashboard with scheduled PR runs (Electron)",
+  "tagline": "A macOS dashboard for every git worktree on your machine, with inline diffs and timers that open pull requests even when the app is closed.",
+  "category": "Desktop",
+  "period": "Jul to Sep 2026",
+  "role": "Solo project",
+  "stack": ["Electron", "React", "TypeScript", "Node.js", "launchd", "Claude Code CLI"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/shipdeck" }]
+}

@@ -1,0 +1,13 @@
+{
+  "kind": "project",
+  "slug": "datespot",
+  "order": 11,
+  "title": "Datespot",
+  "option": "(BACKEND) Datespot: Spring Boot Project",
+  "tagline": "The backend for a date-spot review app, where people sign up, review places and follow each other.",
+  "category": "Backend",
+  "period": "2025",
+  "role": "Solo project",
+  "stack": ["Java", "Spring Boot", "Spring Security", "JWT", "Spring Data JPA", "PostgreSQL", "OpenAPI", "Maven"],
+  "links": [{ "label": "View code", "href": "https://github.com/rogertruong7/datespotapp" }]
+}

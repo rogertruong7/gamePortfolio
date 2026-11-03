@@ -1,0 +1,24 @@
+{
+  "kind": "project",
+  "slug": "forumsite",
+  "order": 23,
+  "title": "Q&A Forum",
+  "option": "(FRONTEND) Forum Website (Vanilla JS)",
+  "tagline": "A forum where people can post threads, reply, like and watch discussions, all on one HTML page with no framework.",
+  "category": "Frontend",
+  "period": "2024",
+  "role": "University project",
+  "stack": [
+    "JavaScript",
+    "HTML",
+    "CSS",
+    "Fetch API"
+  ],
+  "links": [
+    {
+      "label": "View code",
+      "href": "https://github.com/rogertruong7/QandA-Forum-Website"
+    }
+  ],
+  "video": true
+}

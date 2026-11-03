@@ -12,14 +12,14 @@ import { paintLiquidChrome } from "../Helpers/liquidChrome.js";
 
 // The middle of the island, measured from the floor model
 const TOWN_CENTRE = new THREE.Vector3(118.5, 0, -124.8);
-// Baby blue at the top of the screen fading to white at the bottom
+// Darker blue at the top of the screen, through light blue, to white at the bottom
 const SKY_GRADIENT = [
-  [0, "#9fd8f6"],
-  [0.5, "#cdebfa"],
+  [0, "#3f8fd6"],
+  [0.5, "#a9dcf7"],
   [1, "#ffffff"],
 ];
 // Far-off things fade towards the middle of the sky
-const FOG_COLOUR = "#cdebfa";
+const FOG_COLOUR = "#a9dcf7";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // Every layer sits further out than the camera can reach, so stars never get in the way.

@@ -5,6 +5,7 @@ import { clientIp, isSameOrigin, json } from "./_lib/http.js";
 import { classifySource, isBot, parseUserAgent } from "./_lib/classify.js";
 import { MAX_BODY_BYTES, sanitizePayload } from "./_lib/payload.js";
 import { lookupOrganisation } from "./_lib/ipLookup.js";
+import { MAX_EVENTS_PER_SESSION, tooManyNewSessions } from "./_lib/limits.js";
 
 function decodeHeader(value) {
   if (!value) return null;
@@ -98,12 +99,14 @@ async function insertEvents(sql, sessionId, events) {
      SELECT $1::uuid, type, name, path, meta,
             now() - (age_ms * interval '1 millisecond')
      FROM jsonb_to_recordset($2::jsonb)
-       AS e(type text, name text, path text, meta jsonb, age_ms double precision)`,
+       AS e(type text, name text, path text, meta jsonb, age_ms double precision)
+     WHERE (SELECT count(*) FROM events WHERE session_id = $1::uuid) < $3::int`,
     [
       sessionId,
       JSON.stringify(
         events.map(({ ageMs, ...event }) => ({ ...event, age_ms: ageMs }))
       ),
+      MAX_EVENTS_PER_SESSION,
     ]
   );
 }
@@ -134,7 +137,12 @@ export async function POST(request) {
        RETURNING id`,
       [payload.sessionId, payload.activeMs]
     );
-    if (updated.length === 0) await createSession(sql, request, payload);
+    if (updated.length === 0) {
+      if (await tooManyNewSessions(sql, clientIp(request))) {
+        return json(429, { error: "Too many sessions" });
+      }
+      await createSession(sql, request, payload);
+    }
     await insertEvents(sql, payload.sessionId, payload.events);
     return new Response(null, { status: 204 });
   } catch (error) {

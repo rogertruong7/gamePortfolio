@@ -130,6 +130,7 @@ const Projects = () => {
                 setPageToShow={setPageToShow}
                 data={projects}
                 section="Project"
+                active={!pageToShow}
               />
             )}
           </SelectionContainer>

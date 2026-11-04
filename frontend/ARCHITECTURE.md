@@ -174,7 +174,7 @@ Unknown routes redirect to `/` via `Helpers/Redirect.jsx` (uses `<Navigate to="/
 The site records visits in a Neon Postgres database, and `/admin` displays them.
 
 1. `src/Analytics/tracker.js` starts before React renders. It reads any `?ref=` tag, removes it from the URL, and sends batches of events with `sendBeacon`.
-2. `api/game-events.js` validates each batch (`api/_lib/payload.js`) and adds what only the server knows: IP address, Vercel's location headers, the parsed user agent, the traffic source (`api/_lib/classify.js`) and the network owner from ipwho.is (`api/_lib/ipLookup.js`).
+2. `api/game-events.js` validates each batch (`api/_lib/payload.js`) and adds what only the server knows: IP address, Vercel's location headers, the parsed user agent, the traffic source (`api/_lib/classify.js`) and the network owner from ipwho.is (`api/_lib/ipLookup.js`). `api/_lib/limits.js` caps how many new sessions one IP address can start in an hour and how many events one session can store.
 3. `src/Admin/` reads the data back through `api/admin/overview.js` and `api/admin/sessions.js`, which both require the login cookie.
 
 To track something new, call `track(type, name)` from `tracker.js` and add the type to `EVENT_TYPES` in `api/_lib/payload.js`. The server drops any type that isn't listed there. Add wording for it in `describeEvent` in `src/Admin/format.js`.

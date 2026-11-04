@@ -7,6 +7,7 @@ import RouteTracker from "./Analytics/RouteTracker.jsx";
 import DocumentPage from "./Pages/DocumentPage.jsx";
 import { allEntries } from "./Pages/catalog.js";
 import RedirectToHome from "./Helpers/Redirect.jsx";
+import ErrorBoundary from "./Helpers/ErrorBoundary.jsx";
 
 // Loaded on demand so that none of the admin code ships to normal visitors.
 const AdminPage = lazy(() => import("./Admin/AdminPage.jsx"));
@@ -20,29 +21,31 @@ const App = () => {
   return (
     <BrowserRouter>
       <RouteTracker />
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route
-          path="/admin"
-          element={
-            <Suspense fallback={null}>
-              <AdminPage />
-            </Suspense>
-          }
-        />
-        {allEntries.map((entry) => (
+      <ErrorBoundary>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
           <Route
-            key={entry.path}
-            path={entry.path}
+            path="/admin"
             element={
-              <FullPage>
-                <DocumentPage entry={entry} />
-              </FullPage>
+              <Suspense fallback={null}>
+                <AdminPage />
+              </Suspense>
             }
           />
-        ))}
-        <Route path="*" element={<RedirectToHome />} />
-      </Routes>
+          {allEntries.map((entry) => (
+            <Route
+              key={entry.path}
+              path={entry.path}
+              element={
+                <FullPage>
+                  <DocumentPage entry={entry} />
+                </FullPage>
+              }
+            />
+          ))}
+          <Route path="*" element={<RedirectToHome />} />
+        </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   );
 };

@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { track } from "../Analytics/tracker.js";
 
 // Data is an array of strings
-const OptionSelector = ({ setPageToShow, data, section }) => {
+// `active` is false while a page is open over the menu, so its keys stay with that page.
+const OptionSelector = ({ setPageToShow, data, section, active }) => {
   const [currentPage, setCurrentPage] = useState(0); // Current page index
   const [selectedIndex, setSelectedIndex] = useState(0); // Default: Top Left
 
@@ -68,7 +69,8 @@ const OptionSelector = ({ setPageToShow, data, section }) => {
         } else if (selectedIndex < 3) {
           setSelectedIndex((prev) => prev + 1);
         }
-      } else if (selectedIndex === 0 || selectedIndex === 1) {
+      } else if (selectedIndex + 2 < currentOptions.length) {
+        // The last page can be short, so the option below may not exist.
         setSelectedIndex((prev) => prev + 2);
       }
     } else if (e.key === "Enter") {
@@ -77,9 +79,10 @@ const OptionSelector = ({ setPageToShow, data, section }) => {
   };
 
   useEffect(() => {
+    if (!active) return;
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [currentPage, selectedIndex]);
+  }, [active, currentPage, selectedIndex, isMobileView]);
 
   const goToPreviousPage = () => {
     if (currentPage > 0) {

@@ -1,17 +1,18 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import { Howler } from "howler";
+import { readStore, writeStore } from "../Helpers/storage.js";
 
 const AudioContext = createContext(null);
 
 const AudioProvider = ({ children }) => {
   const [muted, setMutedState] = useState(
-    () => localStorage.getItem("audioMuted") === "true"
+    () => readStore("audioMuted") === "true"
   );
   const [audioReady, setAudioReady] = useState(false);
 
   const setMuted = useCallback((value) => {
     setMutedState(value);
-    localStorage.setItem("audioMuted", String(value));
+    writeStore("audioMuted", String(value));
     Howler.mute(value);
   }, []);
 

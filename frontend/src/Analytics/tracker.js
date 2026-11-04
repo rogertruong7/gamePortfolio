@@ -1,5 +1,6 @@
 // First-party visit tracking for the /admin page. Nothing here may ever break
 // the game, so anything that can throw is contained and failures are dropped.
+import { readStore, writeStore } from "../Helpers/storage.js";
 
 const ENDPOINT = "/api/game-events";
 const VISITOR_KEY = "gp_visitor";
@@ -22,24 +23,6 @@ const TAG_PARAMS = [
   "utm_term",
   "utm_content",
 ];
-
-const memoryStore = new Map();
-
-function readStore(key) {
-  try {
-    return localStorage.getItem(key);
-  } catch {
-    return memoryStore.get(key) ?? null;
-  }
-}
-
-function writeStore(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch {
-    memoryStore.set(key, value);
-  }
-}
 
 function makeId() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -247,6 +230,8 @@ function onPageHidden() {
 }
 
 function onLinkClick(event) {
+  // auxclick also fires for the right button, which only opens the context menu.
+  if (event.type === "auxclick" && event.button !== 1) return;
   const link = event.target.closest?.("a[href]");
   if (!link) return;
   if (link.hasAttribute("download")) {

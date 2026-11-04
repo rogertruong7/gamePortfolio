@@ -126,6 +126,7 @@ const Experiences = ({ setCurrentScene }) => {
                 setPageToShow={setPageToShow}
                 data={experiences}
                 section="Experience"
+                active={!pageToShow}
               />
             )}
           </SelectionContainer>

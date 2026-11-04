@@ -2,6 +2,9 @@
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// RegExp.test coerces its argument, so ["<uuid>"] would pass without the type check.
+const isUuid = (value) => typeof value === "string" && UUID.test(value);
+
 export const EVENT_TYPES = new Set([
   "page_view",
   "game_loaded",
@@ -93,7 +96,7 @@ function sanitizeEvent(event) {
 // Returns a clean payload, or null if it is not one the tracker could have sent.
 export function sanitizePayload(input) {
   if (!input || typeof input !== "object") return null;
-  if (!UUID.test(input.visitorId) || !UUID.test(input.sessionId)) return null;
+  if (!isUuid(input.visitorId) || !isUuid(input.sessionId)) return null;
   if (!Array.isArray(input.events)) return null;
 
   const context = input.context ?? {};

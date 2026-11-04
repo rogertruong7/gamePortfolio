@@ -23,6 +23,16 @@ let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
 // PlayerShadow needs the stencil buffer, which three.js leaves off by default
 const RENDERER_OPTIONS = { stencil: true };
+const MOVEMENT_KEYS = new Set([
+  "w",
+  "a",
+  "s",
+  "d",
+  "arrowup",
+  "arrowleft",
+  "arrowdown",
+  "arrowright",
+]);
 
 function ResizeHandler() {
   // gl is renderer
@@ -92,19 +102,21 @@ function MainGame({
 
   function onKeyDown(event) {
     if (currentScene !== 0) return;
-    // E is for the bench, and shouldn't count as walking for the footstep sounds
-    if (event.key.toLowerCase() === "e") return;
-    setKeys((prevKeys) => ({
-      ...prevKeys,
-      [event.key.toLowerCase()]: true,
-    }));
+    // macOS sends no keyup for a letter released while Cmd is held, so a shortcut
+    // has to drop every key or the character would keep walking afterwards.
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      setKeys({});
+      return;
+    }
+    const key = event.key.toLowerCase();
+    if (!MOVEMENT_KEYS.has(key)) return;
+    setKeys((prevKeys) => ({ ...prevKeys, [key]: true }));
   }
 
   function onKeyUp(event) {
-    setKeys((prevKeys) => ({
-      ...prevKeys,
-      [event.key.toLowerCase()]: false,
-    }));
+    const key = event.key.toLowerCase();
+    if (!MOVEMENT_KEYS.has(key)) return;
+    setKeys((prevKeys) => ({ ...prevKeys, [key]: false }));
   }
 
   useEffect(() => {

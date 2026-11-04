@@ -6,6 +6,7 @@ import { benchEdges, invisWalls, pondEdges, walkArea } from "./Static";
 import { createPathfinder } from "./pathfinding";
 import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
 import { updateDoorWalk } from "./doorWalk";
+import { readStore } from "../Helpers/storage.js";
 
 const ANGLED_WALLS = [...pondEdges, ...benchEdges];
 const CHARACTER_RADIUS = 5;
@@ -15,6 +16,12 @@ const pathfinder = createPathfinder({
   radius: CHARACTER_RADIUS,
 });
 const SPEED = 100;
+// A hitch moves the character no further than this much time. At 10 units it can't
+// clear the hitbox's 10-unit width, so a click-to-move step can't jump a wall.
+const MAX_FRAME_DELTA = 0.1;
+// Keyboard moves slide using the wall's closest point, which needs the end of each
+// step to stay outside the wall, so a step has to be well under the hitbox radius.
+const MAX_KEYBOARD_STEP = 2.5;
 // Idle plays the walk clip very slowly as a gentle breathing motion
 const IDLE_ANIMATION_SPEED = 0.06;
 const _hitbox = new THREE.Sphere();
@@ -190,7 +197,7 @@ const Character = React.forwardRef(
     function keyboardMovement() {
       let direction = new THREE.Vector3();
       let finalDirection = new THREE.Vector3();
-      if (localStorage.getItem("visited") === "true") {
+      if (readStore("visited") === "true") {
         if (keys["w"] || keys["arrowup"]) {
           setDarkspot(false);
           setClickMoving(false);
@@ -239,46 +246,44 @@ const Character = React.forwardRef(
       return finalDirection;
     }
 
+    function keyboardStep(direction, length) {
+      const character = ref.current;
+      const newPosition = character.position
+        .clone()
+        .addScaledVector(direction, length);
+      const result = isCollision(newPosition);
+
+      if (!result) {
+        character.position.copy(newPosition);
+        return;
+      }
+
+      // Slide along the wall using the collision normal
+      const slideDirection = direction
+        .clone()
+        .projectOnPlane(result.collisionNormal);
+      if (slideDirection.lengthSq() === 0) return;
+
+      const slidingPosition = character.position
+        .clone()
+        .addScaledVector(slideDirection.normalize(), length);
+
+      // Check if the new sliding position causes a collision, excluding the current sliding wall
+      if (!isCollision(slidingPosition, result.collidingWall)) {
+        character.position.copy(slidingPosition);
+      }
+    }
+
     function keyboardMovingSlide(finalDirection, delta) {
-      if (ref.current !== undefined) {
-        let character = ref.current;
-        let collisionNormal = null;
-        let wall = null;
-        let newPosition = character.position.clone().add(finalDirection);
-        const result = isCollision(newPosition);
+      if (!ref.current || finalDirection.lengthSq() === 0) return;
 
-        if (result) {
-          collisionNormal = result.collisionNormal;
-          wall = result.collidingWall;
-        }
+      // This also normalises finalDirection, so diagonals move at the same speed.
+      updateRotation(finalDirection, delta);
 
-        updateRotation(finalDirection, delta);
-        if (!collisionNormal) {
-          character.position.addScaledVector(finalDirection, delta * SPEED);
-        } else {
-          // Slide along the wall using the collision normal
-          const slideDirection = finalDirection
-            .clone()
-            .projectOnPlane(collisionNormal);
-
-          if (slideDirection.length() > 0) {
-            slideDirection.normalize();
-            let slidingPosition = character.position
-              .clone()
-              .addScaledVector(slideDirection, delta * SPEED);
-
-            // Check if the new sliding position causes a collision, excluding the current sliding wall
-            const collisionNormalAfterSlide = isCollision(
-              slidingPosition,
-              wall
-            );
-
-            if (!collisionNormalAfterSlide) {
-              // If no collision, perform the slide movement
-              character.position.addScaledVector(slideDirection, delta * SPEED);
-            }
-          }
-        }
+      const distance = delta * SPEED;
+      const steps = Math.ceil(distance / MAX_KEYBOARD_STEP);
+      for (let i = 0; i < steps; i++) {
+        keyboardStep(finalDirection, distance / steps);
       }
     }
 
@@ -313,6 +318,7 @@ const Character = React.forwardRef(
 
       if (currentScene !== 0) return;
 
+      const moveDelta = Math.min(delta, MAX_FRAME_DELTA);
       let finalDirection = keyboardMovement();
 
       if (doorWalk) {
@@ -320,8 +326,8 @@ const Character = React.forwardRef(
           onDoorWalkDone(doorWalk);
         }
       } else if (sit.phase === "none") {
-        clickToMove(delta);
-        keyboardMovingSlide(finalDirection, delta);
+        clickToMove(moveDelta);
+        keyboardMovingSlide(finalDirection, moveDelta);
       } else {
         const wantsToMove =
           finalDirection.lengthSq() > 0 || targetPosition !== sit.clickTarget;

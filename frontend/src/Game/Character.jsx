@@ -4,6 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { benchEdges, invisWalls, pondEdges } from "./Static";
 import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
+import { updateDoorWalk, waitOutsideDoor } from "./doorWalk";
 
 const ANGLED_WALLS = [...pondEdges, ...benchEdges];
 const SPEED = 100;
@@ -27,6 +28,8 @@ const Character = React.forwardRef(
       sitRef,
       setSitPhase,
       setNearBench,
+      doorWalkRef,
+      onEntered,
     },
     ref
   ) => {
@@ -268,8 +271,10 @@ const Character = React.forwardRef(
 
     useFrame(({ clock }, delta) => {
       const sit = sitRef.current;
+      const doorWalk = doorWalkRef.current;
       const moving =
-        sit.phase === "none" ? clickMoving || arrowMoving : sit.phase === "approaching";
+        doorWalk !== null ||
+        (sit.phase === "none" ? clickMoving || arrowMoving : sit.phase === "approaching");
 
       if (mixer.current) {
         mixer.current.update(moving ? delta : delta * IDLE_ANIMATION_SPEED);
@@ -280,7 +285,13 @@ const Character = React.forwardRef(
 
       let finalDirection = keyboardMovement();
 
-      if (sit.phase === "none") {
+      if (doorWalk) {
+        if (updateDoorWalk(doorWalk, ref.current, delta, updateRotation)) {
+          waitOutsideDoor(doorWalk, ref.current);
+          doorWalkRef.current = null;
+          onEntered(doorWalk.scene);
+        }
+      } else if (sit.phase === "none") {
         clickToMove(delta);
         keyboardMovingSlide(finalDirection, delta);
       } else {

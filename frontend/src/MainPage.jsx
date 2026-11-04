@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Howl } from "howler";
 import MainGame from "./Game/MainGame.jsx";
 import LoadingScreen from "./UserInterface/LoadingScreen.jsx";
 import Menu from "./UserInterface/Menu.jsx";
@@ -24,6 +25,8 @@ const SCENE_NAMES = {
   4: "Skills",
 };
 
+const doorSound = new Howl({ src: ["/audio/door-open.mp3"], volume: 0.35 });
+
 const AutoAudioReady = ({ loading }) => {
   const { audioReady, setAudioReady } = useAudio();
 
@@ -48,6 +51,8 @@ const AutoAudioReady = ({ loading }) => {
 
 const MainPage = () => {
   const [currentScene, setCurrentScene] = useState(0);
+  // The scene the character is walking through a door to reach
+  const [enteringScene, setEnteringScene] = useState(null);
   const [enterPopupVisible, setEnterPopupVisible] = useState(false);
   const [twoOptionsButton, setTwoOptionsButton] = useState(false);
   const [oneOptionButton, setOneOptionButton] = useState(false);
@@ -62,6 +67,12 @@ const MainPage = () => {
   const [progress, setProgress] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
   const hasMovedRef = useRef(false);
+
+  const finishEntering = (scene) => {
+    doorSound.play();
+    setCurrentScene(scene);
+    setEnteringScene(null);
+  };
 
   useEffect(() => {
     if (SCENE_NAMES[currentScene]) track("scene_enter", SCENE_NAMES[currentScene]);
@@ -137,9 +148,12 @@ const MainPage = () => {
           setProgress={setProgress}
           setIsMoving={setIsMoving}
           currentScene={currentScene}
+          enteringScene={enteringScene}
+          setEnteringScene={setEnteringScene}
+          onEntered={finishEntering}
         />
       </div>
-      {enterPopupVisible && currentScene === 0 && (
+      {enterPopupVisible && currentScene === 0 && enteringScene === null && (
         <EnterPopup
           twoOptionsButton={twoOptionsButton}
           oneOptionButton={oneOptionButton}
@@ -147,7 +161,7 @@ const MainPage = () => {
           aboutButton={aboutButton}
           experiencesButton={experiencesButton}
           skillsButton={skillsButton}
-          setCurrentScene={setCurrentScene}
+          enterScene={setEnteringScene}
         />
       )}
       {currentScene !== 0 && (

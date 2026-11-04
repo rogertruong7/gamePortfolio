@@ -1,6 +1,5 @@
 import { useRef, useEffect } from "react";
 import styled from "styled-components";
-import { Howl } from "howler";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 
 // Styled-components for the different elements
@@ -57,18 +56,23 @@ const EnterPopup = ({
   aboutButton,
   experiencesButton,
   skillsButton,
-  setCurrentScene,
+  enterScene,
 }) => {
-  const doorSound = useRef(
-    new Howl({ src: ["/audio/door-open.mp3"], volume: 0.35 })
-  );
-
-  const enterScene = (scene) => {
-    doorSound.current.play();
-    setCurrentScene(scene);
-  };
-
   const containerRef = useRef(null);
+
+  // Where two doors overlap, E goes with whichever button is focused, as Enter would
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key.toLowerCase() !== "e" || event.repeat) return;
+      const container = containerRef.current;
+      const button = container?.contains(document.activeElement)
+        ? document.activeElement
+        : container?.querySelector("button");
+      button?.click();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   useEffect(() => {
     const firstButton = containerRef.current?.querySelector("button");
@@ -95,7 +99,7 @@ const EnterPopup = ({
       {twoOptionsButton && (
         <OptionText id="twoOptions">Where would you like to go?</OptionText>
       )}
-      {oneOptionButton && <OptionText id="oneOption">Go in?</OptionText>}
+      {oneOptionButton && <OptionText id="oneOption">Go in? (E)</OptionText>}
       <EnterButtonsContainer>
         {aboutButton && (
           <EnterButton id="aboutme_button" onClick={() => enterScene(1)}>

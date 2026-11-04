@@ -16,6 +16,7 @@ import Doorway from "./Doorway.jsx";
 import SitPrompt from "../UserInterface/SitPrompt.jsx";
 import { labels } from "./Static.jsx";
 import { createSitState, startSitting, startStanding } from "./sitting.js";
+import { startDoorWalk } from "./doorWalk.js";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
@@ -50,12 +51,16 @@ function MainGame({
   setReseted,
   setProgress,
   setIsMoving,
-  currentScene
+  currentScene,
+  enteringScene,
+  setEnteringScene,
+  onEntered,
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
   const floorRef = useRef();
   const sitRef = useRef(createSitState());
+  const doorWalkRef = useRef(null);
 
   const [sitPhase, setSitPhase] = useState("none");
   const [nearBench, setNearBench] = useState(null);
@@ -124,6 +129,8 @@ function MainGame({
       setDarkspot(false);
       setClickMoving(false);
       sitRef.current.phase = "none";
+      doorWalkRef.current = null;
+      setEnteringScene(null);
       characterRef.current.position.copy(startVector);
       characterRef.current.rotation.y = -Math.PI / 4;
       setKeys({});
@@ -132,9 +139,17 @@ function MainGame({
   }, [reseted]);
 
   useEffect(() => {
+    if (enteringScene !== null) {
+      doorWalkRef.current = startDoorWalk(enteringScene, characterRef.current.position);
+    }
+  }, [enteringScene]);
+
+  useEffect(() => {
     const anyKeyActive = Object.values(keys).some((v) => v === true);
-    setIsMoving(clickMoving || anyKeyActive || sitPhase === "approaching");
-  }, [clickMoving, keys, sitPhase, setIsMoving]);
+    setIsMoving(
+      clickMoving || anyKeyActive || sitPhase === "approaching" || enteringScene !== null
+    );
+  }, [clickMoving, keys, sitPhase, enteringScene, setIsMoving]);
 
   return (
     <>
@@ -173,6 +188,8 @@ function MainGame({
           sitRef={sitRef}
           setSitPhase={setSitPhase}
           setNearBench={setNearBench}
+          doorWalkRef={doorWalkRef}
+          onEntered={onEntered}
         />
         <PlayerShadow characterRef={characterRef} />
         {labels.map(({ text, position, fontSize, showcaseName }) => (

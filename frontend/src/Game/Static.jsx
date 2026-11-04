@@ -88,6 +88,15 @@ export const benchEdges = benches.map(({ seat: [x, z], facing: [facingX, facingZ
   return new RotatedBox(x - alongX, z - alongZ, x + alongX, z + alongZ, BENCH_DEPTH);
 });
 
+// The way into each building, by scene number. Each stop is [x, y, z], plus how high to hop
+// on the way there for the raised brown step. The last stop is inside the building.
+export const doorRoutes = {
+  1: [[76, -8, -169], [67, -1.9, -169, 3], [45, -1.9, -169]],
+  2: [[76, -8, -62], [67, -1.9, -62, 3], [61.5, -1.9, -62], [57, 3.9, -62], [43, 3.9, -62]],
+  3: [[102, -8, -182], [102, -1.5, -192, 3], [102, -1.5, -215]],
+  4: [[200, -8, -182], [200, -0.4, -189, 3], [200, 5.4, -193], [200, 5.4, -205]],
+};
+
 // Where the main shadow-casting light sits, relative to the middle of the scene
 export const sunPosition = [-100, 300, 200];
 

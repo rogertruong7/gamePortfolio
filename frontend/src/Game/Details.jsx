@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { clone as cloneWithSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
+import { createPondWater } from "./pondWater.js";
 
 // How fast the wind plays, as a fraction of the clip's real speed
 const WIND_SPEED = 0.24;
@@ -38,14 +39,18 @@ const Details = () => {
     [treeScene, treeAnimations]
   );
 
+  const pondWater = useMemo(() => createPondWater(), []);
+
   useEffect(() => {
     trees.forEach(({ scene }) => castAndReceiveShadows(scene));
     castAndReceiveShadows(floorDetails);
-  }, [trees, floorDetails]);
+    floorDetails.getObjectByName("pond_ice001_0").material = pondWater.material;
+  }, [trees, floorDetails, pondWater]);
 
   // The wind is slow, so one tree per frame is enough and saves two thirds of the work
   const turn = useMemo(() => ({ next: 0 }), []);
   useFrame((_, delta) => {
+    pondWater.update(delta);
     trees.forEach((tree) => {
       tree.pendingDelta += delta * WIND_SPEED;
     });

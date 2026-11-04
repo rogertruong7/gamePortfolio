@@ -129,7 +129,8 @@ const ControlsList = ({ showReset = false }) => {
           </Chip>
         }
       >
-        Go inside. This button appears when you reach a building.
+        {touchOnly ? "Go inside." : "Go inside, or press E."} This button appears when you reach a
+        building.
       </Row>
       {showReset && (
         <Row

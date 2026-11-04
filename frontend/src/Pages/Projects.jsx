@@ -7,6 +7,7 @@ const projectsScript = data.projects.script;
 const projects = toOptionPages(projectEntries);
 import OptionSelector from "./OptionSelector";
 import DocumentPage from "./DocumentPage";
+import { documentSlideStyles, gamePanelSlideStyles, useDocumentSlide } from "./documentSlide";
 import { projects as projectEntries, toOptionPages } from "./catalog";
 
 const Projects = () => {
@@ -15,7 +16,7 @@ const Projects = () => {
   const [optionCount, setOptionCount] = useState(-1);
   const [optionsVisible, setOptionsVisible] = useState(false);
   const [fontSize, setFontSize] = useState(3);
-  const [pageToShow, setPageToShow] = useState(null);
+  const { pageToShow, phase, openPage, closePage } = useDocumentSlide();
   const [cameFromBack, setCameFromBack] = useState(false);
   const [lessThan1700, setLessThan1700] = useState(true);
   const [skipText, setSkipText] = useState(false);
@@ -85,8 +86,9 @@ const Projects = () => {
       <Door />
       <Container>
         <GameContainer
+          $phase={phase}
           style={{
-            display: lessThan1700 && pageToShow ? "none" : "block",
+            display: lessThan1700 && phase === "open" ? "none" : "block",
           }}
         >
           <ImageWrapper>
@@ -127,7 +129,7 @@ const Projects = () => {
             </TextContainer>
             {optionsVisible && (
               <OptionSelector
-                setPageToShow={setPageToShow}
+                setPageToShow={openPage}
                 data={projects}
                 section="Project"
               />
@@ -135,14 +137,15 @@ const Projects = () => {
           </SelectionContainer>
         </GameContainer>
         {pageToShow && (
-          <DocumentPage
-            key={projectEntries[pageToShow - 1].slug}
-            entry={projectEntries[pageToShow - 1]}
-            onBack={() => {
-              setPageToShow(null);
-              setCameFromBack(true);
-            }}
-          />
+          <DocumentSlide key={projectEntries[pageToShow - 1].slug} $phase={phase}>
+            <DocumentPage
+              entry={projectEntries[pageToShow - 1]}
+              onBack={() => {
+                closePage();
+                setCameFromBack(true);
+              }}
+            />
+          </DocumentSlide>
         )}
       </Container>
     </>
@@ -192,6 +195,12 @@ export const Container = styled.div`
   display: flex;
   justify-content: center;
   gap: 20px;
+  position: relative;
+  overflow: hidden;
+`;
+
+const DocumentSlide = styled.div`
+  ${documentSlideStyles}
 `;
 
 const Door = styled.div`
@@ -221,6 +230,7 @@ const GameContainer = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  ${gamePanelSlideStyles}
 
   @media (max-width: 1108px) {
     width: 95%;

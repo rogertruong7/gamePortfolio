@@ -120,7 +120,7 @@ AboutMe, Experiences, and Skills pages use `typewriter-effect` to type out text 
 
 ### Projects and Experiences menus
 
-After the typewriter intro, `Projects.jsx` and `Experiences.jsx` display an `OptionSelector`: a paginated 2x2 grid (single column on mobile) navigable with arrow keys or click. Selecting an option renders its `DocumentPage`. On narrow screens (< 1700px) the selector hides and only the document is shown.
+After the typewriter intro, `Projects.jsx` and `Experiences.jsx` display an `OptionSelector`: a paginated 2x2 grid (single column on mobile) navigable with arrow keys or click. Selecting an option renders its `DocumentPage`. The document slides in from the right (`documentSlide.js`) and slides back out when closed. On wide screens the game panel moves aside to make room. On narrow screens (< 1700px) the document slides over the selector, which hides once it's covered.
 
 ### Content catalog (`catalog.js`)
 

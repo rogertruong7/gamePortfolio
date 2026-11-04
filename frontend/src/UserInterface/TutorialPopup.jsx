@@ -1,59 +1,9 @@
-import styled from "styled-components";
 import { useState } from "react";
+import styled from "styled-components";
 import { useAudio } from "../Audio/AudioContext.jsx";
-
-const PopupWrapper = styled.div`
-  font-family: "Pixelify Sans", serif;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-`;
-
-const PopupContent = styled.div`
-  background-color: white;
-  padding: 20px;
-  text-align: center;
-  border-radius: 8px;
-  z-index: 101;
-`;
-
-const DefaultButton = styled.button`
-  font-family: "Pixelify Sans", serif;
-  background-color:rgb(255, 229, 162);
-  border: none;
-  border-radius: 20px;
-  padding: 10px 15px;
-  margin: 0 5px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #666;
-  box-shadow: 0px 2px 4px rgba(255, 113, 19, 0.2);
-  cursor: pointer;
-  width: 130px;
-
-  &:hover {
-    background-color:rgb(244, 189, 95);
-  }
-`;
-
-const MuteLabel = styled.label`
-  font-family: "Pixelify Sans", serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 10px 0;
-  font-size: 14px;
-  color: #666;
-  cursor: pointer;
-`;
+import ChromeFrame from "./ChromeFrame.jsx";
+import ControlsList from "./ControlsList.jsx";
+import Modal, { crimson, focusBlue, ink, inkSoft } from "./Modal.jsx";
 
 const Popup = ({ setShowPopup }) => {
   const { setMuted, setAudioReady } = useAudio();
@@ -69,26 +19,101 @@ const Popup = ({ setShowPopup }) => {
   };
 
   return (
-    <PopupWrapper>
-      <PopupContent>
-        <h2>Hi, I'm Roger and welcome to my Portfolio!</h2>
-        <p>You can use WASD/Arrow keys to move.</p>
-        <p>You can also click to move to that location.</p>
-        <p>Enter whichever building you want!</p>
-        <p>Hold your mouse to move the camera.</p>
-        <p>This site has background music and sound effects.</p>
+    <Modal
+      title="Hi, I'm Roger"
+      tagline="Welcome to my portfolio. Walk around the town and go into any building you like."
+      actionLabel="Start exploring"
+      onClose={handleClose}
+      footer={
         <MuteLabel>
-          <input
-            type="checkbox"
-            checked={startMuted}
-            onChange={(e) => setStartMuted(e.target.checked)}
-          />
-          Start muted
+          <Box>
+            <input
+              type="checkbox"
+              checked={startMuted}
+              onChange={(e) => setStartMuted(e.target.checked)}
+            />
+            <svg
+              viewBox="0 0 9 8"
+              width="18"
+              height="16"
+              shapeRendering="crispEdges"
+              aria-hidden="true"
+            >
+              <path
+                fill={crimson}
+                d="M7 0h2v2H8v1H7v1H6v1H5v1H4v1H3V6H2V5H1V4H0V3h2v1h1v1h1V4h1V3h1V2h1z"
+              />
+            </svg>
+            <ChromeFrame spikes={false} radius={8} />
+          </Box>
+          <span>
+            <strong>Start muted</strong>
+            <small>This site has music and sound effects.</small>
+          </span>
         </MuteLabel>
-        <DefaultButton onClick={handleClose}>OK</DefaultButton>
-      </PopupContent>
-    </PopupWrapper>
+      }
+    >
+      <ControlsList />
+    </Modal>
   );
 };
+
+const MuteLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  user-select: none;
+
+  strong {
+    display: block;
+    color: ${ink};
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  small {
+    display: block;
+    color: ${inkSoft};
+    font-size: 14px;
+  }
+`;
+
+const Box = styled.span`
+  position: relative;
+  isolation: isolate;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 2px;
+  border-radius: 8px;
+  background: linear-gradient(#fff, #e6eaf1);
+
+  input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  svg {
+    visibility: hidden;
+  }
+
+  input:checked + svg {
+    visibility: visible;
+  }
+
+  &:has(input:focus-visible) {
+    outline: 3px solid ${focusBlue};
+    outline-offset: 5px;
+  }
+`;
 
 export default Popup;

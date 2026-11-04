@@ -150,8 +150,8 @@ HTML elements positioned absolutely over the 3D canvas.
 | Component | z-index | Purpose |
 |-----------|---------|---------|
 | LoadingScreen | 100 | Shown while GLB models load. Progress bar segments from drei's `useProgress`. |
-| TutorialPopup | 100 | First-visit modal explaining controls. Sets `localStorage.visited = true` on dismiss. Controls are locked until dismissed. |
-| HelpPopup | 200 | Re-openable version of the tutorial with additional info. |
+| TutorialPopup | top layer | First-visit modal explaining controls, built on `Modal` (a native `<dialog>`) and `ControlsList`. Sets `localStorage.visited = true` on dismiss. Controls are locked until dismissed. |
+| HelpPopup | top layer | Re-openable version of the tutorial with additional info, on the same `Modal` and `ControlsList`. |
 | EnterPopup | 102 | Doorway interaction prompt. Shows 1-2 buttons depending on which zones overlap. |
 | BackButton | 103 | Returns to game view (scene 0). Only visible on content pages. |
 | ResetButton | 103 | Resets character position and returns to game view. |

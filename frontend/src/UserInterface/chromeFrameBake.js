@@ -11,8 +11,10 @@ const SCALE = 3; // pixels per CSS pixel, so the frames stay sharp on high-res s
 const CORNER_RADIUS = 20;
 const INFLATE_DISTANCE = 3.1 * SCALE;
 const NORMAL_STRENGTH = 1.35;
+const STRETCH_ABOVE_AREA = 60000; // CSS pixels; every HUD button is well under this
 
 const frames = new Map();
+const tiles = new Map();
 let chrome = null;
 
 function pointPath(cx, cy, rx, ry) {
@@ -102,9 +104,7 @@ function boxBlur(source, width, height, radius) {
   return result;
 }
 
-export function bakeChromeFrame(buttonWidth, buttonHeight, spikes) {
-  const key = `${buttonWidth}x${buttonHeight}:${spikes}`;
-  if (frames.has(key)) return frames.get(key);
+function shadeFrame(buttonWidth, buttonHeight, spikes, cornerRadius, spikeScale) {
   if (!chrome) {
     const chromeCanvas = paintLiquidChrome();
     chrome = {
@@ -117,7 +117,7 @@ export function bakeChromeFrame(buttonWidth, buttonHeight, spikes) {
 
   const w = buttonWidth;
   const h = buttonHeight;
-  const PADDING = spikes ? PADDING_WITH_SPIKES : PADDING_RIM_ONLY;
+  const PADDING = spikes ? Math.ceil(PADDING_WITH_SPIKES * spikeScale) : PADDING_RIM_ONLY;
   const width = (w + PADDING * 2) * SCALE;
   const height = (h + PADDING * 2) * SCALE;
   const canvas = document.createElement("canvas");
@@ -128,17 +128,19 @@ export function bakeChromeFrame(buttonWidth, buttonHeight, spikes) {
   ctx.fillStyle = ctx.strokeStyle = "#fff";
 
   // The silhouette: rim, then the four spikes
-  const radius = Math.min(CORNER_RADIUS, h / 2);
+  const radius = Math.min(cornerRadius, h / 2);
   ctx.lineWidth = 5.2;
   ctx.beginPath();
   ctx.roundRect(1, 1, w - 2, h - 2, radius - 1);
   ctx.stroke();
   if (spikes) {
+    const long = 10 * spikeScale;
+    const short = 5 * spikeScale;
     [
-      pointPath(w / 2, -1, 5, 10),
-      pointPath(w / 2, h + 1, 5, 10),
-      pointPath(-1, h / 2, 10, 5),
-      pointPath(w + 1, h / 2, 10, 5),
+      pointPath(w / 2, -1, short, long),
+      pointPath(w / 2, h + 1, short, long),
+      pointPath(-1, h / 2, long, short),
+      pointPath(w + 1, h / 2, long, short),
     ].forEach((path) => ctx.fill(new Path2D(path)));
   }
 
@@ -183,13 +185,82 @@ export function bakeChromeFrame(buttonWidth, buttonHeight, spikes) {
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.putImageData(image, 0, 0);
+  return { canvas, padding: PADDING };
+}
 
-  const frame = {
+// Shading depends only on the local shape, so a straight stretch of rim looks the same at any
+// length. Large panels shade one small frame and stretch its straight parts, which keeps the
+// corners and spikes exact without shading millions of pixels each time the panel resizes.
+function stretchFrame(w, h, spikes, cornerRadius, spikeScale) {
+  const tileKey = `${spikes}:${cornerRadius}:${spikeScale}`;
+  const corner = cornerRadius + 6;
+  const spikeHalf = Math.ceil(5 * spikeScale) + 6;
+  const tileSize = 2 * (corner + spikeHalf) + 8;
+  if (!tiles.has(tileKey)) {
+    tiles.set(tileKey, shadeFrame(tileSize, tileSize, spikes, cornerRadius, spikeScale));
+  }
+  const { canvas: tile, padding } = tiles.get(tileKey);
+
+  // Where each axis is cut: corner, stretch, spike, stretch, corner
+  const cuts = (length) => [
+    -padding,
+    corner,
+    length / 2 - spikeHalf,
+    length / 2 + spikeHalf,
+    length - corner,
+    length + padding,
+  ];
+  const from = cuts(tileSize).map((v) => (v + padding) * SCALE);
+  const toX = cuts(w).map((v) => (v + padding) * SCALE);
+  const toY = cuts(h).map((v) => (v + padding) * SCALE);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = (w + padding * 2) * SCALE;
+  canvas.height = (h + padding * 2) * SCALE;
+  const ctx = canvas.getContext("2d");
+  for (let row = 0; row < 5; row++) {
+    for (let col = 0; col < 5; col++) {
+      ctx.drawImage(
+        tile,
+        from[col],
+        from[row],
+        from[col + 1] - from[col],
+        from[row + 1] - from[row],
+        toX[col],
+        toY[row],
+        toX[col + 1] - toX[col],
+        toY[row + 1] - toY[row]
+      );
+    }
+  }
+  return { canvas, padding };
+}
+
+function toFrame({ canvas, padding }, w, h) {
+  return {
     url: canvas.toDataURL("image/png"),
-    padding: PADDING,
-    width: w + PADDING * 2,
-    height: h + PADDING * 2,
+    padding,
+    width: w + padding * 2,
+    height: h + padding * 2,
   };
-  frames.set(key, frame);
-  return frame;
+}
+
+export function bakeChromeFrame(
+  width,
+  height,
+  spikes,
+  cornerRadius = CORNER_RADIUS,
+  spikeScale = 1
+) {
+  // Not cached: resizing a panel would keep a large image for every size it passed through.
+  if (width * height > STRETCH_ABOVE_AREA) {
+    return toFrame(stretchFrame(width, height, spikes, cornerRadius, spikeScale), width, height);
+  }
+
+  const key = `${width}x${height}:${spikes}:${cornerRadius}:${spikeScale}`;
+  if (!frames.has(key)) {
+    const shaded = shadeFrame(width, height, spikes, cornerRadius, spikeScale);
+    frames.set(key, toFrame(shaded, width, height));
+  }
+  return frames.get(key);
 }

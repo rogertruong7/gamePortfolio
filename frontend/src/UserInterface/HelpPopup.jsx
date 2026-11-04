@@ -1,92 +1,112 @@
 import styled from "styled-components";
+import ControlsList from "./ControlsList.jsx";
+import Modal, { SectionTitle, WIDE_FROM, crimson, inkSoft } from "./Modal.jsx";
 
-const PopupWrapper = styled.div`
-  font-family: "Pixelify Sans", serif;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 200;
-`;
+const HelpPopup = ({ setShowHelp }) => (
+  <Modal
+    title="Help"
+    tagline="How to get around, and how I made this."
+    actionLabel="Keep exploring"
+    onClose={() => setShowHelp(false)}
+    closeOnBackdrop
+    wide
+    footer="Roger Truong 2026"
+  >
+    <Columns>
+      <section>
+        {/* Not "Controls": Pixelify's capital C reads as an O. */}
+        <SectionTitle>Getting around</SectionTitle>
+        <ControlsList showReset />
+      </section>
+      <section>
+        <SectionTitle>About this website</SectionTitle>
+        <Intro>
+          I made this website entirely by myself with React Three Fiber, a React
+          renderer for three.js. It also works on mobile, if your device can run
+          it.
+        </Intro>
+        <Credits>
+          <div>
+            <dt>Cats</dt>
+            <dd>All drawn by me</dd>
+          </div>
+          <div>
+            <dt>3D models</dt>
+            <dd>Found online and edited in Blender</dd>
+          </div>
+          <div>
+            <dt>Inspiration</dt>
+            <dd>Heavily inspired by Undertale</dd>
+          </div>
+          <div>
+            <dt>Music</dt>
+            <dd>From Undertale</dd>
+          </div>
+          <div>
+            <dt>Code</dt>
+            <dd>
+              <a
+                href="https://github.com/rogertruong7/gamePortfolio"
+                target="_blank"
+                rel="noreferrer"
+              >
+                See the repository on GitHub
+              </a>
+            </dd>
+          </div>
+        </Credits>
+      </section>
+    </Columns>
+  </Modal>
+);
 
-const PopupContent = styled.div`
-  background-color: white;
-  padding: 20px;
-  text-align: center;
-  border-radius: 8px;
-  z-index: 101;
-  width: 400px;
-`;
+const Columns = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
 
-const DefaultButton = styled.button`
-  font-family: "Pixelify Sans", serif;
-  background-color: rgb(255, 229, 162);
-  border: none;
-  border-radius: 20px;
-  padding: 10px 15px;
-  margin: 0 5px;
-  font-size: 14px;
-  font-weight: bold;
-  color: #666;
-  box-shadow: 0px 2px 4px rgba(255, 113, 19, 0.2);
-  cursor: pointer;
-  width: 130px;
-
-  &:hover {
-    background-color: rgb(244, 189, 95);
+  @media (min-width: ${WIDE_FROM}px) {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 48px;
   }
 `;
 
-const HelpPopup = ({ setShowHelp }) => {
-  const handleClose = () => {
-    setShowHelp(false);
-  };
+const Intro = styled.p`
+  margin: 0 0 20px;
+  max-width: 34em;
+`;
 
-  return (
-    <PopupWrapper>
-      <PopupContent>
-        <h2>Help Page</h2>
-        <h3>Controls</h3>
-        <p>You can use WASD/Arrow keys to move.</p>
-        <p>You can also click to move to that location.</p>
-        <p>Hold your mouse to move the camera.</p>
-        <p>
-          Walk to a building and click enter to learn more about that section.
-        </p>
-        <p>Press the reset button to reset your position.</p>
-        <h3>About this Website</h3>
-        <p>
-          This website was made entirely by me and uses React Three Fiber, a
-          react renderer for three.js. It is also fully mobile responsive, if
-          your mobile device can run it.
-        </p>
-        <p>
-          The repository can be found
-          <a
-            href="https://github.com/rogertruong7/gamePortfolio"
-            target="_blank"
-          >
-            {" "}
-            here.
-          </a>
-        </p>
+const Credits = styled.dl`
+  display: grid;
+  gap: 12px;
+  margin: 0;
 
-        <p>All of the cats were drawn by me.</p>
-        <p>The 3D models were found online and edited in blender.</p>
-        <p>This was heavily inspired by Undertale, music is also from the game!</p>
+  & > div {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 2px 16px;
+  }
 
-        <DefaultButton onClick={handleClose}>OK</DefaultButton>
-        <br></br>
-        <br></br>
-        <b>Roger Truong 2026</b>
-      </PopupContent>
-    </PopupWrapper>
-  );
-};
+  dt {
+    color: ${inkSoft};
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  a {
+    color: ${crimson};
+    text-underline-offset: 4px;
+  }
+
+  @container (max-width: 360px) {
+    & > div {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+`;
 
 export default HelpPopup;

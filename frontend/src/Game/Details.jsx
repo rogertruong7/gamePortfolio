@@ -45,6 +45,8 @@ const Details = () => {
     trees.forEach(({ scene }) => castAndReceiveShadows(scene));
     castAndReceiveShadows(floorDetails);
     floorDetails.getObjectByName("pond_ice001_0").material = pondWater.material;
+    // The fence is gone from view, but invisWalls in Static.jsx still stop the player
+    floorDetails.getObjectByName("Cube002_Material005_0").visible = false;
   }, [trees, floorDetails, pondWater]);
 
   // The wind is slow, so one tree per frame is enough and saves two thirds of the work

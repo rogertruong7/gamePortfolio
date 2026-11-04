@@ -18,7 +18,7 @@ const _euler = new THREE.Euler(0, 0, 0, "YXZ");
 const _cameraOffset = new THREE.Vector3();
 const _targetPos = new THREE.Vector3();
 
-const MainCamera = React.forwardRef(({ playerPos }, ref) => {
+const MainCamera = React.forwardRef(({ playerPos, resetAngleRef }, ref) => {
   const [aspect, setAspect] = useState(window.innerWidth / window.innerHeight);
   const rotationRef = useRef(new THREE.Vector2(0, 0));
   const isDraggingRef = useRef(false);
@@ -96,6 +96,14 @@ const MainCamera = React.forwardRef(({ playerPos }, ref) => {
     const camera = ref.current;
     const rot = rotationRef.current;
     const state = idle.current;
+
+    if (resetAngleRef.current) {
+      resetAngleRef.current = false;
+      rot.set(0, 0);
+      state.seconds = 0;
+      state.swayTime = 0;
+      state.swayStrength = 0;
+    }
 
     const swayAngle = () =>
       Math.sin(state.swayTime * IDLE_SWAY_SPEED) * IDLE_SWAY_RANGE * state.swayStrength;

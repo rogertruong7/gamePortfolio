@@ -20,6 +20,11 @@ const Floor = React.forwardRef(({
         node.receiveShadow = true;
       }
     });
+
+    // Island.jsx replaces the old square block. Hidden things still catch clicks, so its top
+    // is still what the click-to-move ray lands on.
+    scene.getObjectByName("Cube").visible = false;
+    scene.getObjectByName("Cube001").visible = false;
   }, [scene]);
 
   function onMouseDown() {

@@ -101,7 +101,9 @@ const Character = React.forwardRef(
           };
         }
         const route = clickRoute.current;
+        // Arriving only asks React to stop the walk, so a frame can run before it has
         const stop = route.stops[route.next];
+        if (!stop) return;
 
         const movingDirection = new THREE.Vector3(
           stop.x - character.position.x,

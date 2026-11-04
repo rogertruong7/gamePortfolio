@@ -8,6 +8,7 @@ import MainCamera from "./MainCamera.jsx";
 import Character from "./Character.jsx";
 import PlayerShadow from "./PlayerShadow.jsx";
 import Floor from "./Floor.jsx";
+import Island from "./Island.jsx";
 import Buildings from "./Buildings.jsx";
 import Text from "./Text.jsx";
 import Details from "./Details.jsx";
@@ -61,6 +62,7 @@ function MainGame({
   const floorRef = useRef();
   const sitRef = useRef(createSitState());
   const doorWalkRef = useRef(null);
+  const resetCameraAngleRef = useRef(false);
   const [walkingOut, setWalkingOut] = useState(false);
 
   const [sitPhase, setSitPhase] = useState("none");
@@ -133,6 +135,7 @@ function MainGame({
       doorWalkRef.current = null;
       setWalkingOut(false);
       setEnteringScene(null);
+      resetCameraAngleRef.current = true;
       characterRef.current.position.copy(startVector);
       characterRef.current.rotation.y = -Math.PI / 4;
       setKeys({});
@@ -187,7 +190,7 @@ function MainGame({
       >
         <ResizeHandler />
         <Backdrop />
-        <MainCamera ref={cameraRef} playerPos={playerPos} />
+        <MainCamera ref={cameraRef} playerPos={playerPos} resetAngleRef={resetCameraAngleRef} />
         <Lights />
         <Floor
           ref={floorRef}
@@ -197,6 +200,7 @@ function MainGame({
           setTargetPosition={setTargetPosition}
           cameraRef={cameraRef}
         />
+        <Island />
         <Buildings setLoading={setLoading} setProgress={setProgress} />
         <Details />
         <Character

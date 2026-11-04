@@ -73,6 +73,21 @@ export const invisWalls = [
   ),
 ];
 
+// The middle of each bench's seat as [x, z], and the way someone sitting on it would face
+export const benches = [
+  { seat: [123.05, -46.0], facing: [0.735, -0.678] },
+  { seat: [117.95, -123.4], facing: [0.93, 0.368] },
+];
+
+const BENCH_HALF_LENGTH = 11.2;
+const BENCH_DEPTH = 7;
+
+export const benchEdges = benches.map(({ seat: [x, z], facing: [facingX, facingZ] }) => {
+  const alongX = -facingZ * BENCH_HALF_LENGTH;
+  const alongZ = facingX * BENCH_HALF_LENGTH;
+  return new RotatedBox(x - alongX, z - alongZ, x + alongX, z + alongZ, BENCH_DEPTH);
+});
+
 // Where the main shadow-casting light sits, relative to the middle of the scene
 export const sunPosition = [-100, 300, 200];
 

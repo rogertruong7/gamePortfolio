@@ -13,7 +13,9 @@ import Text from "./Text.jsx";
 import Details from "./Details.jsx";
 import DarkSpot from "./Darkspot.jsx";
 import Doorway from "./Doorway.jsx";
+import SitPrompt from "../UserInterface/SitPrompt.jsx";
 import { labels } from "./Static.jsx";
+import { createSitState, startSitting, startStanding } from "./sitting.js";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
@@ -53,7 +55,10 @@ function MainGame({
   const characterRef = useRef();
   const cameraRef = useRef();
   const floorRef = useRef();
+  const sitRef = useRef(createSitState());
 
+  const [sitPhase, setSitPhase] = useState("none");
+  const [nearBench, setNearBench] = useState(null);
   const [playerPos, setPlayerPos] = useState(startVector);
   const [clickMoving, setClickMoving] = useState(false);
   const [darkSpot, setDarkspot] = useState(false);
@@ -67,8 +72,20 @@ function MainGame({
     setKeys({}); // Clear all keys
   }
 
+  function sitDown() {
+    setDarkspot(false);
+    setClickMoving(false);
+    startSitting(sitRef.current, nearBench, targetPosition, characterRef.current.position);
+  }
+
+  function standUp() {
+    startStanding(sitRef.current);
+  }
+
   function onKeyDown(event) {
     if (currentScene !== 0) return;
+    // E is for the bench, and shouldn't count as walking for the footstep sounds
+    if (event.key.toLowerCase() === "e") return;
     setKeys((prevKeys) => ({
       ...prevKeys,
       [event.key.toLowerCase()]: true,
@@ -106,6 +123,7 @@ function MainGame({
       // console.log("resetting");
       setDarkspot(false);
       setClickMoving(false);
+      sitRef.current.phase = "none";
       characterRef.current.position.copy(startVector);
       characterRef.current.rotation.y = -Math.PI / 4;
       setKeys({});
@@ -115,8 +133,8 @@ function MainGame({
 
   useEffect(() => {
     const anyKeyActive = Object.values(keys).some((v) => v === true);
-    setIsMoving(clickMoving || anyKeyActive);
-  }, [clickMoving, keys, setIsMoving]);
+    setIsMoving(clickMoving || anyKeyActive || sitPhase === "approaching");
+  }, [clickMoving, keys, sitPhase, setIsMoving]);
 
   return (
     <>
@@ -152,6 +170,9 @@ function MainGame({
           targetPosition={targetPosition}
           keys={keys}
           currentScene={currentScene}
+          sitRef={sitRef}
+          setSitPhase={setSitPhase}
+          setNearBench={setNearBench}
         />
         <PlayerShadow characterRef={characterRef} />
         {labels.map(({ text, position, fontSize, showcaseName }) => (
@@ -179,6 +200,8 @@ function MainGame({
           setOneOptionButton={setOneOptionButton}
         />
       </Canvas>
+      {sitPhase === "none" && nearBench && <SitPrompt label="Sit down" onPress={sitDown} />}
+      {sitPhase === "seated" && <SitPrompt label="Stand up" onPress={standUp} />}
     </>
   );
 }

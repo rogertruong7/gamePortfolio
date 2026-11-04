@@ -1,9 +1,11 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { invisWalls, pondEdges } from "./Static";
+import { benchEdges, invisWalls, pondEdges } from "./Static";
+import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
 
+const ANGLED_WALLS = [...pondEdges, ...benchEdges];
 const SPEED = 100;
 // Idle plays the walk clip very slowly as a gentle breathing motion
 const IDLE_ANIMATION_SPEED = 0.06;
@@ -22,12 +24,16 @@ const Character = React.forwardRef(
       targetPosition,
       keys,
       currentScene,
+      sitRef,
+      setSitPhase,
+      setNearBench,
     },
     ref
   ) => {
     const { scene, animations } = useGLTF("/models/cloudme.glb");
     const [arrowMoving, setArrowMoving] = useState(false);
     const mixer = useRef();
+    const sitBones = useMemo(() => findSitBones(scene), [scene]);
 
     function isCollision(newPosition, ignoreWall = null) {
       const characterRadius = 5;
@@ -52,7 +58,7 @@ const Character = React.forwardRef(
         }
       });
 
-      pondEdges.forEach((edge) => {
+      ANGLED_WALLS.forEach((edge) => {
         if (edge === ignoreWall) return;
 
         if (edge.intersectsSphere(_hitbox)) {
@@ -260,22 +266,39 @@ const Character = React.forwardRef(
       });
     }, [scene, animations]);
 
-    useFrame((_, delta) => {
-      const moving = clickMoving || arrowMoving;
+    useFrame(({ clock }, delta) => {
+      const sit = sitRef.current;
+      const moving =
+        sit.phase === "none" ? clickMoving || arrowMoving : sit.phase === "approaching";
 
       if (mixer.current) {
         mixer.current.update(moving ? delta : delta * IDLE_ANIMATION_SPEED);
       }
+      applySitPose(sit, sitBones, clock.elapsedTime);
 
       if (currentScene !== 0) return;
 
       let finalDirection = keyboardMovement();
 
-      clickToMove(delta);
-      keyboardMovingSlide(finalDirection, delta);
+      if (sit.phase === "none") {
+        clickToMove(delta);
+        keyboardMovingSlide(finalDirection, delta);
+      } else {
+        const wantsToMove =
+          finalDirection.lengthSq() > 0 || targetPosition !== sit.clickTarget;
+        updateSit(sit, ref.current, delta, wantsToMove, updateRotation);
+      }
+
       if (ref.current !== undefined) {
         setPlayerPos(ref.current.position);
+
+        const near = nearestBench(ref.current.position);
+        if (near !== sit.near) {
+          sit.near = near;
+          setNearBench(near);
+        }
       }
+      setSitPhase(sit.phase);
     });
 
     return (

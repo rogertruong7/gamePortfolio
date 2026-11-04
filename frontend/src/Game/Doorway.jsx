@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 
 export default function Doorway({
   characterRef,
+  doorWalkRef,
   setEnterPopupVisible,
   setProjectButton,
   setAboutButton,
@@ -62,12 +63,15 @@ export default function Doorway({
     let standingOn = [];
     let characterPosition = characterRef.current.position;
 
-    Object.entries(showcases).forEach(([, showcase]) => {
-      let box = showcase.box;
-      if (box.containsPoint(characterPosition)) {
-        standingOn.push(showcase.showcaseName);
-      }
-    });
+    // The popup stays away while the character is walking through a door, either way
+    if (!doorWalkRef.current) {
+      Object.entries(showcases).forEach(([, showcase]) => {
+        let box = showcase.box;
+        if (box.containsPoint(characterPosition)) {
+          standingOn.push(showcase.showcaseName);
+        }
+      });
+    }
 
     const key = standingOn.sort().join(",");
     if (key === prevKey.current) return;

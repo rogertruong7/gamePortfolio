@@ -4,7 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { benchEdges, invisWalls, pondEdges } from "./Static";
 import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
-import { updateDoorWalk, waitOutsideDoor } from "./doorWalk";
+import { updateDoorWalk } from "./doorWalk";
 
 const ANGLED_WALLS = [...pondEdges, ...benchEdges];
 const SPEED = 100;
@@ -29,7 +29,7 @@ const Character = React.forwardRef(
       setSitPhase,
       setNearBench,
       doorWalkRef,
-      onEntered,
+      onDoorWalkDone,
     },
     ref
   ) => {
@@ -286,10 +286,8 @@ const Character = React.forwardRef(
       let finalDirection = keyboardMovement();
 
       if (doorWalk) {
-        if (updateDoorWalk(doorWalk, ref.current, delta, updateRotation)) {
-          waitOutsideDoor(doorWalk, ref.current);
-          doorWalkRef.current = null;
-          onEntered(doorWalk.scene);
+        if (!doorWalk.finished && updateDoorWalk(doorWalk, ref.current, delta, updateRotation)) {
+          onDoorWalkDone(doorWalk);
         }
       } else if (sit.phase === "none") {
         clickToMove(delta);

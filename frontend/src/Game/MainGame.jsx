@@ -16,7 +16,7 @@ import Doorway from "./Doorway.jsx";
 import SitPrompt from "../UserInterface/SitPrompt.jsx";
 import { labels } from "./Static.jsx";
 import { createSitState, startSitting, startStanding } from "./sitting.js";
-import { startDoorWalk } from "./doorWalk.js";
+import { startWalkingIn, startWalkingOut } from "./doorWalk.js";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
@@ -61,6 +61,7 @@ function MainGame({
   const floorRef = useRef();
   const sitRef = useRef(createSitState());
   const doorWalkRef = useRef(null);
+  const [walkingOut, setWalkingOut] = useState(false);
 
   const [sitPhase, setSitPhase] = useState("none");
   const [nearBench, setNearBench] = useState(null);
@@ -130,6 +131,7 @@ function MainGame({
       setClickMoving(false);
       sitRef.current.phase = "none";
       doorWalkRef.current = null;
+      setWalkingOut(false);
       setEnteringScene(null);
       characterRef.current.position.copy(startVector);
       characterRef.current.rotation.y = -Math.PI / 4;
@@ -140,16 +142,39 @@ function MainGame({
 
   useEffect(() => {
     if (enteringScene !== null) {
-      doorWalkRef.current = startDoorWalk(enteringScene, characterRef.current.position);
+      doorWalkRef.current = startWalkingIn(enteringScene, characterRef.current.position);
     }
   }, [enteringScene]);
+
+  // It waits inside the building while the page is open, then walks back out
+  useEffect(() => {
+    const walk = doorWalkRef.current;
+    if (currentScene === 0 && walk?.finished) {
+      doorWalkRef.current = startWalkingOut(walk.scene, characterRef.current);
+      setWalkingOut(true);
+    }
+  }, [currentScene]);
+
+  function onDoorWalkDone(walk) {
+    if (walk.leaving) {
+      doorWalkRef.current = null;
+      setWalkingOut(false);
+    } else {
+      walk.finished = true;
+      onEntered(walk.scene);
+    }
+  }
 
   useEffect(() => {
     const anyKeyActive = Object.values(keys).some((v) => v === true);
     setIsMoving(
-      clickMoving || anyKeyActive || sitPhase === "approaching" || enteringScene !== null
+      clickMoving ||
+        anyKeyActive ||
+        sitPhase === "approaching" ||
+        enteringScene !== null ||
+        walkingOut
     );
-  }, [clickMoving, keys, sitPhase, enteringScene, setIsMoving]);
+  }, [clickMoving, keys, sitPhase, enteringScene, walkingOut, setIsMoving]);
 
   return (
     <>
@@ -189,7 +214,7 @@ function MainGame({
           setSitPhase={setSitPhase}
           setNearBench={setNearBench}
           doorWalkRef={doorWalkRef}
-          onEntered={onEntered}
+          onDoorWalkDone={onDoorWalkDone}
         />
         <PlayerShadow characterRef={characterRef} />
         {labels.map(({ text, position, fontSize, showcaseName }) => (
@@ -208,6 +233,7 @@ function MainGame({
 
         <Doorway
           characterRef={characterRef}
+          doorWalkRef={doorWalkRef}
           setEnterPopupVisible={setEnterPopupVisible}
           setProjectButton={setProjectButton}
           setAboutButton={setAboutButton}

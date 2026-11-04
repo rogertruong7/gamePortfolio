@@ -2,11 +2,18 @@ import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { benchEdges, invisWalls, pondEdges } from "./Static";
+import { benchEdges, invisWalls, pondEdges, walkArea } from "./Static";
+import { createPathfinder } from "./pathfinding";
 import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
 import { updateDoorWalk } from "./doorWalk";
 
 const ANGLED_WALLS = [...pondEdges, ...benchEdges];
+const CHARACTER_RADIUS = 5;
+const pathfinder = createPathfinder({
+  boxes: ANGLED_WALLS,
+  bounds: walkArea,
+  radius: CHARACTER_RADIUS,
+});
 const SPEED = 100;
 // Idle plays the walk clip very slowly as a gentle breathing motion
 const IDLE_ANIMATION_SPEED = 0.06;
@@ -37,10 +44,10 @@ const Character = React.forwardRef(
     const [arrowMoving, setArrowMoving] = useState(false);
     const mixer = useRef();
     const sitBones = useMemo(() => findSitBones(scene), [scene]);
+    const clickRoute = useRef({ target: null, stops: [], next: 0 });
 
     function isCollision(newPosition, ignoreWall = null) {
-      const characterRadius = 5;
-      _hitbox.set(newPosition, characterRadius);
+      _hitbox.set(newPosition, CHARACTER_RADIUS);
       let collisionNormal = null;
       let collidingWall = null;
 
@@ -84,9 +91,24 @@ const Character = React.forwardRef(
     function clickToMove(delta) {
       if (clickMoving && ref.current !== undefined) {
         let character = ref.current;
-        const movingDirection = targetPosition.clone().sub(character.position);
-        movingDirection.y = 0;
-        // If the distance to target is large enough, move the character
+
+        // A new click is a new target object, so that's the time to plan a new route
+        if (clickRoute.current.target !== targetPosition) {
+          clickRoute.current = {
+            target: targetPosition,
+            stops: pathfinder.findPath(character.position, targetPosition),
+            next: 0,
+          };
+        }
+        const route = clickRoute.current;
+        const stop = route.stops[route.next];
+
+        const movingDirection = new THREE.Vector3(
+          stop.x - character.position.x,
+          0,
+          stop.z - character.position.z
+        );
+        // If the distance to the next stop is large enough, move the character
         if (movingDirection.length() > delta * SPEED) {
           const stepDirection = movingDirection
             .normalize()
@@ -104,8 +126,14 @@ const Character = React.forwardRef(
             setClickMoving(false);
           }
         } else {
-          setDarkspot(false);
-          setClickMoving(false);
+          // Land exactly on it, or the line to the next stop could clip the corner
+          character.position.x = stop.x;
+          character.position.z = stop.z;
+          route.next += 1;
+          if (route.next === route.stops.length) {
+            setDarkspot(false);
+            setClickMoving(false);
+          }
         }
       }
     }

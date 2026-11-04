@@ -54,6 +54,9 @@ export const pondEdges = [
   new RotatedBox(136.1, -87.2, 134.4, -109.4),
 ];
 
+// The space inside invisWalls below
+export const walkArea = { minX: 70, maxX: 217, minZ: -190, maxZ: -22 };
+
 export const invisWalls = [
   new THREE.Box3(
     new THREE.Vector3(0, -21, -190),

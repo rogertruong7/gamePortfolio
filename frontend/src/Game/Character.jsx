@@ -6,8 +6,15 @@ import { benchEdges, invisWalls, pondEdges, walkArea } from "./Static";
 import { createPathfinder } from "./pathfinding";
 import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
 import { updateDoorWalk } from "./doorWalk";
+import { isBlocked, moveAndSlide } from "./wallSliding";
 
 const ANGLED_WALLS = [...pondEdges, ...benchEdges];
+const WALLS = [
+  ...invisWalls.map((wall) => ({
+    closestPoint: (position) => wall.clampPoint(position, new THREE.Vector3()),
+  })),
+  ...ANGLED_WALLS,
+];
 const CHARACTER_RADIUS = 5;
 const pathfinder = createPathfinder({
   boxes: ANGLED_WALLS,
@@ -17,8 +24,6 @@ const pathfinder = createPathfinder({
 const SPEED = 100;
 // Idle plays the walk clip very slowly as a gentle breathing motion
 const IDLE_ANIMATION_SPEED = 0.06;
-const _hitbox = new THREE.Sphere();
-const _closestPt = new THREE.Vector3();
 
 const Character = React.forwardRef(
   (
@@ -45,48 +50,6 @@ const Character = React.forwardRef(
     const mixer = useRef();
     const sitBones = useMemo(() => findSitBones(scene), [scene]);
     const clickRoute = useRef({ target: null, stops: [], next: 0 });
-
-    function isCollision(newPosition, ignoreWall = null) {
-      _hitbox.set(newPosition, CHARACTER_RADIUS);
-      let collisionNormal = null;
-      let collidingWall = null;
-
-      invisWalls.forEach((wall) => {
-        if (wall === ignoreWall) return;
-
-        if (wall.intersectsSphere(_hitbox)) {
-          _closestPt.set(
-            Math.max(wall.min.x, Math.min(newPosition.x, wall.max.x)),
-            Math.max(wall.min.y, Math.min(newPosition.y, wall.max.y)),
-            Math.max(wall.min.z, Math.min(newPosition.z, wall.max.z))
-          );
-          collisionNormal = new THREE.Vector3()
-            .subVectors(newPosition, _closestPt)
-            .normalize();
-          collisionNormal.y = 0;
-          collidingWall = wall;
-        }
-      });
-
-      ANGLED_WALLS.forEach((edge) => {
-        if (edge === ignoreWall) return;
-
-        if (edge.intersectsSphere(_hitbox)) {
-          const closestPoint = edge.closestPoint(newPosition);
-          collisionNormal = new THREE.Vector3()
-            .subVectors(newPosition, closestPoint)
-            .normalize();
-          collisionNormal.y = 0;
-          collidingWall = edge;
-        }
-      });
-
-      if (collisionNormal) {
-        return { collisionNormal, collidingWall };
-      }
-
-      return null;
-    }
 
     function clickToMove(delta) {
       if (clickMoving && ref.current !== undefined) {
@@ -118,8 +81,7 @@ const Character = React.forwardRef(
 
           // Check if the next step leads to a collision
           const newPosition = character.position.clone().add(stepDirection);
-          const result = isCollision(newPosition);
-          if (!result) {
+          if (!isBlocked(character.position, newPosition, WALLS, CHARACTER_RADIUS)) {
             // No collision, move the character
             character.position.add(stepDirection);
             updateRotation(stepDirection, delta);
@@ -241,44 +203,15 @@ const Character = React.forwardRef(
 
     function keyboardMovingSlide(finalDirection, delta) {
       if (ref.current !== undefined) {
-        let character = ref.current;
-        let collisionNormal = null;
-        let wall = null;
-        let newPosition = character.position.clone().add(finalDirection);
-        const result = isCollision(newPosition);
-
-        if (result) {
-          collisionNormal = result.collisionNormal;
-          wall = result.collidingWall;
-        }
-
+        // This also normalizes finalDirection, so diagonals aren't any faster
         updateRotation(finalDirection, delta);
-        if (!collisionNormal) {
-          character.position.addScaledVector(finalDirection, delta * SPEED);
-        } else {
-          // Slide along the wall using the collision normal
-          const slideDirection = finalDirection
-            .clone()
-            .projectOnPlane(collisionNormal);
-
-          if (slideDirection.length() > 0) {
-            slideDirection.normalize();
-            let slidingPosition = character.position
-              .clone()
-              .addScaledVector(slideDirection, delta * SPEED);
-
-            // Check if the new sliding position causes a collision, excluding the current sliding wall
-            const collisionNormalAfterSlide = isCollision(
-              slidingPosition,
-              wall
-            );
-
-            if (!collisionNormalAfterSlide) {
-              // If no collision, perform the slide movement
-              character.position.addScaledVector(slideDirection, delta * SPEED);
-            }
-          }
-        }
+        moveAndSlide(
+          ref.current.position,
+          finalDirection.x * delta * SPEED,
+          finalDirection.z * delta * SPEED,
+          WALLS,
+          CHARACTER_RADIUS
+        );
       }
     }
 

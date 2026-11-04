@@ -83,7 +83,7 @@ Two movement systems run simultaneously each frame via `useFrame`:
 1. **Keyboard movement** — WASD/arrow keys. Direction is relative to camera orientation. Only active after `localStorage.visited === "true"` (after tutorial dismissal).
 2. **Click-to-move** — Floor raycasting sets a target position; character walks toward it each frame.
 
-Collision detection: the character is approximated as a `THREE.Sphere` (radius 5) tested against `invisWalls` bounding boxes. On collision, the character slides along the wall surface using the collision normal projected onto the movement plane.
+Collision detection: the character is approximated as a `THREE.Sphere` (radius 5) tested against `invisWalls` and the angled pond and bench boxes. `wallSliding.js` moves it in small steps, and when a step would enter a wall it runs along the wall instead, as long as that doesn't enter any wall, including the same one.
 
 ### Camera (`MainCamera.jsx`)
 

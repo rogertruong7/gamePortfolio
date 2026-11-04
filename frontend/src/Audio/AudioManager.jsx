@@ -13,6 +13,7 @@ const AudioManager = ({ currentScene, isMoving }) => {
   const footstepsRef = useRef(null);
   const prevSceneRef = useRef(currentScene);
   const initializedRef = useRef(false);
+  const fadeEndTimerRef = useRef(null);
   const wasPlayingBeforeHideRef = useRef({ snowy: false, shop: false, footsteps: false });
 
   useEffect(() => {
@@ -33,6 +34,7 @@ const AudioManager = ({ currentScene, isMoving }) => {
     });
 
     return () => {
+      clearTimeout(fadeEndTimerRef.current);
       snowyRef.current?.unload();
       shopRef.current?.unload();
       footstepsRef.current?.unload();
@@ -73,21 +75,27 @@ const AudioManager = ({ currentScene, isMoving }) => {
     const shop = shopRef.current;
     if (!snowy || !shop) return;
 
+    // A scene change within the fade must cancel the old track's pending pause or
+    // stop, or that would silence the track that has just been faded back in.
     if (prevScene === 0 && currentScene !== 0) {
+      clearTimeout(fadeEndTimerRef.current);
       snowy.fade(snowy.volume(), 0, FADE_DURATION);
-      setTimeout(() => snowy.pause(), FADE_DURATION);
+      fadeEndTimerRef.current = setTimeout(() => snowy.pause(), FADE_DURATION);
+      // play() on a track that is still fading out would layer a second copy of it.
+      shop.stop();
       shop.volume(0);
       shop.seek(0);
       shop.play();
       shop.fade(0, BGM_VOLUME, FADE_DURATION);
     } else if (prevScene !== 0 && currentScene === 0) {
+      clearTimeout(fadeEndTimerRef.current);
       shop.fade(shop.volume(), 0, FADE_DURATION);
-      setTimeout(() => shop.stop(), FADE_DURATION);
+      fadeEndTimerRef.current = setTimeout(() => shop.stop(), FADE_DURATION);
       if (!snowy.playing()) {
         snowy.volume(0);
         snowy.play();
       }
-      snowy.fade(0, BGM_VOLUME, FADE_DURATION);
+      snowy.fade(snowy.volume(), BGM_VOLUME, FADE_DURATION);
     }
   }, [currentScene, audioReady]);
 

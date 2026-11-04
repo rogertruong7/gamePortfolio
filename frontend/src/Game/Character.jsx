@@ -7,6 +7,7 @@ import { createPathfinder } from "./pathfinding";
 import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
 import { updateDoorWalk } from "./doorWalk";
 import { isBlocked, moveAndSlide } from "./wallSliding";
+import { readStore } from "../Helpers/storage.js";
 
 const ANGLED_WALLS = [...pondEdges, ...benchEdges];
 const WALLS = [
@@ -22,6 +23,9 @@ const pathfinder = createPathfinder({
   radius: CHARACTER_RADIUS,
 });
 const SPEED = 100;
+// A hitch moves the character no further than this much time. At 10 units it can't
+// clear the hitbox's 10-unit width, so a click-to-move step can't jump a wall.
+const MAX_FRAME_DELTA = 0.1;
 // Idle plays the walk clip very slowly as a gentle breathing motion
 const IDLE_ANIMATION_SPEED = 0.06;
 
@@ -152,7 +156,7 @@ const Character = React.forwardRef(
     function keyboardMovement() {
       let direction = new THREE.Vector3();
       let finalDirection = new THREE.Vector3();
-      if (localStorage.getItem("visited") === "true") {
+      if (readStore("visited") === "true") {
         if (keys["w"] || keys["arrowup"]) {
           setDarkspot(false);
           setClickMoving(false);
@@ -202,17 +206,17 @@ const Character = React.forwardRef(
     }
 
     function keyboardMovingSlide(finalDirection, delta) {
-      if (ref.current !== undefined) {
-        // This also normalizes finalDirection, so diagonals aren't any faster
-        updateRotation(finalDirection, delta);
-        moveAndSlide(
-          ref.current.position,
-          finalDirection.x * delta * SPEED,
-          finalDirection.z * delta * SPEED,
-          WALLS,
-          CHARACTER_RADIUS
-        );
-      }
+      if (!ref.current || finalDirection.lengthSq() === 0) return;
+
+      // This also normalizes finalDirection, so diagonals aren't any faster
+      updateRotation(finalDirection, delta);
+      moveAndSlide(
+        ref.current.position,
+        finalDirection.x * delta * SPEED,
+        finalDirection.z * delta * SPEED,
+        WALLS,
+        CHARACTER_RADIUS
+      );
     }
 
     useEffect(() => {
@@ -246,6 +250,7 @@ const Character = React.forwardRef(
 
       if (currentScene !== 0) return;
 
+      const moveDelta = Math.min(delta, MAX_FRAME_DELTA);
       let finalDirection = keyboardMovement();
 
       if (doorWalk) {
@@ -253,8 +258,8 @@ const Character = React.forwardRef(
           onDoorWalkDone(doorWalk);
         }
       } else if (sit.phase === "none") {
-        clickToMove(delta);
-        keyboardMovingSlide(finalDirection, delta);
+        clickToMove(moveDelta);
+        keyboardMovingSlide(finalDirection, moveDelta);
       } else {
         const wantsToMove =
           finalDirection.lengthSq() > 0 || targetPosition !== sit.clickTarget;

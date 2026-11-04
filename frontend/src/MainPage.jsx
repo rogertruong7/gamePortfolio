@@ -17,6 +17,7 @@ import HelpPopup from "./UserInterface/HelpPopup.jsx";
 import { AudioProvider, useAudio } from "./Audio/AudioContext.jsx";
 import { AudioManager } from "./Audio/AudioManager.jsx";
 import { track } from "./Analytics/tracker.js";
+import { readStore } from "./Helpers/storage.js";
 
 const SCENE_NAMES = {
   1: "About Me",
@@ -31,7 +32,7 @@ const AutoAudioReady = ({ loading }) => {
   const { audioReady, setAudioReady } = useAudio();
 
   useEffect(() => {
-    if (!loading && !audioReady && localStorage.getItem("visited") === "true") {
+    if (!loading && !audioReady && readStore("visited") === "true") {
       const unlock = () => {
         setAudioReady(true);
         window.removeEventListener("click", unlock);
@@ -120,7 +121,7 @@ const MainPage = () => {
             setCurrentScene={setCurrentScene}
           ></ResetButton>
           <HelpButton setShowHelp={setShowHelp}></HelpButton>
-          {localStorage.getItem("visited") !== "true" && showPopup && (
+          {readStore("visited") !== "true" && showPopup && (
             <Popup setShowPopup={setShowPopup}></Popup>
           )}
           {showHelp && <HelpPopup setShowHelp={setShowHelp}></HelpPopup>}

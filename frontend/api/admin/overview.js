@@ -46,10 +46,12 @@ const QUERIES = {
     WHERE ${IN_RANGE}`,
 
   daily: `
+    -- The range is rolling, so it starts partway through its first calendar day.
+    -- That day gets a bar too, otherwise its visits count in the totals but not here.
     WITH bounds AS (
       SELECT CASE
                WHEN $1::int IS NOT NULL THEN
-                 (now() AT TIME ZONE '${DAY_ZONE}')::date - ($1::int - 1)
+                 ((now() - ($1::int * interval '1 day')) AT TIME ZONE '${DAY_ZONE}')::date
                ELSE coalesce(
                  (SELECT min(started_at AT TIME ZONE '${DAY_ZONE}')::date FROM sessions),
                  (now() AT TIME ZONE '${DAY_ZONE}')::date

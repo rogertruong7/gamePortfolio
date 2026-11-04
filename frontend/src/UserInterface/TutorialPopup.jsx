@@ -1,6 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { useAudio } from "../Audio/AudioContext.jsx";
+import { writeStore } from "../Helpers/storage.js";
 import ChromeFrame from "./ChromeFrame.jsx";
 import ControlsList from "./ControlsList.jsx";
 import Modal, { crimson, focusBlue, ink, inkSoft } from "./Modal.jsx";
@@ -10,7 +11,7 @@ const Popup = ({ setShowPopup }) => {
   const [startMuted, setStartMuted] = useState(false);
 
   const handleClose = () => {
-    localStorage.setItem("visited", true);
+    writeStore("visited", "true");
     if (startMuted) {
       setMuted(true);
     }

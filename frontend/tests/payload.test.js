@@ -37,6 +37,11 @@ test("payloads without valid ids are rejected", () => {
   assert.equal(sanitizePayload(valid({ events: "nope" })), null);
 });
 
+test("ids that only pass as uuids once coerced to strings are rejected", () => {
+  assert.equal(sanitizePayload(valid({ visitorId: [VISITOR] })), null);
+  assert.equal(sanitizePayload(valid({ sessionId: [SESSION] })), null);
+});
+
 test("unknown event types are dropped", () => {
   const result = sanitizePayload(
     valid({ events: [{ type: "made_up" }, { type: "first_move" }, null] })

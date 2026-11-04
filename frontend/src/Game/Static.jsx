@@ -135,7 +135,7 @@ export const showcases = [
   {
     showcaseName: "skills",
     box: new THREE.Box3(
-      new THREE.Vector3(172, -50, -190),
+      new THREE.Vector3(140, -50, -190),
       new THREE.Vector3(215, 50, -160)
     ),
   },

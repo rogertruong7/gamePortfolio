@@ -34,10 +34,22 @@
         const tell = (message) => parent.postMessage({ sansFight: message }, location.origin);
         let fighting = false;
         let gameOver = false;
+        // It loads while the player is still diving, so it waits to be told to go
+        let waiting = true;
+
+        window.startFight = function () {
+          waiting = false;
+          cr_setSuspended(false);
+        };
+
+        document.addEventListener("visibilitychange", () => {
+          cr_setSuspended(document.hidden || waiting);
+        });
 
         // Runs as the battle starts
         function start() {
           fighting = true;
+          if (waiting) cr_setSuspended(true);
           tell("started");
         }
 
@@ -83,10 +95,6 @@
         if (new URLSearchParams(location.search).has("muted")) {
           cr.plugins_.Audio.prototype.acts.SetSilent(0);
         }
-      });
-
-      document.addEventListener("visibilitychange", function () {
-        cr_setSuspended(document.hidden);
       });
     </script>
   </body>

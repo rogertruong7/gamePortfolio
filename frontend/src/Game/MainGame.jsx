@@ -142,15 +142,16 @@ function MainGame({
 
   function jumpIntoLake() {
     stopWalking();
+    if (!lakeRef.current.flipped) setFightOpen(true);
     startJump(lakeRef.current, characterRef.current);
   }
 
   const closeReflection = useCallback(() => stopReflection(lakeRef.current), []);
   const onFightCovered = useCallback(() => setFightCovers(true), []);
-  const onFightClosed = useCallback(() => setFightOpen(false), []);
-  const onFightEnd = useCallback((outcome) => {
-    endFight(lakeRef.current, outcome === "died" || outcome === "fled");
-    setFightCovers(false);
+  const onFightEnd = useCallback(() => setFightCovers(false), []);
+  const onFightClosed = useCallback((outcome) => {
+    setFightOpen(false);
+    endFight(lakeRef.current, characterRef.current, outcome === "died" || outcome === "fled");
   }, []);
 
   function playEmote(emote) {
@@ -250,12 +251,9 @@ function MainGame({
   }, [lakePhase, setIsPlunging]);
 
   useEffect(() => {
-    if (lakePhase === "fighting") setFightOpen(true);
-  }, [lakePhase]);
-
-  useEffect(() => {
-    setIsFighting(fightOpen);
-  }, [fightOpen, setIsFighting]);
+    // The fight loads during the dive, which keeps its sounds until it's over
+    setIsFighting(fightOpen && !isJumping(lakePhase));
+  }, [fightOpen, lakePhase, setIsFighting]);
 
   useEffect(() => {
     const anyKeyActive = Object.values(keys).some((v) => v === true);
@@ -363,6 +361,7 @@ function MainGame({
       {lakePhase === "reflecting" && <ReflectionDialog onClose={closeReflection} />}
       {fightOpen && (
         <SansFight
+          ready={lakePhase === "fighting"}
           muted={muted}
           onCovered={onFightCovered}
           onEnd={onFightEnd}

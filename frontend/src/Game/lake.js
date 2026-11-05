@@ -73,13 +73,9 @@ export function startJump(lake, character) {
   lake.jumpSeconds = 0;
 }
 
-// Leaving sends the character back to the pond in the normal world, right where it's standing
-export function endFight(lake, backToNormalWorld) {
+export function endFight(lake, character, jumpOut) {
   lake.phase = "none";
-  if (!backToNormalWorld) return;
-  lake.flipped = false;
-  lake.underwater = 0;
-  lake.roll = 0;
+  if (jumpOut) startJump(lake, character);
 }
 
 export function resetLake(lake) {

@@ -39,21 +39,6 @@ export class RotatedBox {
   }
 }
 
-export const pondEdges = [
-  new RotatedBox(134.4, -109.4, 135.8, -121.3),
-  new RotatedBox(135.8, -121.3, 152.0, -134.9),
-  new RotatedBox(152.0, -134.9, 167.4, -134.9),
-  new RotatedBox(167.4, -134.9, 183.6, -121.3),
-  new RotatedBox(183.6, -121.3, 185.1, -109.4),
-  new RotatedBox(185.1, -109.4, 183.3, -87.2),
-  new RotatedBox(183.3, -87.2, 184.2, -74.8),
-  new RotatedBox(184.2, -74.8, 171.9, -58.6),
-  new RotatedBox(171.9, -58.6, 147.5, -58.6),
-  new RotatedBox(147.5, -58.6, 135.3, -74.8),
-  new RotatedBox(135.3, -74.8, 136.1, -87.2),
-  new RotatedBox(136.1, -87.2, 134.4, -109.4),
-];
-
 // The space inside invisWalls below
 export const walkArea = { minX: 70, maxX: 217, minZ: -190, maxZ: -22 };
 

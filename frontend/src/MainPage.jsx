@@ -56,7 +56,6 @@ const MainPage = () => {
   const [enteringScene, setEnteringScene] = useState(null);
   const [enterPopupVisible, setEnterPopupVisible] = useState(false);
   const [twoOptionsButton, setTwoOptionsButton] = useState(false);
-  const [oneOptionButton, setOneOptionButton] = useState(false);
   const [projectButton, setProjectButton] = useState(false);
   const [aboutButton, setAboutButton] = useState(false);
   const [experiencesButton, setExperiencesButton] = useState(false);
@@ -67,6 +66,8 @@ const MainPage = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
+  const [isWading, setIsWading] = useState(false);
+  const [isPlunging, setIsPlunging] = useState(false);
   const hasMovedRef = useRef(false);
 
   const finishEntering = (scene) => {
@@ -111,7 +112,12 @@ const MainPage = () => {
   return (
     <AudioProvider>
       <AutoAudioReady loading={loading} />
-      <AudioManager currentScene={currentScene} isMoving={isMoving} />
+      <AudioManager
+        currentScene={currentScene}
+        isMoving={isMoving}
+        isWading={isWading}
+        isPlunging={isPlunging}
+      />
       <Menu />
       {loading && currentScene === 0 && <LoadingScreen progress={progress} />}
       {!loading && (
@@ -143,11 +149,12 @@ const MainPage = () => {
           setExperiencesButton={setExperiencesButton}
           setSkillsButton={setSkillsButton}
           setTwoOptionsButton={setTwoOptionsButton}
-          setOneOptionButton={setOneOptionButton}
           reseted={reseted}
           setReseted={setReseted}
           setProgress={setProgress}
           setIsMoving={setIsMoving}
+          setIsWading={setIsWading}
+          setIsPlunging={setIsPlunging}
           currentScene={currentScene}
           enteringScene={enteringScene}
           setEnteringScene={setEnteringScene}
@@ -157,7 +164,6 @@ const MainPage = () => {
       {enterPopupVisible && currentScene === 0 && enteringScene === null && (
         <EnterPopup
           twoOptionsButton={twoOptionsButton}
-          oneOptionButton={oneOptionButton}
           projectButton={projectButton}
           aboutButton={aboutButton}
           experiencesButton={experiencesButton}

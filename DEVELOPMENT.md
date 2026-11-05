@@ -80,6 +80,14 @@ When deploying to Vercel, set the **root directory** to `frontend` and the **bui
 
 Utility scripts live in the `scripts/` directory. Run them from the **repo root**.
 
+### `scripts/make-water-sounds.mjs` — Water Sounds
+
+Synthesises `wading.mp3` and `plunge.mp3` into `frontend/public/audio`, so there's no licence to track. Change the numbers in the script and run it again to retune them. Needs ffmpeg.
+
+```bash
+node scripts/make-water-sounds.mjs
+```
+
 ### `scripts/optimise.sh` — Optimize 3D Models
 
 Compresses all GLB models in-place using [gltf-transform](https://gltf-transform.dev/), converting textures to WebP to reduce file size.

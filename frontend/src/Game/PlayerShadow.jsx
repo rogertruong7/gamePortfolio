@@ -1,5 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { isJumping } from "./lake";
 import { sunPosition } from "./Static";
 
 // The town's shadows are only drawn once, so the character can't use them. Instead its
@@ -8,8 +10,11 @@ import { sunPosition } from "./Static";
 // though it stays on the ground rather than climbing walls or benches.
 const FLOOR_HEIGHT = -7.2;
 const SHADOW_OPACITY = 0.32;
+// How far above the rocks it's drawn, and the layer the main camera sees but the reflection doesn't
+const ABOVE_GROUND = 0.5;
+const SHADOW_LAYER = 1;
 
-function shadowMaterial() {
+function shadowMaterial(floorHeight) {
   const material = new THREE.MeshBasicMaterial({
     color: 0x000000,
     transparent: true,
@@ -30,7 +35,7 @@ function shadowMaterial() {
     polygonOffsetUnits: -8,
   });
   material.onBeforeCompile = (shader) => {
-    shader.uniforms.uFloorHeight = { value: FLOOR_HEIGHT };
+    shader.uniforms.uFloorHeight = floorHeight;
     shader.uniforms.uSun = { value: new THREE.Vector3(...sunPosition) };
     shader.vertexShader = shader.vertexShader
       .replace(
@@ -51,7 +56,20 @@ function shadowMaterial() {
   return material;
 }
 
-function PlayerShadow({ characterRef }) {
+function PlayerShadow({ characterRef, lakeRef }) {
+  const floorHeight = useMemo(() => ({ value: FLOOR_HEIGHT }), []);
+  const material = useMemo(() => shadowMaterial(floorHeight), [floorHeight]);
+
+  useFrame(() => {
+    const lake = lakeRef.current;
+    const { x, z } = characterRef.current.position;
+    if (lake.ground) {
+      floorHeight.value = Math.max(FLOOR_HEIGHT, lake.ground.heightAt(x, z) + ABOVE_GROUND);
+    }
+    material.visible = !isJumping(lake.phase);
+    material.opacity = SHADOW_OPACITY * (1 - lake.reflection);
+  });
+
   useEffect(() => {
     const character = characterRef.current;
     if (!character) return undefined;
@@ -61,7 +79,6 @@ function PlayerShadow({ characterRef }) {
       if (node.isSkinnedMesh) bodyParts.push(node);
     });
 
-    const material = shadowMaterial();
     const shadows = bodyParts.map((part) => {
       const shadow = new THREE.SkinnedMesh(part.geometry, material);
       shadow.bind(part.skeleton, part.bindMatrix);
@@ -69,6 +86,7 @@ function PlayerShadow({ characterRef }) {
       shadow.quaternion.copy(part.quaternion);
       shadow.scale.copy(part.scale);
       shadow.frustumCulled = false;
+      shadow.layers.set(SHADOW_LAYER);
       part.parent.add(shadow);
       return shadow;
     });
@@ -77,7 +95,7 @@ function PlayerShadow({ characterRef }) {
       shadows.forEach((shadow) => shadow.removeFromParent());
       material.dispose();
     };
-  }, [characterRef]);
+  }, [characterRef, material]);
 
   return null;
 }

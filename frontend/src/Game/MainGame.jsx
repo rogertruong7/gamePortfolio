@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useCallback, useRef, useEffect, useState } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -14,10 +14,21 @@ import Text from "./Text.jsx";
 import Details from "./Details.jsx";
 import DarkSpot from "./Darkspot.jsx";
 import Doorway from "./Doorway.jsx";
+import UnderwaterFilter from "./UnderwaterFilter.jsx";
 import SitPrompt from "../UserInterface/SitPrompt.jsx";
+import LakePrompt from "../UserInterface/LakePrompt.jsx";
+import ReflectionDialog from "../UserInterface/ReflectionDialog.jsx";
 import { labels } from "./Static.jsx";
 import { createSitState, startSitting, startStanding } from "./sitting.js";
 import { startWalkingIn, startWalkingOut } from "./doorWalk.js";
+import {
+  createLakeState,
+  isJumping,
+  resetLake,
+  startJump,
+  startReflection,
+  stopReflection,
+} from "./lake.js";
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
@@ -57,11 +68,12 @@ function MainGame({
   setExperiencesButton,
   setSkillsButton,
   setTwoOptionsButton,
-  setOneOptionButton,
   reseted,
   setReseted,
   setProgress,
   setIsMoving,
+  setIsWading,
+  setIsPlunging,
   currentScene,
   enteringScene,
   setEnteringScene,
@@ -72,11 +84,15 @@ function MainGame({
   const floorRef = useRef();
   const sitRef = useRef(createSitState());
   const doorWalkRef = useRef(null);
+  const lakeRef = useRef(createLakeState());
   const resetCameraAngleRef = useRef(false);
   const [walkingOut, setWalkingOut] = useState(false);
 
   const [sitPhase, setSitPhase] = useState("none");
   const [nearBench, setNearBench] = useState(null);
+  const [inWater, setInWater] = useState(false);
+  const [lakePhase, setLakePhase] = useState("none");
+  const [flipped, setFlipped] = useState(false);
   const [playerPos, setPlayerPos] = useState(startVector);
   const [clickMoving, setClickMoving] = useState(false);
   const [darkSpot, setDarkspot] = useState(false);
@@ -100,6 +116,25 @@ function MainGame({
     startStanding(sitRef.current);
   }
 
+  // A key held down from before would otherwise call the view straight off again
+  function stopWalking() {
+    setDarkspot(false);
+    setClickMoving(false);
+    setKeys({});
+  }
+
+  function viewReflection() {
+    stopWalking();
+    startReflection(lakeRef.current, characterRef.current, cameraRef.current);
+  }
+
+  function jumpIntoLake() {
+    stopWalking();
+    startJump(lakeRef.current, characterRef.current);
+  }
+
+  const closeReflection = useCallback(() => stopReflection(lakeRef.current), []);
+
   function onKeyDown(event) {
     if (currentScene !== 0) return;
     // macOS sends no keyup for a letter released while Cmd is held, so a shortcut
@@ -110,6 +145,7 @@ function MainGame({
     }
     const key = event.key.toLowerCase();
     if (!MOVEMENT_KEYS.has(key)) return;
+    if (event.repeat && lakeRef.current.phase !== "none") return;
     setKeys((prevKeys) => ({ ...prevKeys, [key]: true }));
   }
 
@@ -144,6 +180,7 @@ function MainGame({
       setDarkspot(false);
       setClickMoving(false);
       sitRef.current.phase = "none";
+      resetLake(lakeRef.current);
       doorWalkRef.current = null;
       setWalkingOut(false);
       setEnteringScene(null);
@@ -181,15 +218,24 @@ function MainGame({
   }
 
   useEffect(() => {
+    setIsPlunging(lakePhase === "sinking");
+  }, [lakePhase, setIsPlunging]);
+
+  useEffect(() => {
     const anyKeyActive = Object.values(keys).some((v) => v === true);
     setIsMoving(
-      clickMoving ||
-        anyKeyActive ||
-        sitPhase === "approaching" ||
-        enteringScene !== null ||
-        walkingOut
+      lakePhase === "none" &&
+        (clickMoving ||
+          anyKeyActive ||
+          sitPhase === "approaching" ||
+          enteringScene !== null ||
+          walkingOut)
     );
-  }, [clickMoving, keys, sitPhase, enteringScene, walkingOut, setIsMoving]);
+  }, [clickMoving, keys, sitPhase, enteringScene, walkingOut, lakePhase, setIsMoving]);
+
+  useEffect(() => {
+    setIsWading(inWater);
+  }, [inWater, setIsWading]);
 
   return (
     <>
@@ -202,7 +248,12 @@ function MainGame({
       >
         <ResizeHandler />
         <Backdrop />
-        <MainCamera ref={cameraRef} playerPos={playerPos} resetAngleRef={resetCameraAngleRef} />
+        <MainCamera
+          ref={cameraRef}
+          playerPos={playerPos}
+          resetAngleRef={resetCameraAngleRef}
+          lakeRef={lakeRef}
+        />
         <Lights />
         <Floor
           ref={floorRef}
@@ -211,10 +262,11 @@ function MainGame({
           setDarkspotPos={setDarkspotPos}
           setTargetPosition={setTargetPosition}
           cameraRef={cameraRef}
+          lakeRef={lakeRef}
         />
         <Island />
         <Buildings setLoading={setLoading} setProgress={setProgress} />
-        <Details />
+        <Details characterRef={characterRef} lakeRef={lakeRef} />
         <Character
           ref={characterRef}
           position={startPosition}
@@ -231,35 +283,46 @@ function MainGame({
           setNearBench={setNearBench}
           doorWalkRef={doorWalkRef}
           onDoorWalkDone={onDoorWalkDone}
+          lakeRef={lakeRef}
+          setInWater={setInWater}
+          setLakePhase={setLakePhase}
+          setFlipped={setFlipped}
         />
-        <PlayerShadow characterRef={characterRef} />
-        {labels.map(({ text, position, fontSize, showcaseName }) => (
-          <Text
-            key={text}
-            text={text}
-            position={position}
-            fontPath="fonts/PixelifySans_Regular.json"
-            fontSize={fontSize}
-            cameraRef={cameraRef}
-            characterRef={characterRef}
-            showcaseName={showcaseName}
-          />
-        ))}
+        <PlayerShadow characterRef={characterRef} lakeRef={lakeRef} />
+        <group visible={!flipped}>
+          {labels.map(({ text, position, fontSize, showcaseName }) => (
+            <Text
+              key={text}
+              text={text}
+              position={position}
+              fontPath="fonts/PixelifySans_Regular.json"
+              fontSize={fontSize}
+              cameraRef={cameraRef}
+              characterRef={characterRef}
+              showcaseName={showcaseName}
+            />
+          ))}
+        </group>
         {darkSpot && <DarkSpot darkSpotPos={darkSpotPos} />}
 
         <Doorway
           characterRef={characterRef}
           doorWalkRef={doorWalkRef}
+          lakeRef={lakeRef}
           setEnterPopupVisible={setEnterPopupVisible}
           setProjectButton={setProjectButton}
           setAboutButton={setAboutButton}
           setExperiencesButton={setExperiencesButton}
           setSkillsButton={setSkillsButton}
           setTwoOptionsButton={setTwoOptionsButton}
-          setOneOptionButton={setOneOptionButton}
         />
+        {(flipped || isJumping(lakePhase)) && <UnderwaterFilter lakeRef={lakeRef} />}
       </Canvas>
       {sitPhase === "none" && nearBench && <SitPrompt label="Sit down" onPress={sitDown} />}
+      {inWater && lakePhase === "none" && (
+        <LakePrompt flipped={flipped} onReflect={viewReflection} onJump={jumpIntoLake} />
+      )}
+      {lakePhase === "reflecting" && <ReflectionDialog onClose={closeReflection} />}
       {sitPhase === "seated" && <SitPrompt label="Stand up" onPress={standUp} />}
     </>
   );

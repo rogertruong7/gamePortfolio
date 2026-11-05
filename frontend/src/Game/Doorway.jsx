@@ -6,13 +6,13 @@ import { useFrame } from "@react-three/fiber";
 export default function Doorway({
   characterRef,
   doorWalkRef,
+  lakeRef,
   setEnterPopupVisible,
   setProjectButton,
   setAboutButton,
   setExperiencesButton,
   setSkillsButton,
   setTwoOptionsButton,
-  setOneOptionButton,
 }) {
   const prevKey = useRef("");
 
@@ -23,7 +23,6 @@ export default function Doorway({
     setExperiencesButton(false);
     setSkillsButton(false);
     setTwoOptionsButton(false);
-    setOneOptionButton(false);
   }
 
   function turnOptionsOn(showcases, length) {
@@ -32,13 +31,7 @@ export default function Doorway({
     setExperiencesButton(false);
     setSkillsButton(false);
     setEnterPopupVisible(true);
-    if (length > 1) {
-      setTwoOptionsButton(true);
-      setOneOptionButton(false);
-    } else {
-      setTwoOptionsButton(false);
-      setOneOptionButton(true);
-    }
+    setTwoOptionsButton(length > 1);
     showcases.forEach((showcase) => {
       switch (showcase) {
         case "projects":
@@ -63,8 +56,9 @@ export default function Doorway({
     let standingOn = [];
     let characterPosition = characterRef.current.position;
 
-    // The popup stays away while the character is walking through a door, either way
-    if (!doorWalkRef.current) {
+    // The popup stays away while the character is walking through a door, either way, and
+    // the buildings can't be entered from the upside-down world
+    if (!doorWalkRef.current && !lakeRef.current.flipped) {
       Object.entries(showcases).forEach(([, showcase]) => {
         let box = showcase.box;
         if (box.containsPoint(characterPosition)) {

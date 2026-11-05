@@ -2,23 +2,23 @@ import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { benchEdges, invisWalls, pondEdges, walkArea } from "./Static";
+import { benchEdges, invisWalls, walkArea } from "./Static";
 import { createPathfinder } from "./pathfinding";
 import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
 import { updateDoorWalk } from "./doorWalk";
+import { applyLakePose, followGround, updateLake } from "./lake";
 import { isBlocked, moveAndSlide } from "./wallSliding";
 import { readStore } from "../Helpers/storage.js";
 
-const ANGLED_WALLS = [...pondEdges, ...benchEdges];
 const WALLS = [
   ...invisWalls.map((wall) => ({
     closestPoint: (position) => wall.clampPoint(position, new THREE.Vector3()),
   })),
-  ...ANGLED_WALLS,
+  ...benchEdges,
 ];
 const CHARACTER_RADIUS = 5;
 const pathfinder = createPathfinder({
-  boxes: ANGLED_WALLS,
+  boxes: benchEdges,
   bounds: walkArea,
   radius: CHARACTER_RADIUS,
 });
@@ -46,6 +46,10 @@ const Character = React.forwardRef(
       setNearBench,
       doorWalkRef,
       onDoorWalkDone,
+      lakeRef,
+      setInWater,
+      setLakePhase,
+      setFlipped,
     },
     ref
   ) => {
@@ -53,6 +57,7 @@ const Character = React.forwardRef(
     const [arrowMoving, setArrowMoving] = useState(false);
     const mixer = useRef();
     const sitBones = useMemo(() => findSitBones(scene), [scene]);
+    const headBone = useMemo(() => scene.getObjectByName("Head_210_015"), [scene]);
     const clickRoute = useRef({ target: null, stops: [], next: 0 });
 
     function clickToMove(delta) {
@@ -239,27 +244,43 @@ const Character = React.forwardRef(
     useFrame(({ clock }, delta) => {
       const sit = sitRef.current;
       const doorWalk = doorWalkRef.current;
+      const lake = lakeRef.current;
       const moving =
         doorWalk !== null ||
-        (sit.phase === "none" ? clickMoving || arrowMoving : sit.phase === "approaching");
+        (sit.phase === "none"
+          ? lake.phase === "none" && (clickMoving || arrowMoving)
+          : sit.phase === "approaching");
 
       if (mixer.current) {
         mixer.current.update(moving ? delta : delta * IDLE_ANIMATION_SPEED);
       }
       applySitPose(sit, sitBones, clock.elapsedTime);
+      applyLakePose(lake, headBone);
 
       if (currentScene !== 0) return;
 
       const moveDelta = Math.min(delta, MAX_FRAME_DELTA);
       let finalDirection = keyboardMovement();
+      // The picture is upside down, so going up the screen means walking back towards the camera
+      if (lake.flipped) finalDirection.negate();
+      const lakeMovesCharacter = updateLake(
+        lake,
+        ref.current,
+        delta,
+        finalDirection.lengthSq() > 0,
+        updateRotation
+      );
 
       if (doorWalk) {
         if (!doorWalk.finished && updateDoorWalk(doorWalk, ref.current, delta, updateRotation)) {
           onDoorWalkDone(doorWalk);
         }
+      } else if (lakeMovesCharacter) {
+        // The lake has moved it already
       } else if (sit.phase === "none") {
         clickToMove(moveDelta);
         keyboardMovingSlide(finalDirection, moveDelta);
+        followGround(lake, ref.current, moveDelta);
       } else {
         const wantsToMove =
           finalDirection.lengthSq() > 0 || targetPosition !== sit.clickTarget;
@@ -274,8 +295,15 @@ const Character = React.forwardRef(
           sit.near = near;
           setNearBench(near);
         }
+
+        const { x, z } = ref.current.position;
+        lake.inWater =
+          sit.phase === "none" && !doorWalk && lake.ground !== null && lake.ground.isWater(x, z);
+        setInWater(lake.inWater);
       }
       setSitPhase(sit.phase);
+      setLakePhase(lake.phase);
+      setFlipped(lake.flipped);
     });
 
     return (

@@ -27,12 +27,10 @@ const RINGS = [
 const TIP = { x: ISLAND_CENTRE.x + 6, y: -172, z: ISLAND_CENTRE.z - 4 };
 
 const RIM_ROCKS = 48;
-const UNDERSIDE_ROCKS = 22;
-const VINES = 44;
-// How far off the island's side the vines sit
-const VINE_GAP = 0.9;
-const THREE_SIXTY_WRAP = (angle) =>
-  ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+const UNDERSIDE_ROCKS = 12;
+// Below the green of the rim, and above where the island narrows to its point
+const UNDERSIDE_TOP = -24;
+const UNDERSIDE_BOTTOM = -118;
 
 function seededRandom(start) {
   let seed = start;
@@ -101,65 +99,46 @@ export function rimRocks() {
   return rocks;
 }
 
-// How wide the island is at this height, compared to its rim
-function scaleAtHeight(y) {
-  for (let i = 1; i < RINGS.length; i += 1) {
-    if (y >= RINGS[i].y) {
-      const amount = (y - RINGS[i - 1].y) / (RINGS[i].y - RINGS[i - 1].y);
-      return RINGS[i - 1].scale + (RINGS[i].scale - RINGS[i - 1].scale) * amount;
-    }
-  }
-  return RINGS[RINGS.length - 1].scale;
-}
-
-export function undersideRocks() {
-  const random = seededRandom(9127);
-  const rocks = [];
-  for (let i = 0; i < UNDERSIDE_ROCKS; i += 1) {
-    const angle = random() * Math.PI * 2;
-    const y = between(random, -18, -140);
-    const point = pointAt(angle, rimRadius(angle) * scaleAtHeight(y), y);
-    rocks.push({ ...point, size: between(random, 3, 8), spin: random() * Math.PI * 2 });
-  }
-  return rocks;
-}
-
 const radiusOf = ({ x, z }) => Math.hypot(x - ISLAND_CENTRE.x, z - ISLAND_CENTRE.z);
 
 function ringIndexAt(angle) {
-  const turn = THREE_SIXTY_WRAP(angle);
+  const turn = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
   return Math.round((turn / (Math.PI * 2)) * RING_POINTS) % RING_POINTS;
 }
 
-// How far out the actual jagged side is in this direction, at this height
-function sideRadius(rings, angle, y) {
-  const index = ringIndexAt(angle);
-  const lower = RINGS.findIndex((ring) => ring.y <= y);
-  const amount = (y - RINGS[lower - 1].y) / (RINGS[lower].y - RINGS[lower - 1].y);
-  const above = radiusOf(rings[lower - 1][index]);
-  const below = radiusOf(rings[lower][index]);
-  return above + (below - above) * amount;
-}
-
-// Each vine starts up on the grass, comes over the edge and trails down the island's side,
-// lying close against it. They're spaced evenly with a little wander, so there's no bald side
-// and no neat row.
-export function hangingVines() {
-  const random = seededRandom(3847);
+// Outcrops set into the cliff. Each one sits on the line between two rings, which is an edge of
+// the island's actual surface, and carries the way that surface faces so it can lie along it.
+// There are only a few, so they're spaced around the island to stop them bunching up on one side.
+export function undersideRocks() {
+  const random = seededRandom(9127);
   const { rings } = islandRings();
-  const vines = [];
-  for (let i = 0; i < VINES; i += 1) {
-    let angle = ((i + random()) / VINES) * Math.PI * 2;
-    const bottom = -8 - between(random, 12, 58);
-    const rimHere = radiusOf(rings[0][ringIndexAt(angle)]);
-    const points = [pointAt(angle, rimHere - 4, -7.9)];
-    for (let y = -10; y > bottom; y -= between(random, 4, 8)) {
-      angle += (random() - 0.5) * 0.03;
-      points.push(pointAt(angle, sideRadius(rings, angle, y) + VINE_GAP, y));
-    }
-    vines.push({ points });
+  const rocks = [];
+  for (let i = 0; i < UNDERSIDE_ROCKS; i += 1) {
+    const angle = ((i + random()) / UNDERSIDE_ROCKS) * Math.PI * 2;
+    const index = ringIndexAt(angle);
+    const height = between(random, UNDERSIDE_TOP, UNDERSIDE_BOTTOM);
+    const lower = RINGS.findIndex((ring) => ring.y <= height);
+    const amount = (height - RINGS[lower - 1].y) / (RINGS[lower].y - RINGS[lower - 1].y);
+    const above = rings[lower - 1][index];
+    const below = rings[lower][index];
+
+    const fallsBy = above.y - below.y;
+    const narrowsBy = radiusOf(above) - radiusOf(below);
+    const length = Math.hypot(fallsBy, narrowsBy);
+    const outwards = fallsBy / length;
+    const outX = (above.x - ISLAND_CENTRE.x) / radiusOf(above);
+    const outZ = (above.z - ISLAND_CENTRE.z) / radiusOf(above);
+
+    rocks.push({
+      x: above.x + (below.x - above.x) * amount,
+      y: above.y + (below.y - above.y) * amount,
+      z: above.z + (below.z - above.z) * amount,
+      size: between(random, 5, 9.5),
+      spin: random() * Math.PI * 2,
+      facing: { x: outX * outwards, y: -narrowsBy / length, z: outZ * outwards },
+    });
   }
-  return vines;
+  return rocks;
 }
 
 // The edges where something raised meets the grass, each with the direction the grass lies in.
@@ -188,6 +167,32 @@ const BANK_STEP = 4.5;
 function isSafelyOnIsland(point) {
   const angle = Math.atan2(point.z - ISLAND_CENTRE.z, point.x - ISLAND_CENTRE.x);
   return radiusOf(point) < rimRadius(angle) - 6;
+}
+
+// A few small rocks, placed by hand beside the pond's ring and the bushes
+const GARDEN_ROCKS = [
+  { x: 123, z: -103, size: 1.6 },
+  { x: 126, z: -71, size: 2.1 },
+  { x: 121, z: -67, size: 1 },
+  { x: 150, z: -152, size: 1.5 },
+  { x: 199, z: -125, size: 1.9 },
+  { x: 196, z: -72, size: 1.3 },
+  { x: 168, z: -52, size: 1.7 },
+  { x: 195, z: -60, size: 1.2 },
+  { x: 196, z: -41, size: 1.5 },
+  { x: 216, z: -40, size: 1.1 },
+  { x: 203, z: -24, size: 1.6 },
+];
+
+export function gardenRocks() {
+  const random = seededRandom(5521);
+  return GARDEN_ROCKS.map(({ x, z, size }) => ({
+    x,
+    y: -8 + size * 0.2,
+    z,
+    size,
+    spin: random() * Math.PI * 2,
+  }));
 }
 
 function isPaved({ x, z }) {

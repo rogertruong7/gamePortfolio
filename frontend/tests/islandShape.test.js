@@ -4,7 +4,7 @@ import {
   ISLAND_CENTRE,
   edgeBanks,
   edgeDetails,
-  hangingVines,
+  gardenRocks,
   islandRings,
   rimRadius,
   rimRocks,
@@ -123,58 +123,56 @@ test("rocks on the grass don't hang off the jagged edge", () => {
   }
 });
 
-test("rocks on the underside are below the grass", () => {
-  for (const rock of undersideRocks()) assert.ok(rock.y < -14);
+test("the rocks in the garden stay on the grass", () => {
+  // The open water, and the path with its kerb
+  const isInWater = ({ x, z }) => x > 137 && x < 184 && z > -136 && z < -57;
+  const isOnPath = ({ x, z }) =>
+    (x > 72 && x < 102 && z > -187 && z < -21.6) || (x > 72 && x < 218 && z > -187 && z < -160);
+  const rocks = gardenRocks();
+  assert.ok(rocks.length <= 12);
+  for (const rock of rocks) {
+    const angle = Math.atan2(rock.z - ISLAND_CENTRE.z, rock.x - ISLAND_CENTRE.x);
+    assert.ok(radiusOf(rock) <= rimRadius(angle) - 5, `${rock.x}, ${rock.z} is too near the edge`);
+    assert.ok(!isOnPath(rock), `${rock.x}, ${rock.z} is on the path`);
+    assert.ok(!isInWater(rock), `${rock.x}, ${rock.z} is in the pond`);
+  }
 });
 
-test("there are vines all the way around the island", () => {
-  const vines = hangingVines();
-  assert.ok(vines.length >= 30);
+test("cliff rocks are spread around the island, below the green of the rim", () => {
+  const rocks = undersideRocks();
+  for (const rock of rocks) assert.ok(rock.y < -20);
   const quarters = new Set(
-    vines.map(({ points: [start] }) => {
-      const angle = Math.atan2(start.z - ISLAND_CENTRE.z, start.x - ISLAND_CENTRE.x);
-      return Math.floor((angle + Math.PI) / (Math.PI / 2));
-    })
+    rocks.map(({ x, z }) =>
+      Math.floor((Math.atan2(z - ISLAND_CENTRE.z, x - ISLAND_CENTRE.x) + Math.PI) / (Math.PI / 2))
+    )
   );
-  assert.ok(quarters.size >= 4);
+  assert.equal(quarters.size, 4);
 });
 
-// The point on a ring in the direction of this spot. Every ring has its points at the same angles.
-function ringPointTowards(ring, spot) {
-  const angle = Math.atan2(spot.z - ISLAND_CENTRE.z, spot.x - ISLAND_CENTRE.x);
-  const turn = (angle + Math.PI * 2) % (Math.PI * 2);
-  return ring[Math.round((turn / (Math.PI * 2)) * ring.length) % ring.length];
-}
-
-test("every vine starts up on the grass, inside the jagged edge", () => {
-  const rim = islandRings().rings[0];
-  for (const { points } of hangingVines()) {
-    const [start] = points;
-    assert.ok(start.y >= -8);
-    assert.ok(radiusOf(start) < radiusOf(ringPointTowards(rim, start)));
-  }
-});
-
-test("vines only ever go downhill", () => {
-  for (const { points } of hangingVines()) {
-    for (let i = 1; i < points.length; i += 1) assert.ok(points[i].y < points[i - 1].y);
-  }
-});
-
-test("vines hug the island's side rather than hanging off it like wires", () => {
+test("cliff rocks sit on the cliff's surface, between two of its rings", () => {
   const { rings } = islandRings();
-  const heights = [-8, -13, -24, -42, -70, -102, -135];
-  for (const { points } of hangingVines()) {
-    for (const point of points.slice(1)) {
-      const lower = heights.findIndex((height) => height <= point.y);
-      const above = radiusOf(ringPointTowards(rings[lower - 1], point));
-      const below = radiusOf(ringPointTowards(rings[lower], point));
-      const widest = Math.max(above, below);
-      const narrowest = Math.min(above, below);
-      // Allowing for how far the side's neighbouring points wander from this one
-      assert.ok(radiusOf(point) < widest + 10, "too far out from the side");
-      assert.ok(radiusOf(point) > narrowest - 10, "buried in the side");
-    }
+  for (const rock of undersideRocks()) {
+    const angle = Math.atan2(rock.z - ISLAND_CENTRE.z, rock.x - ISLAND_CENTRE.x);
+    const turn = (angle + Math.PI * 2) % (Math.PI * 2);
+    const index = Math.round((turn / (Math.PI * 2)) * rings[0].length) % rings[0].length;
+    const onASegment = rings.slice(1).some((ring, i) => {
+      const [above, below] = [rings[i][index], ring[index]];
+      const radius = radiusOf(rock);
+      return (
+        rock.y <= above.y + 1e-9 &&
+        rock.y >= below.y - 1e-9 &&
+        radius <= Math.max(radiusOf(above), radiusOf(below)) + 1e-9 &&
+        radius >= Math.min(radiusOf(above), radiusOf(below)) - 1e-9
+      );
+    });
+    assert.ok(onASegment, `${rock.x}, ${rock.y}, ${rock.z} isn't on the cliff`);
+  }
+});
+
+test("cliff rocks face outwards from the island", () => {
+  for (const { x, z, facing } of undersideRocks()) {
+    assert.ok(Math.abs(Math.hypot(facing.x, facing.y, facing.z) - 1) < 1e-9);
+    assert.ok(facing.x * (x - ISLAND_CENTRE.x) + facing.z * (z - ISLAND_CENTRE.z) > 0);
   }
 });
 

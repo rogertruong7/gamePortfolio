@@ -7,7 +7,8 @@ const Floor = React.forwardRef(({
   setClickMoving,
   setDarkspotPos,
   setTargetPosition,
-  cameraRef
+  cameraRef,
+  lakeRef
 }, ref) => {
   const { scene } = useGLTF("/models/floor.glb");
   let mouseDownTime = 0; 
@@ -41,6 +42,7 @@ const Floor = React.forwardRef(({
   }
 
   function onMouseClick(event) {
+    if (lakeRef.current.phase !== "none") return;
     if (ref.current && cameraRef.current) {
 
       setDarkspot(false);

@@ -4,7 +4,7 @@ import {
   ISLAND_CENTRE,
   edgeBanks,
   edgeDetails,
-  hangingVines,
+  gardenRocks,
   islandRings,
   rimRocks,
   undersideRocks,
@@ -26,9 +26,13 @@ const GRASS_EDGE = ["#3f9a43", "#378f3d"];
 const DIRT = ["#d8bd7f", "#cdb173", "#c2a568"];
 const DEEP_DIRT = ["#b0966a", "#a58b60", "#987f58"];
 const STONE = ["#8a8076", "#7a7168", "#6c645c", "#958a7c"];
-const VINE_STEM = "#2c7437";
-const VINE_LEAVES = ["#3f9a43", "#4cae4c", "#2f8a3e", "#5cbb55"];
-const VINE_THICKNESS = 0.55;
+const MOSS = "#6f9e3c";
+// How a rock set into the cliff is squashed: wide across the slope, and shallow out of it
+const OUTCROP_WIDTH = 1.25;
+const OUTCROP_LENGTH = 0.95;
+const OUTCROP_DEPTH = 0.8;
+// How far a rock is pushed out of the cliff, as a fraction of its size
+const OUTCROP_LIFT = 0.2;
 const BANK_COLOURS = {
   plinth: {
     top: ["#7a4a36", "#6d4230", "#86563e"],
@@ -49,6 +53,9 @@ const _position = new THREE.Vector3();
 const _rotation = new THREE.Quaternion();
 const _euler = new THREE.Euler();
 const _scale = new THREE.Vector3();
+const _up = new THREE.Vector3(0, 1, 0);
+const _facing = new THREE.Vector3();
+const _turn = new THREE.Quaternion();
 
 function seededRandom(start) {
   let seed = start;
@@ -136,67 +143,6 @@ function addEdges(addTriangle) {
   }
 }
 
-// Thin three-sided stems from point to point, with a few flat diamond leaves at each joint
-function addVines(addTriangle) {
-  const random = seededRandom(1951);
-
-  const ringAround = ({ x, y, z }) =>
-    [0, 1, 2].map((corner) => {
-      const turn = (corner / 3) * Math.PI * 2;
-      return {
-        x: x + Math.cos(turn) * VINE_THICKNESS,
-        y,
-        z: z + Math.sin(turn) * VINE_THICKNESS,
-      };
-    });
-
-  const addLeaf = (point) => {
-    const dx = point.x - ISLAND_CENTRE.x;
-    const dz = point.z - ISLAND_CENTRE.z;
-    const length = Math.hypot(dx, dz);
-    const out = { x: dx / length, z: dz / length };
-    const side = (random() - 0.5) * 5;
-    const drop = (random() - 0.5) * 3;
-    const size = 1.3 + random() * 1.3;
-    const middle = {
-      x: point.x - out.z * side + out.x * 0.5,
-      y: point.y + drop,
-      z: point.z + out.x * side + out.z * 0.5,
-    };
-    const top = { ...middle, y: middle.y + size };
-    const bottom = { ...middle, y: middle.y - size };
-    const left = { x: middle.x - out.z * size, y: middle.y, z: middle.z + out.x * size };
-    const right = { x: middle.x + out.z * size, y: middle.y, z: middle.z - out.x * size };
-    const front = { x: middle.x + out.x * size * 0.5, y: middle.y, z: middle.z + out.z * size * 0.5 };
-    const colour = pick(random, VINE_LEAVES);
-    const outwards = facingAwayFrom(addTriangle, middle);
-    outwards(top, left, front, colour);
-    outwards(top, right, front, colour);
-    outwards(bottom, left, front, colour);
-    outwards(bottom, right, front, colour);
-  };
-
-  for (const { points } of hangingVines()) {
-    for (let i = 0; i < points.length - 1; i += 1) {
-      const upper = ringAround(points[i]);
-      const lower = ringAround(points[i + 1]);
-      const middle = {
-        x: (points[i].x + points[i + 1].x) / 2,
-        y: (points[i].y + points[i + 1].y) / 2,
-        z: (points[i].z + points[i + 1].z) / 2,
-      };
-      const outwards = facingAwayFrom(addTriangle, middle);
-      for (let corner = 0; corner < 3; corner += 1) {
-        const next = (corner + 1) % 3;
-        outwards(upper[corner], upper[next], lower[corner], VINE_STEM);
-        outwards(upper[next], lower[next], lower[corner], VINE_STEM);
-      }
-      addLeaf(points[i + 1]);
-      if (random() < 0.5) addLeaf(points[i + 1]);
-    }
-  }
-}
-
 function buildIsland() {
   const random = seededRandom(3301);
   const { rings, tip } = islandRings();
@@ -229,7 +175,6 @@ function buildIsland() {
     addSloped(point, last[(i + 1) % last.length], tip);
   });
 
-  addVines(addTriangle);
   addEdges(addTriangle);
 
   const geometry = new THREE.BufferGeometry();
@@ -340,23 +285,73 @@ function buildRock(seed) {
   return geometry;
 }
 
+// Paints the faces of a mossy rock that look up at the sky. Rocks are flat-shaded, so each face is
+// all moss or all stone, and how far up a face has to look varies from rock to rock.
+function growMossOnTop(shader) {
+  shader.uniforms.uMoss = { value: new THREE.Color(MOSS) };
+  shader.vertexShader = shader.vertexShader
+    .replace(
+      "#include <common>",
+      `#include <common>
+      attribute float aMoss;
+      varying float vMoss;`
+    )
+    .replace(
+      "#include <begin_vertex>",
+      `#include <begin_vertex>
+      float facesUp = normalize(mat3(modelMatrix) * mat3(instanceMatrix) * objectNormal).y;
+      float mossLine = 0.3 + 0.2 * sin(instanceMatrix[3].x * 1.7 + instanceMatrix[3].z * 2.3);
+      vMoss = aMoss * step(mossLine, facesUp);`
+    );
+  shader.fragmentShader = shader.fragmentShader
+    .replace(
+      "#include <common>",
+      `#include <common>
+      uniform vec3 uMoss;
+      varying float vMoss;`
+    )
+    .replace(
+      "#include <color_fragment>",
+      `#include <color_fragment>
+      diffuseColor.rgb = mix(diffuseColor.rgb, uMoss, vMoss);`
+    );
+}
+
 function placeRock(rock) {
   _position.set(rock.x, rock.y, rock.z);
-  _rotation.setFromEuler(_euler.set(rock.spin * 0.3, rock.spin, rock.spin * 0.2));
-  _scale.setScalar(rock.size);
+  if (rock.facing) {
+    // Lies along the cliff with its shallow side facing out, partly buried in the surface
+    _facing.set(rock.facing.x, rock.facing.y, rock.facing.z);
+    _position.addScaledVector(_facing, rock.size * OUTCROP_LIFT);
+    _rotation.setFromUnitVectors(_up, _facing).multiply(_turn.setFromAxisAngle(_up, rock.spin));
+    _scale.set(OUTCROP_WIDTH, OUTCROP_DEPTH, OUTCROP_LENGTH).multiplyScalar(rock.size);
+  } else {
+    _rotation.setFromEuler(_euler.set(rock.spin * 0.3, rock.spin, rock.spin * 0.2));
+    _scale.setScalar(rock.size);
+  }
   return _matrix.compose(_position, _rotation, _scale);
 }
 
 const Island = () => {
   const rocks = useMemo(
-    () => [...rimRocks(), ...undersideRocks(), ...edgeDetails().pebbles],
+    () => [
+      ...rimRocks().map((rock) => ({ ...rock, mossy: true })),
+      ...undersideRocks(),
+      ...edgeDetails().pebbles,
+      ...gardenRocks(),
+    ],
     []
   );
 
   const islandGeometry = useMemo(() => buildIsland(), []);
   const grassGeometry = useMemo(() => buildGrass(), []);
   const grassTexture = useMemo(() => paintGrass(), []);
-  const rockGeometry = useMemo(() => buildRock(4441), []);
+  const rockGeometry = useMemo(() => {
+    const geometry = buildRock(4441);
+    const moss = Float32Array.from(rocks, (rock) => (rock.mossy ? 1 : 0));
+    geometry.setAttribute("aMoss", new THREE.InstancedBufferAttribute(moss, 1));
+    return geometry;
+  }, [rocks]);
 
   const rocksRef = useRef();
 
@@ -364,7 +359,9 @@ const Island = () => {
     const random = seededRandom(1187);
     rocks.forEach((rock, i) => {
       rocksRef.current.setMatrixAt(i, placeRock(rock));
-      rocksRef.current.setColorAt(i, _colour.set(pick(random, STONE)));
+      // Rocks in the cliff take the wall's colour at their height, so they darken further down
+      const colour = rock.facing ? colourAtHeight(random, rock.y) : pick(random, STONE);
+      rocksRef.current.setColorAt(i, _colour.set(colour));
     });
     rocksRef.current.instanceMatrix.needsUpdate = true;
     rocksRef.current.instanceColor.needsUpdate = true;
@@ -385,7 +382,7 @@ const Island = () => {
         castShadow
         receiveShadow
       >
-        <meshStandardMaterial roughness={1} />
+        <meshStandardMaterial roughness={1} onBeforeCompile={growMossOnTop} />
       </instancedMesh>
     </>
   );

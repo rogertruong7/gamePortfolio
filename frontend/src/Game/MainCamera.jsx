@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { PerspectiveCamera } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { bendCameraToReflection } from "./lake";
 
 const CAMERA_OFFSET = new THREE.Vector3(140, 90, 140);
 const CAMERA_ROTATION_SPEED = 0.0012;
@@ -17,8 +18,9 @@ const _rotationQuat = new THREE.Quaternion();
 const _euler = new THREE.Euler(0, 0, 0, "YXZ");
 const _cameraOffset = new THREE.Vector3();
 const _targetPos = new THREE.Vector3();
+const _lookAt = new THREE.Vector3();
 
-const MainCamera = React.forwardRef(({ playerPos, resetAngleRef }, ref) => {
+const MainCamera = React.forwardRef(({ playerPos, resetAngleRef, lakeRef }, ref) => {
   const [aspect, setAspect] = useState(window.innerWidth / window.innerHeight);
   const rotationRef = useRef(new THREE.Vector2(0, 0));
   const isDraggingRef = useRef(false);
@@ -26,6 +28,11 @@ const MainCamera = React.forwardRef(({ playerPos, resetAngleRef }, ref) => {
   const lastPlayerPos = useRef(playerPos.clone());
   const cursorMoved = useRef(false);
   const idle = useRef({ seconds: 0, swayTime: 0, swayStrength: 0 });
+
+  useEffect(() => {
+    // PlayerShadow draws on this layer, which keeps it out of the water's reflection
+    ref.current.layers.enable(1);
+  }, [ref]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -50,9 +57,14 @@ const MainCamera = React.forwardRef(({ playerPos, resetAngleRef }, ref) => {
     };
 
     const onMouseMove = (event) => {
-      const deltaX = event.clientX - previousMousePosition.current.x;
-      const deltaY = event.clientY - previousMousePosition.current.y;
+      const lake = lakeRef.current;
+      // The picture is upside down, so the camera turns the other way to follow the mouse
+      const direction = lake.flipped ? -1 : 1;
+      const deltaX = (event.clientX - previousMousePosition.current.x) * direction;
+      const deltaY = (event.clientY - previousMousePosition.current.y) * direction;
       const rot = rotationRef.current;
+      previousMousePosition.current = { x: event.clientX, y: event.clientY };
+      if (lake.phase !== "none") return;
 
       if (isDraggingRef.current) {
         rot.x = Math.max(
@@ -64,8 +76,6 @@ const MainCamera = React.forwardRef(({ playerPos, resetAngleRef }, ref) => {
         rot.x -= deltaY * 0.00005;
         rot.y -= deltaX * 0.00005;
       }
-
-      previousMousePosition.current = { x: event.clientX, y: event.clientY };
     };
 
     const canvas = document.getElementById("gameCanvas");
@@ -80,7 +90,7 @@ const MainCamera = React.forwardRef(({ playerPos, resetAngleRef }, ref) => {
       canvas.removeEventListener("mouseleave", onMouseLeave);
       canvas.removeEventListener("mousemove", onMouseMove);
     };
-  }, []);
+  }, [lakeRef]);
 
   useEffect(() => {
     // On the window, so the cursor counts when it's over the buttons too
@@ -111,7 +121,9 @@ const MainCamera = React.forwardRef(({ playerPos, resetAngleRef }, ref) => {
     const playerMoved = lastPlayerPos.current.distanceToSquared(playerPos) > 0.0001;
     lastPlayerPos.current.copy(playerPos);
 
-    const active = playerMoved || isDraggingRef.current || cursorMoved.current;
+    const lake = lakeRef.current;
+    const active =
+      playerMoved || isDraggingRef.current || cursorMoved.current || lake.reflection > 0;
     cursorMoved.current = false;
 
     if (active) {
@@ -136,8 +148,11 @@ const MainCamera = React.forwardRef(({ playerPos, resetAngleRef }, ref) => {
     if (_cameraOffset.y < 10) _cameraOffset.y = 10;
 
     _targetPos.copy(playerPos).add(_cameraOffset);
+    _lookAt.copy(playerPos);
+    bendCameraToReflection(lake, _targetPos, _lookAt, playerPos);
     camera.position.lerp(_targetPos, 0.1);
-    camera.lookAt(playerPos);
+    camera.lookAt(_lookAt);
+    camera.rotateZ(lake.roll);
   });
 
   return (

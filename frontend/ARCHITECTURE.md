@@ -83,7 +83,22 @@ Two movement systems run simultaneously each frame via `useFrame`:
 1. **Keyboard movement** — WASD/arrow keys. Direction is relative to camera orientation. Only active after `localStorage.visited === "true"` (after tutorial dismissal).
 2. **Click-to-move** — Floor raycasting sets a target position; character walks toward it each frame.
 
-Collision detection: the character is approximated as a `THREE.Sphere` (radius 5) tested against `invisWalls` and the angled pond and bench boxes. `wallSliding.js` moves it in small steps, and when a step would enter a wall it runs along the wall instead, as long as that doesn't enter any wall, including the same one.
+Collision detection: the character is approximated as a `THREE.Sphere` (radius 5) tested against `invisWalls` and the angled bench boxes. `wallSliding.js` moves it in small steps, and when a step would enter a wall it runs along the wall instead, as long as that doesn't enter any wall, including the same one.
+
+### The Lake (`lake.js`, `pondShape.js`, `pondWater.js`, `pondReflection.js`, `UnderwaterFilter.jsx`)
+
+The pond has no hitbox, so the character walks straight through it.
+
+- **Ground height:** `pondShape.js` builds a height map from the rock mesh once it loads. `followGround` in `lake.js` eases the character towards that height, so it climbs over the rocks and wades a little below the surface in the water. The map also decides what counts as open water.
+- **Prompts and sound:** standing in open water shows `LakePrompt`, and walking there swaps the footsteps for the wading loop. The sounds come from `scripts/make-water-sounds.mjs`.
+- **State:** `lake.js` holds one state object, read each frame by the character, camera, shadow, water and filter. Its `phase` is `none`, `lookingDown` then `reflecting`, or `hopping` then `sinking` then `surfacing`.
+- **Reflection:** `pondReflection.js` draws the scene from a camera mirrored under the water into a texture that the water's shader shows. This second pass only runs while `lake.reflection` is above 0. Trees dissolve out of the main view, because their branches would block the camera, but stay in the reflection. `PlayerShadow` draws on layer 1, which only the main camera sees.
+- **Upside-down world:** this is the same town and the same walls with the camera rolled 180 degrees. Keyboard movement and camera dragging are reversed to cancel out the roll, so the controls still match the screen. Click-to-move needs no change. Labels are hidden and `Doorway` stays off, so no building can be entered.
+- **Filter:** `UnderwaterFilter.jsx` only mounts during a jump or in the upside-down world. While mounted it takes over rendering, copies the finished frame and draws it back through the wave, tint and flood shader.
+
+### Plantings (`plantings.js`, `fallenLeaves.js`)
+
+The front corner's bushes are extra copies of the bush model in `floorDetails.glb`. The pink shrubs are generated from leaf cards sampled from the cherry tree's mesh, using a copy of its leaf material, so they match the trees. Neither has a hitbox. `fallenLeaves.js` picks where the fallen blossom lands from a fixed seed, keeping it off the pond, rocks, kerb and buildings. `plantings.js` draws all the leaves as one instanced mesh.
 
 ### Camera (`MainCamera.jsx`)
 
@@ -153,6 +168,8 @@ HTML elements positioned absolutely over the 3D canvas.
 | TutorialPopup | top layer | First-visit modal explaining controls, built on `Modal` (a native `<dialog>`) and `ControlsList`. Sets `localStorage.visited = true` on dismiss. Controls are locked until dismissed. |
 | HelpPopup | top layer | Re-openable version of the tutorial with additional info, on the same `Modal` and `ControlsList`. |
 | EnterPopup | 102 | Doorway interaction prompt. Shows 1-2 buttons depending on which zones overlap. |
+| LakePrompt | 102 | Lake prompt, shown in open water. Built on `ChoicePopup`, like EnterPopup. |
+| ReflectionDialog | 102 | The typed "Despite everything, it's still you." box. |
 | BackButton | 103 | Returns to game view (scene 0). Only visible on content pages. |
 | ResetButton | 103 | Resets character position and returns to game view. |
 | HelpButton | 103 | Opens HelpPopup. |

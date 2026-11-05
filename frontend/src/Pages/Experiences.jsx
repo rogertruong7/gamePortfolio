@@ -78,8 +78,8 @@ const Experiences = ({ setCurrentScene }) => {
 
   return (
     <>
-      <Door />
       <Container>
+        <Door />
         <GameContainer
           $phase={phase}
           style={{
@@ -185,7 +185,10 @@ const DocumentSlide = styled.div`
   ${documentSlideStyles}
 `;
 
+// Lives inside Container because Container is positioned, so it would paint over a door before it
 const Door = styled.div`
+  top: 0;
+  left: 0;
   margin: 0;
   height: 100vh;
   width: 100vw;

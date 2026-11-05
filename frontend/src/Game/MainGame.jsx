@@ -15,6 +15,7 @@ import Details from "./Details.jsx";
 import DarkSpot from "./Darkspot.jsx";
 import Doorway from "./Doorway.jsx";
 import UnderwaterFilter from "./UnderwaterFilter.jsx";
+import SuperSaiyan from "./SuperSaiyan.jsx";
 import SitPrompt from "../UserInterface/SitPrompt.jsx";
 import LakePrompt from "../UserInterface/LakePrompt.jsx";
 import SansFight from "../UserInterface/SansFight.jsx";
@@ -102,6 +103,7 @@ function MainGame({
   const [lakePhase, setLakePhase] = useState("none");
   const [flipped, setFlipped] = useState(false);
   const [fightOpen, setFightOpen] = useState(false);
+  const [beatSans, setBeatSans] = useState(false);
   // The town stops drawing while the fight fills the screen, so the two don't compete for frames
   const [fightCovers, setFightCovers] = useState(false);
   const { muted } = useAudio();
@@ -151,7 +153,9 @@ function MainGame({
   const onFightEnd = useCallback(() => setFightCovers(false), []);
   const onFightClosed = useCallback((outcome) => {
     setFightOpen(false);
-    endFight(lakeRef.current, characterRef.current, outcome === "died" || outcome === "fled");
+    if (outcome === "won") setBeatSans(true);
+    // If it never loaded, nothing has covered the town, so it just carries on upside down
+    endFight(lakeRef.current, characterRef.current, outcome !== "failed");
   }, []);
 
   function playEmote(emote) {
@@ -325,6 +329,7 @@ function MainGame({
           emoteRef={emoteRef}
         />
         <PlayerShadow characterRef={characterRef} lakeRef={lakeRef} />
+        {beatSans && <SuperSaiyan characterRef={characterRef} />}
         <group visible={!flipped}>
           {labels.map(({ text, position, fontSize, showcaseName }) => (
             <Text

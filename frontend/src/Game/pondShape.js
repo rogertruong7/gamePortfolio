@@ -32,6 +32,16 @@ const POND_OUTLINE = [
   [130.2, -82.3],
 ];
 
+// The model's rock mesh also holds its green bushes and their berries, as [x, z]. The character
+// walks through those instead of over them, so they stay out of the height map.
+const BUSHES_IN_THE_ROCK_MESH = [
+  [161, -39],
+  [123, -147],
+  [163, -150],
+  [112, -81],
+];
+const BUSH_REACH = 9;
+
 const CELL_SIZE = 2;
 const MARGIN_CELLS = 2;
 // Anywhere with no rock, lower than every other height so it never wins against one
@@ -94,8 +104,17 @@ function blurred(cells, columns, rows) {
   return result;
 }
 
-// Takes the rocks' triangles in world space, each as three [x, y, z] corners
-export function createGroundMap(triangles) {
+function isPartOfABush([a, b, c]) {
+  const x = (a[0] + b[0] + c[0]) / 3;
+  const z = (a[2] + b[2] + c[2]) / 3;
+  return BUSHES_IN_THE_ROCK_MESH.some(
+    ([bushX, bushZ]) => Math.hypot(x - bushX, z - bushZ) < BUSH_REACH
+  );
+}
+
+// Takes the rock mesh's triangles in world space, each as three [x, y, z] corners
+export function createGroundMap(meshTriangles) {
+  const triangles = meshTriangles.filter((triangle) => !isPartOfABush(triangle));
   const rocks = boundsOf(triangles);
   // A margin of empty cells all round lets the height fall away smoothly past the last rock
   const minX = rocks.minX - MARGIN_CELLS * CELL_SIZE;

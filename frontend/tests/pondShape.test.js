@@ -49,6 +49,13 @@ test("only open water counts as water", () => {
   assert.equal(map.isWater(...OUT_ON_THE_GRASS), false);
 });
 
+test("the character walks through the bushes in the rock mesh, not over them", () => {
+  const bush = [161, -39];
+  const withBush = createGroundMap([...rockAt(ROCK_SPOT, ROCK_TOP), ...rockAt(bush, 0.6, 5)]);
+  assert.equal(withBush.heightAt(...bush), FLOOR_Y);
+  assert.ok(Math.abs(withBush.heightAt(...ROCK_SPOT) - ROCK_TOP) < 0.01);
+});
+
 test("a rock under the surface doesn't get in the way", () => {
   const sunken = createGroundMap(rockAt(MIDDLE_OF_POND, WATER_Y - 3));
   assert.equal(sunken.isWater(...MIDDLE_OF_POND), true);

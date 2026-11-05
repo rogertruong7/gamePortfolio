@@ -22,7 +22,7 @@ const Popup = ({ setShowPopup }) => {
   return (
     <Modal
       title="Hi, I'm Roger"
-      tagline="Welcome to my portfolio. Walk around the town and go into any building you like."
+      tagline="Welcome to my portfolio. Walk around the town and go into any building you like. I made the original codebase before agents like Claude Code."
       actionLabel="Start exploring"
       onClose={handleClose}
       footer={

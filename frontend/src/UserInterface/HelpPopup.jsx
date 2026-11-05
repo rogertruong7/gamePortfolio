@@ -21,9 +21,9 @@ const HelpPopup = ({ setShowHelp }) => (
       <section>
         <SectionTitle>About this website</SectionTitle>
         <Intro>
-          I made this website entirely by myself with React Three Fiber, a React
-          renderer for three.js. It also works on mobile, if your device can run
-          it.
+          I made the original codebase before agents like Claude Code, with React
+          Three Fiber, a React renderer for three.js. It also works on mobile, if
+          your device can run it.
         </Intro>
         <Credits>
           <div>

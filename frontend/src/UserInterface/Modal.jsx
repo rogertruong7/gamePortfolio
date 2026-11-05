@@ -78,7 +78,7 @@ const Shell = styled.dialog`
   position: fixed;
   inset: 0;
   box-sizing: border-box;
-  width: min(580px, calc(100vw - 56px));
+  width: min(700px, calc(100vw - 56px));
   max-width: none;
   height: fit-content;
   max-height: ${MAX_HEIGHT};
@@ -92,7 +92,7 @@ const Shell = styled.dialog`
   cursor: default;
 
   @media (min-width: ${WIDE_FROM}px) {
-    width: ${({ $wide }) => ($wide ? "980px" : "580px")};
+    width: ${({ $wide }) => ($wide ? "980px" : "700px")};
   }
 
   &::backdrop {

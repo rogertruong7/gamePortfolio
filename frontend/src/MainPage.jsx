@@ -126,7 +126,7 @@ const MainPage = () => {
             setReseted={setReseted}
             setCurrentScene={setCurrentScene}
           ></ResetButton>
-          <HelpButton setShowHelp={setShowHelp}></HelpButton>
+          <HelpButton setShowHelp={setShowHelp} aboveEmotes={currentScene === 0}></HelpButton>
           {readStore("visited") !== "true" && showPopup && (
             <Popup setShowPopup={setShowPopup}></Popup>
           )}
@@ -155,6 +155,7 @@ const MainPage = () => {
           setIsMoving={setIsMoving}
           setIsWading={setIsWading}
           setIsPlunging={setIsPlunging}
+          showHud={!loading}
           currentScene={currentScene}
           enteringScene={enteringScene}
           setEnteringScene={setEnteringScene}

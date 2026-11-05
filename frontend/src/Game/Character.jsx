@@ -6,6 +6,7 @@ import { benchEdges, invisWalls, walkArea } from "./Static";
 import { createPathfinder } from "./pathfinding";
 import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
 import { updateDoorWalk } from "./doorWalk";
+import { applyEmotePose, findEmoteBones, updateEmote } from "./emotes";
 import { applyLakePose, followGround, updateLake } from "./lake";
 import { isBlocked, moveAndSlide } from "./wallSliding";
 import { readStore } from "../Helpers/storage.js";
@@ -50,6 +51,7 @@ const Character = React.forwardRef(
       setInWater,
       setLakePhase,
       setFlipped,
+      emoteRef,
     },
     ref
   ) => {
@@ -58,6 +60,7 @@ const Character = React.forwardRef(
     const mixer = useRef();
     const sitBones = useMemo(() => findSitBones(scene), [scene]);
     const headBone = useMemo(() => scene.getObjectByName("Head_210_015"), [scene]);
+    const emoteBones = useMemo(() => findEmoteBones(scene), [scene]);
     const clickRoute = useRef({ target: null, stops: [], next: 0 });
 
     function clickToMove(delta) {
@@ -256,6 +259,7 @@ const Character = React.forwardRef(
       }
       applySitPose(sit, sitBones, clock.elapsedTime);
       applyLakePose(lake, headBone);
+      applyEmotePose(emoteRef.current, emoteBones);
 
       if (currentScene !== 0) return;
 
@@ -268,6 +272,18 @@ const Character = React.forwardRef(
         ref.current,
         delta,
         finalDirection.lengthSq() > 0,
+        updateRotation
+      );
+      updateEmote(
+        emoteRef.current,
+        delta,
+        finalDirection.lengthSq() > 0 ||
+          clickMoving ||
+          doorWalk !== null ||
+          lake.phase !== "none" ||
+          sit.phase !== "none",
+        ref.current,
+        cameraRef.current,
         updateRotation
       );
 

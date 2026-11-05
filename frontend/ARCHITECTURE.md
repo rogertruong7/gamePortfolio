@@ -106,6 +106,7 @@ Isometric-style perspective camera with:
 - Fixed offset from player position (`[140, 90, 140]`), lerped smoothly
 - Mouse drag to orbit (rotates the offset vector via quaternion)
 - Subtle drift when not dragging (very slow mouse-follow)
+- After 8 seconds with no input, it drifts back to the centred angle looking in from the front corner, then sways from side to side around that
 - Vertical rotation clamped to prevent flipping; minimum height of 10 units
 
 ### Floor Click Detection (`Floor.jsx`)
@@ -170,6 +171,8 @@ HTML elements positioned absolutely over the 3D canvas.
 | EnterPopup | 102 | Doorway interaction prompt. Shows 1-2 buttons depending on which zones overlap. |
 | LakePrompt | 102 | Lake prompt, shown in open water. Built on `ChoicePopup`, like EnterPopup. |
 | ReflectionDialog | 102 | The typed "Despite everything, it's still you." box. |
+| EmoteButton | 103 | Opens EmoteWheel. Add an emote to `EMOTES` in `Game/emotes.js` with a function that poses its bones, and a figure in `EmoteWheel.jsx`. |
+| EmoteWheel | 104 | Full-screen wheel of emotes. The mouse's direction from the middle selects a slot, and a click plays it. |
 | BackButton | 103 | Returns to game view (scene 0). Only visible on content pages. |
 | ResetButton | 103 | Resets character position and returns to game view. |
 | HelpButton | 103 | Opens HelpPopup. |

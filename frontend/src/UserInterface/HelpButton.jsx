@@ -10,20 +10,20 @@ const Button = styled.button`
   font-weight: bold;
   cursor: pointer;
   position: absolute;
-  bottom: 82px;
+  bottom: ${({ $aboveEmotes }) => ($aboveEmotes ? 144 : 82)}px;
   right: 20px;
   z-index: 103;
   width: 80px;
 `;
 
-const HelpButton = ({ setShowHelp }) => {
+const HelpButton = ({ setShowHelp, aboveEmotes }) => {
   const showHelp = () => {
     setShowHelp(true);
   };
   
   return (
     <>
-      <Button onClick={showHelp}>
+      <Button onClick={showHelp} $aboveEmotes={aboveEmotes}>
         ?
         <ChromeFrame />
       </Button>

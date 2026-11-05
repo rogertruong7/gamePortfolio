@@ -132,6 +132,16 @@ const ControlsList = ({ showReset = false }) => {
         {touchOnly ? "Go inside." : "Go inside, or press E."} This button appears when you reach a
         building.
       </Row>
+      <Row
+        input={
+          <Chip>
+            emote
+            <ChromeFrame />
+          </Chip>
+        }
+      >
+        {touchOnly ? "Open the emote wheel" : "Open the emote wheel, or press B"}
+      </Row>
       {showReset && (
         <Row
           input={

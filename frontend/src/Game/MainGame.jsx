@@ -18,9 +18,11 @@ import UnderwaterFilter from "./UnderwaterFilter.jsx";
 import SitPrompt from "../UserInterface/SitPrompt.jsx";
 import LakePrompt from "../UserInterface/LakePrompt.jsx";
 import ReflectionDialog from "../UserInterface/ReflectionDialog.jsx";
+import EmoteButton from "../UserInterface/EmoteButton.jsx";
 import { labels } from "./Static.jsx";
 import { createSitState, startSitting, startStanding } from "./sitting.js";
 import { startWalkingIn, startWalkingOut } from "./doorWalk.js";
+import { createEmoteState, startEmote, stopEmote } from "./emotes.js";
 import {
   createLakeState,
   isJumping,
@@ -74,6 +76,7 @@ function MainGame({
   setIsMoving,
   setIsWading,
   setIsPlunging,
+  showHud,
   currentScene,
   enteringScene,
   setEnteringScene,
@@ -85,6 +88,7 @@ function MainGame({
   const sitRef = useRef(createSitState());
   const doorWalkRef = useRef(null);
   const lakeRef = useRef(createLakeState());
+  const emoteRef = useRef(createEmoteState());
   const resetCameraAngleRef = useRef(false);
   const [walkingOut, setWalkingOut] = useState(false);
 
@@ -135,6 +139,15 @@ function MainGame({
 
   const closeReflection = useCallback(() => stopReflection(lakeRef.current), []);
 
+  function playEmote(emote) {
+    if (sitRef.current.phase !== "none" || doorWalkRef.current) return;
+    if (lakeRef.current.phase !== "none") return;
+    setDarkspot(false);
+    setClickMoving(false);
+    setKeys({});
+    startEmote(emoteRef.current, emote);
+  }
+
   function onKeyDown(event) {
     if (currentScene !== 0) return;
     // macOS sends no keyup for a letter released while Cmd is held, so a shortcut
@@ -181,6 +194,7 @@ function MainGame({
       setClickMoving(false);
       sitRef.current.phase = "none";
       resetLake(lakeRef.current);
+      stopEmote(emoteRef.current);
       doorWalkRef.current = null;
       setWalkingOut(false);
       setEnteringScene(null);
@@ -253,6 +267,7 @@ function MainGame({
           playerPos={playerPos}
           resetAngleRef={resetCameraAngleRef}
           lakeRef={lakeRef}
+          emoteRef={emoteRef}
         />
         <Lights />
         <Floor
@@ -287,6 +302,7 @@ function MainGame({
           setInWater={setInWater}
           setLakePhase={setLakePhase}
           setFlipped={setFlipped}
+          emoteRef={emoteRef}
         />
         <PlayerShadow characterRef={characterRef} lakeRef={lakeRef} />
         <group visible={!flipped}>
@@ -323,6 +339,9 @@ function MainGame({
         <LakePrompt flipped={flipped} onReflect={viewReflection} onJump={jumpIntoLake} />
       )}
       {lakePhase === "reflecting" && <ReflectionDialog onClose={closeReflection} />}
+      {showHud && currentScene === 0 && sitPhase === "none" && (
+        <EmoteButton onEmote={playEmote} />
+      )}
       {sitPhase === "seated" && <SitPrompt label="Stand up" onPress={standUp} />}
     </>
   );

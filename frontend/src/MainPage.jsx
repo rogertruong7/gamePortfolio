@@ -68,6 +68,7 @@ const MainPage = () => {
   const [isMoving, setIsMoving] = useState(false);
   const [isWading, setIsWading] = useState(false);
   const [isPlunging, setIsPlunging] = useState(false);
+  const [isFighting, setIsFighting] = useState(false);
   const hasMovedRef = useRef(false);
 
   const finishEntering = (scene) => {
@@ -117,6 +118,7 @@ const MainPage = () => {
         isMoving={isMoving}
         isWading={isWading}
         isPlunging={isPlunging}
+        isFighting={isFighting}
       />
       <Menu />
       {loading && currentScene === 0 && <LoadingScreen progress={progress} />}
@@ -155,6 +157,7 @@ const MainPage = () => {
           setIsMoving={setIsMoving}
           setIsWading={setIsWading}
           setIsPlunging={setIsPlunging}
+          setIsFighting={setIsFighting}
           showHud={!loading}
           currentScene={currentScene}
           enteringScene={enteringScene}

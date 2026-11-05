@@ -17,6 +17,8 @@ import Doorway from "./Doorway.jsx";
 import UnderwaterFilter from "./UnderwaterFilter.jsx";
 import SitPrompt from "../UserInterface/SitPrompt.jsx";
 import LakePrompt from "../UserInterface/LakePrompt.jsx";
+import SansFight from "../UserInterface/SansFight.jsx";
+import { useAudio } from "../Audio/AudioContext.jsx";
 import ReflectionDialog from "../UserInterface/ReflectionDialog.jsx";
 import EmoteButton from "../UserInterface/EmoteButton.jsx";
 import { labels } from "./Static.jsx";
@@ -25,6 +27,7 @@ import { startWalkingIn, startWalkingOut } from "./doorWalk.js";
 import { createEmoteState, startEmote, stopEmote } from "./emotes.js";
 import {
   createLakeState,
+  endFight,
   isJumping,
   resetLake,
   startJump,
@@ -76,6 +79,7 @@ function MainGame({
   setIsMoving,
   setIsWading,
   setIsPlunging,
+  setIsFighting,
   showHud,
   currentScene,
   enteringScene,
@@ -97,6 +101,10 @@ function MainGame({
   const [inWater, setInWater] = useState(false);
   const [lakePhase, setLakePhase] = useState("none");
   const [flipped, setFlipped] = useState(false);
+  const [fightOpen, setFightOpen] = useState(false);
+  // The town stops drawing while the fight fills the screen, so the two don't compete for frames
+  const [fightCovers, setFightCovers] = useState(false);
+  const { muted } = useAudio();
   const [playerPos, setPlayerPos] = useState(startVector);
   const [clickMoving, setClickMoving] = useState(false);
   const [darkSpot, setDarkspot] = useState(false);
@@ -138,6 +146,12 @@ function MainGame({
   }
 
   const closeReflection = useCallback(() => stopReflection(lakeRef.current), []);
+  const onFightCovered = useCallback(() => setFightCovers(true), []);
+  const onFightClosed = useCallback(() => setFightOpen(false), []);
+  const onFightEnd = useCallback((outcome) => {
+    endFight(lakeRef.current, outcome === "died" || outcome === "fled");
+    setFightCovers(false);
+  }, []);
 
   function playEmote(emote) {
     if (sitRef.current.phase !== "none" || doorWalkRef.current) return;
@@ -236,6 +250,14 @@ function MainGame({
   }, [lakePhase, setIsPlunging]);
 
   useEffect(() => {
+    if (lakePhase === "fighting") setFightOpen(true);
+  }, [lakePhase]);
+
+  useEffect(() => {
+    setIsFighting(fightOpen);
+  }, [fightOpen, setIsFighting]);
+
+  useEffect(() => {
     const anyKeyActive = Object.values(keys).some((v) => v === true);
     setIsMoving(
       lakePhase === "none" &&
@@ -258,7 +280,7 @@ function MainGame({
         shadows={{ type: THREE.PCFShadowMap }}
         dpr={[1, 1.5]}
         gl={RENDERER_OPTIONS}
-        frameloop={currentScene === 0 ? "always" : "never"}
+        frameloop={currentScene === 0 && !fightCovers ? "always" : "never"}
       >
         <ResizeHandler />
         <Backdrop />
@@ -339,6 +361,14 @@ function MainGame({
         <LakePrompt flipped={flipped} onReflect={viewReflection} onJump={jumpIntoLake} />
       )}
       {lakePhase === "reflecting" && <ReflectionDialog onClose={closeReflection} />}
+      {fightOpen && (
+        <SansFight
+          muted={muted}
+          onCovered={onFightCovered}
+          onEnd={onFightEnd}
+          onClosed={onFightClosed}
+        />
+      )}
       {showHud && currentScene === 0 && sitPhase === "none" && (
         <EmoteButton onEmote={playEmote} />
       )}

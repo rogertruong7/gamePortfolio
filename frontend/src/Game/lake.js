@@ -27,7 +27,8 @@ const _toCamera = new THREE.Vector3();
 
 export function createLakeState() {
   return {
-    // none -> lookingDown -> reflecting -> none, or none -> hopping -> sinking -> surfacing -> none
+    // none -> lookingDown -> reflecting -> none, or none -> hopping -> sinking -> surfacing, then
+    // none coming back up or fighting on the way into the upside-down world, until the fight ends
     phase: "none",
     // Set once the rocks have loaded
     ground: null,
@@ -70,6 +71,15 @@ export function startJump(lake, character) {
   lake.surfaceY = character.position.y;
   lake.rollFrom = lake.flipped ? Math.PI : 0;
   lake.jumpSeconds = 0;
+}
+
+// Leaving sends the character back to the pond in the normal world, right where it's standing
+export function endFight(lake, backToNormalWorld) {
+  lake.phase = "none";
+  if (!backToNormalWorld) return;
+  lake.flipped = false;
+  lake.underwater = 0;
+  lake.roll = 0;
 }
 
 export function resetLake(lake) {
@@ -153,14 +163,14 @@ export function updateLake(lake, character, delta, wantsToMove, turnTowards) {
     lake.flood = 1 - THREE.MathUtils.smoothstep(lake.progress, 0, 0.7);
     updateRoll(lake, delta);
     if (lake.progress === 1) {
-      lake.phase = "none";
+      lake.phase = lake.flipped ? "fighting" : "none";
       lake.roll = lake.flipped ? Math.PI : 0;
       lake.flood = 0;
     }
     return true;
   }
 
-  return false;
+  return lake.phase === "fighting";
 }
 
 // Tilts the head down once the walk clip has posed it

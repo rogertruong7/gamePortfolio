@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sans fight</title>
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        background: #000;
+        overflow: hidden;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      canvas {
+        touch-action: none;
+      }
+    </style>
+    <script>
+      // The game was exported to report to an ad network, and it calls these from its event
+      // sheets. They do nothing here except tell the site how the fight is going.
+      (function () {
+        // Long enough to see the GAME OVER screen, if X doesn't quit it sooner
+        const GAME_OVER_SECONDS = 5;
+
+        const tell = (message) => parent.postMessage({ sansFight: message }, location.origin);
+        let fighting = false;
+        let gameOver = false;
+
+        // Runs as the battle starts
+        function start() {
+          fighting = true;
+          tell("started");
+        }
+
+        // Runs when the GAME OVER screen appears, and again as the battle ends
+        function stop() {
+          if (!fighting || gameOver) return;
+          gameOver = true;
+          setTimeout(() => tell("died"), GAME_OVER_SECONDS * 1000);
+        }
+
+        // Runs as the battle ends, whichever way it went, and on the menu before it starts
+        window.ShowAd = function () {
+          if (!fighting) return;
+          fighting = false;
+          tell(gameOver ? "died" : "won");
+        };
+
+        window.ysdk = {
+          features: {
+            LoadingAPI: { ready() {} },
+            GameplayAPI: { start, stop },
+          },
+        };
+
+        window.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") tell("fled");
+          // During the battle, Return is the game's confirm key
+          if (event.key === "Enter" && gameOver) tell("died");
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="c2canvasdiv">
+      <canvas id="c2canvas" width="640" height="480"></canvas>
+    </div>
+    <script src="jquery-3.4.1.min.js"></script>
+    <script src="c2runtime.js"></script>
+    <script>
+      jQuery(document).ready(function () {
+        cr_createRuntime("c2canvas");
+        // The site's mute button is out of reach once the fight is up, so it carries over
+        if (new URLSearchParams(location.search).has("muted")) {
+          cr.plugins_.Audio.prototype.acts.SetSilent(0);
+        }
+      });
+
+      document.addEventListener("visibilitychange", function () {
+        cr_setSuspended(document.hidden);
+      });
+    </script>
+  </body>
+</html>

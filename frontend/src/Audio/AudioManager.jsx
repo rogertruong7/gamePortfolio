@@ -8,7 +8,7 @@ const WADING_VOLUME = 0.08;
 const PLUNGE_VOLUME = 0.25;
 const FADE_DURATION = 1000;
 
-const AudioManager = ({ currentScene, isMoving, isWading, isPlunging }) => {
+const AudioManager = ({ currentScene, isMoving, isWading, isPlunging, isFighting }) => {
   const { muted, audioReady } = useAudio();
   const snowyRef = useRef(null);
   const shopRef = useRef(null);
@@ -62,8 +62,9 @@ const AudioManager = ({ currentScene, isMoving, isWading, isPlunging }) => {
   }, []);
 
   useEffect(() => {
-    Howler.mute(muted);
-  }, [muted]);
+    // The fight brings its own music
+    Howler.mute(muted || isFighting);
+  }, [muted, isFighting]);
 
   useEffect(() => {
     if (!audioReady || !snowyRef.current) return;

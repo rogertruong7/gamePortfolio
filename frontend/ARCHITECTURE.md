@@ -91,10 +91,11 @@ The pond has no hitbox, so the character walks straight through it.
 
 - **Ground height:** `pondShape.js` builds a height map from the rock mesh once it loads. `followGround` in `lake.js` eases the character towards that height, so it climbs over the rocks and wades a little below the surface in the water. The map also decides what counts as open water.
 - **Prompts and sound:** standing in open water shows `LakePrompt`, and walking there swaps the footsteps for the wading loop. The sounds come from `scripts/make-water-sounds.mjs`.
-- **State:** `lake.js` holds one state object, read each frame by the character, camera, shadow, water and filter. Its `phase` is `none`, `lookingDown` then `reflecting`, or `hopping` then `sinking` then `surfacing`.
+- **State:** `lake.js` holds one state object, read each frame by the character, camera, shadow, water and filter. Its `phase` is `none`, `lookingDown` then `reflecting`, or `hopping` then `sinking` then `surfacing`, followed by `fighting` when the jump led into the upside-down world.
 - **Reflection:** `pondReflection.js` draws the scene from a camera mirrored under the water into a texture that the water's shader shows. This second pass only runs while `lake.reflection` is above 0. Trees dissolve out of the main view, because their branches would block the camera, but stay in the reflection. `PlayerShadow` draws on layer 1, which only the main camera sees.
 - **Upside-down world:** this is the same town and the same walls with the camera rolled 180 degrees. Keyboard movement and camera dragging are reversed to cancel out the roll, so the controls still match the screen. Click-to-move needs no change. Labels are hidden and `Doorway` stays off, so no building can be entered.
 - **Filter:** `UnderwaterFilter.jsx` only mounts during a jump or in the upside-down world. While mounted it takes over rendering, copies the finished frame and draws it back through the wave, tint and flood shader.
+- **Sans fight:** jumping into the upside-down world starts the `fighting` phase, which holds the character still and mounts `SansFight.jsx`. That runs a third-party Construct 2 export from `public/sans-fight` in a same-origin iframe, with `?mode=normal` skipping its menu. Sans explains the controls through an added line in its `sans_intro.csv`, and his text box in `data.js` is narrowed from 256 to 184 so that line wraps inside his speech bubble. The export's ad and analytics calls are stubbed in its `index.html` and used as the signals for the battle starting and ending, which it posts to the site. Dying or running away goes back to the normal world's pond, and Return also leaves the GAME OVER screen. Winning stays upside down, as does the fight failing to load. The canvas stops drawing and the site's audio is muted while the fight is up.
 
 ### Plantings (`plantings.js`, `fallenLeaves.js`)
 
@@ -171,6 +172,7 @@ HTML elements positioned absolutely over the 3D canvas.
 | EnterPopup | 102 | Doorway interaction prompt. Shows 1-2 buttons depending on which zones overlap. |
 | LakePrompt | 102 | Lake prompt, shown in open water. Built on `ChoicePopup`, like EnterPopup. |
 | ReflectionDialog | 102 | The typed "Despite everything, it's still you." box. |
+| SansFight | 149-151 | The Sans fight, faded in over the upside-down world. |
 | EmoteButton | 103 | Opens EmoteWheel. Add an emote to `EMOTES` in `Game/emotes.js` with a function that poses its bones, and a figure in `EmoteWheel.jsx`. |
 | EmoteWheel | 104 | Full-screen wheel of emotes. The mouse's direction from the middle selects a slot, and a click plays it. |
 | BackButton | 103 | Returns to game view (scene 0). Only visible on content pages. |

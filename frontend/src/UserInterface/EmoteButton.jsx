@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
+import { topLeftSlot } from "./hudCorner.js";
 import EmoteWheel from "./EmoteWheel.jsx";
 import { isModalOpen } from "../Helpers/modal.js";
 
@@ -16,6 +17,7 @@ const Button = styled.button`
   right: 20px;
   z-index: 103;
   width: 80px;
+  ${topLeftSlot(2, false)}
 `;
 
 const EmoteButton = ({ onEmote }) => {

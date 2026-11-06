@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import styled from "styled-components";
+import { useEffect, useRef, useState } from "react";
+import styled, { css, keyframes } from "styled-components";
 import resume from "../assets/RogerTruongResume.pdf";
 import MuteButton from "./MuteButton.jsx";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
@@ -19,18 +19,45 @@ const MenuContainer = styled.div`
 const MenuRow = styled.div`
   display: flex;
 `;
-const SmallMenuContainer = styled.div`
+const dropIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+// The links drop down under the menu button as a column of the same chrome buttons
+const SmallMenuContainer = styled.nav`
   position: absolute;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  top: 70px;
-  right: 20px;
-  background-color: white;
-  box-shadow: 0px 2px 12px rgba(0, 0, 0, 0.2);
-  padding: 5px;
-  border-radius: 10px;
-  z-index: 106;
+  align-items: flex-end;
+  gap: 10px;
+  top: 78px;
+  right: 15px;
+  z-index: 140;
+
+  & > * {
+    animation: ${dropIn} 180ms ease-out both;
+  }
+
+  ${[1, 2, 3, 4].map(
+    (n) => css`
+      & > :nth-child(${n}) {
+        animation-delay: ${(n - 1) * 40}ms;
+      }
+    `
+  )}
+
+  @media (prefers-reduced-motion: reduce) {
+    & > * {
+      animation: none;
+    }
+  }
 `;
 
 const DefaultButton = styled.button`
@@ -45,136 +72,128 @@ const DefaultButton = styled.button`
 `;
 
 const HamburgerMenuButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  justify-content: center;
-  align-items: center;
+  ${chromeButton}
   position: absolute;
-  top: 20px;
+  top: 17px;
   right: 20px;
   z-index: 140;
-  border-radius: 10px;
-  border: 2px solid rgb(255, 255, 255);
-  background-color: white;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
 
-  &:hover {
-    background-color: #f2f2f2;
+  /* Three bars that cross into an X while the menu is open */
+  span {
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+    background-color: currentColor;
+    transition: transform 180ms ease, opacity 180ms ease;
   }
 
-  /* Lines for the hamburger menu */
-  &::before,
-  &::after,
-  div {
-    content: "";
-    width: 25px;
-    height: 5px;
-    background-color: rgb(153, 153, 153);
-    border-radius: 3px;
+  &[aria-expanded="true"] span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
   }
 
-  /* Center line style */
-  div {
-    width: 25px;
-    height: 5px;
-    background-color: rgb(153, 153, 153);
+  &[aria-expanded="true"] span:nth-child(2) {
+    opacity: 0;
   }
 
-  /* Show the hamburger menu only on smaller screens */
+  &[aria-expanded="true"] span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
   @media (min-width: 1100px) {
-    display: none; /* Hide hamburger button on screens larger than 1100px */
+    display: none;
   }
 `;
+
+const LINKS = [
+  { label: "github", href: "https://github.com/rogertruong7", external: true },
+  { label: "linkedin", href: "https://www.linkedin.com/in/roger-truong/", external: true },
+  { label: "download cv", href: resume, download: "RogerTruongResume.pdf" },
+];
+
+const Links = ({ onPick }) =>
+  LINKS.map(({ label, href, external, download }) => (
+    <a
+      key={label}
+      href={href}
+      target="_blank"
+      rel={external ? "noopener noreferrer" : undefined}
+      download={download}
+      onClick={onPick}
+    >
+      <DefaultButton tabIndex={-1}>
+        {label}
+        <ChromeFrame spikes={false} />
+      </DefaultButton>
+    </a>
+  ));
 
 const Menu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [lessThan1100, setLessThan1100] = useState(false);
+  const menuRef = useRef(null);
+  const toggleRef = useRef(null);
+
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 1100px)");
     const handleResize = (e) => setLessThan1100(e.matches);
-
-    // Check on initial load
     setLessThan1100(mediaQuery.matches);
-
-    // Add listener
     mediaQuery.addEventListener("change", handleResize);
-
-    // Cleanup listener on unmount
     return () => mediaQuery.removeEventListener("change", handleResize);
   }, []);
-  // Function to toggle the menu
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // Closes on a tap anywhere else, or Escape
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const onPointerDown = (event) => {
+      if (menuRef.current?.contains(event.target)) return;
+      if (toggleRef.current?.contains(event.target)) return;
+      setIsMenuOpen(false);
+    };
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isMenuOpen]);
 
   return (
     <>
-      <HamburgerMenuButton onClick={toggleMenu}>
-        <div />
+      <HamburgerMenuButton
+        ref={toggleRef}
+        onClick={() => setIsMenuOpen((open) => !open)}
+        aria-label="Menu"
+        aria-expanded={isMenuOpen}
+      >
+        <span />
+        <span />
+        <span />
+        <ChromeFrame spikes={false} />
       </HamburgerMenuButton>
       {!lessThan1100 && (
         <MenuContainer>
           <MenuRow>
-            <a
-              href="https://github.com/rogertruong7"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <DefaultButton>
-                github
-                <ChromeFrame spikes={false} />
-              </DefaultButton>
-            </a>
-            <a
-              href="https://www.linkedin.com/in/roger-truong/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <DefaultButton>
-                linkedin
-                <ChromeFrame spikes={false} />
-              </DefaultButton>
-            </a>
-            <a href={resume} target="_blank" download="RogerTruongResume.pdf">
-              <DefaultButton>
-                download cv
-                <ChromeFrame spikes={false} />
-              </DefaultButton>
-            </a>
+            <Links />
             <MuteButton />
           </MenuRow>
         </MenuContainer>
       )}
       {lessThan1100 && isMenuOpen && (
-        <SmallMenuContainer>
-          <a
-            href="https://github.com/rogertruong7"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <DefaultButton>
-                github
-                <ChromeFrame spikes={false} />
-              </DefaultButton>
-          </a>
-          <a
-            href="https://www.linkedin.com/in/roger-truong/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <DefaultButton>
-                linkedin
-                <ChromeFrame spikes={false} />
-              </DefaultButton>
-          </a>
-          <a href={resume} target="_blank" download="RogerTruongResume.pdf">
-            <DefaultButton>
-                download cv
-                <ChromeFrame spikes={false} />
-              </DefaultButton>
-          </a>
+        <SmallMenuContainer ref={menuRef} aria-label="Links">
+          <Links onPick={() => setIsMenuOpen(false)} />
           <MuteButton />
         </SmallMenuContainer>
       )}

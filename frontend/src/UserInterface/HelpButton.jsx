@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
+import { topLeftSlot } from "./hudCorner.js";
 
 const Button = styled.button`
   font-family: "Pixelify Sans", serif;
@@ -14,6 +15,7 @@ const Button = styled.button`
   right: 20px;
   z-index: 103;
   width: 80px;
+  ${({ $aboveEmotes }) => topLeftSlot(0, !$aboveEmotes)}
 `;
 
 const HelpButton = ({ setShowHelp, aboveEmotes }) => {

@@ -130,6 +130,7 @@ const MainPage = () => {
           <ResetButton
             setReseted={setReseted}
             setCurrentScene={setCurrentScene}
+            afterHome={currentScene !== 0}
           ></ResetButton>
           <HelpButton setShowHelp={setShowHelp} aboveEmotes={currentScene === 0}></HelpButton>
           {readStore("visited") !== "true" && showPopup && (

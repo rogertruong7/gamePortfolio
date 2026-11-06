@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
+import { topLeftSlot } from "./hudCorner.js";
 
 const Button = styled.button`
   font-family: "Pixelify Sans", serif;
@@ -14,16 +15,17 @@ const Button = styled.button`
   right: 20px;
   z-index: 103;
   width: 80px;
+  ${({ $afterHome }) => topLeftSlot(1, $afterHome)}
 `;
 
-const ResetButton = ({ setReseted, setCurrentScene }) => {
+const ResetButton = ({ setReseted, setCurrentScene, afterHome }) => {
   const handleReset = () => {
     setReseted(true);
     setCurrentScene(0);
   };
   return (
     <>
-      <Button onClick={handleReset}>
+      <Button onClick={handleReset} $afterHome={afterHome}>
         reset
         <ChromeFrame />
       </Button>

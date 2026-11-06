@@ -41,7 +41,55 @@
         window.startFight = function () {
           waiting = false;
           cr_setSuspended(false);
+          readOpeningLines();
         };
+
+        // Sans's opening lines each wait for Z before the next, which left players stuck on the
+        // first one. Each is given time to be read and then moved on, until the attack starts.
+        const OPENING_LINES = 3;
+        const READ_SECONDS_PER_CHARACTER = 0.045;
+        const MIN_READ_SECONDS = 1.4;
+        const Z_KEY = 90;
+
+        function sansSpeech() {
+          const type = cr_getC2Runtime().types_by_index.find(
+            (t) => t.instances[0]?.instance_vars?.[1] === "SansSpeak"
+          );
+          return type?.instances[0] ?? null;
+        }
+
+        function pressZ() {
+          jQuery(document).trigger(jQuery.Event("keydown", { which: Z_KEY }));
+          setTimeout(() => jQuery(document).trigger(jQuery.Event("keyup", { which: Z_KEY })), 60);
+        }
+
+        function readOpeningLines() {
+          let advanced = 0;
+          let line = null;
+          let typedAt = 0;
+          const timer = setInterval(() => {
+            if (gameOver || advanced >= OPENING_LINES) {
+              clearInterval(timer);
+              return;
+            }
+            const speech = sansSpeech();
+            if (!speech || !speech.visible) return;
+            // The line in full, and how many of its letters have been typed so far
+            const full = speech.instance_vars[2];
+            const typed = speech.instance_vars[5];
+            if (full !== line) {
+              line = full;
+              typedAt = 0;
+            }
+            if (typed < full.length) return;
+            if (!typedAt) typedAt = performance.now();
+            const readSeconds = Math.max(MIN_READ_SECONDS, full.length * READ_SECONDS_PER_CHARACTER);
+            if (performance.now() - typedAt < readSeconds * 1000) return;
+            pressZ();
+            advanced += 1;
+            line = null;
+          }, 100);
+        }
 
         document.addEventListener("visibilitychange", () => {
           cr_setSuspended(document.hidden || waiting);
@@ -91,10 +139,53 @@
     <script src="jquery-3.4.1.min.js"></script>
     <script src="c2runtime.js"></script>
     <script>
+      // The game draws its pixel art without smoothing, which suits everything but the photo of
+      // Roger's face on Sans's head. That one texture is smoothed so the face stays sharp.
+      (function () {
+        const loadTexture = cr.GLWrap.prototype.loadTexture;
+        cr.GLWrap.prototype.loadTexture = function (img, tiling, linearSampling, ...rest) {
+          const smooth = linearSampling || /sanshead-sheet0\.png/.test(img.src || "");
+          return loadTexture.call(this, img, tiling, smooth, ...rest);
+        };
+
+        // The ACT options are Roger's links, and sparing him gets you his resume. The game runs
+        // these by name when they're picked, and the page does the rest. The site passes the
+        // resume's address, since its file name changes with every build.
+        const resume = new URLSearchParams(location.search).get("resume");
+        const LINKS = {
+          menuactresume: () => download(resume),
+          menuspare: () => download(resume),
+          menuactgithub: () => openTab("https://github.com/rogertruong7"),
+          menuactlinkedin: () => openTab("https://www.linkedin.com/in/roger-truong/"),
+        };
+
+        function openTab(url) {
+          window.open(url, "_blank", "noopener,noreferrer");
+        }
+
+        function download(url) {
+          if (!url) return;
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = "RogerTruongResume.pdf";
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+
+        const acts = cr.plugins_.Function.prototype.acts;
+        const callFunction = acts.CallFunction;
+        acts.CallFunction = function (name, params) {
+          LINKS[String(name).toLowerCase()]?.();
+          return callFunction.call(this, name, params);
+        };
+      })();
+    </script>
+    <script>
       jQuery(document).ready(function () {
         cr_createRuntime("c2canvas");
-        // In decibels: this is 60% of the game's original volume
-        cr.plugins_.Audio.prototype.acts.SetMasterVolume(-4.44);
+        // In decibels: this is 30% of the game's original volume
+        cr.plugins_.Audio.prototype.acts.SetMasterVolume(-10.46);
         // The site's mute button is out of reach once the fight is up, so it carries over
         if (new URLSearchParams(location.search).has("muted")) {
           cr.plugins_.Audio.prototype.acts.SetSilent(0);

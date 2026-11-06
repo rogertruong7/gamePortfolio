@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Typewriter from "typewriter-effect";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
+import resume from "../assets/RogerTruongResume.pdf";
 
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Phones have no Escape key, so they're pointed at the button instead
@@ -66,6 +67,46 @@ const ReturnHint = styled.p`
   pointer-events: none;
 `;
 
+// After a win, so there's a moment to enjoy it before the town comes back
+const WIN_SECONDS = 15;
+
+const WinCard = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 3vh, 28px);
+  background: black;
+  color: white;
+  font-family: "Determination Mono", "Pixelify Sans", serif;
+  text-align: center;
+  pointer-events: auto;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
+
+  h2 {
+    margin: 0;
+    color: #ffff40;
+    font-size: clamp(2.4rem, 8vw, 5rem);
+    font-weight: normal;
+  }
+
+  p {
+    margin: 0;
+    font-size: clamp(1rem, 0.8rem + 1vw, 1.8rem);
+  }
+
+  small {
+    color: #9a9a9a;
+    font-size: clamp(0.85rem, 0.7rem + 0.4vw, 1.1rem);
+  }
+`;
+
 // Stops clicks reaching the town and the buttons over it until the fight has gone
 const ClickBlocker = styled.div`
   position: fixed;
@@ -98,11 +139,15 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
   const endedRef = useRef(false);
   const timersRef = useRef([]);
   // The site's mute setting only matters as the game loads
-  const src = useRef(`/sans-fight/index.html?mode=normal${muted ? "&muted" : ""}`).current;
+  const src = useRef(
+    `/sans-fight/index.html?mode=normal&resume=${encodeURIComponent(resume)}${muted ? "&muted" : ""}`
+  ).current;
   const [loaded, setLoaded] = useState(false);
   const [shown, setShown] = useState(false);
   const [stalled, setStalled] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [won, setWon] = useState(false);
+  const winCardRef = useRef(null);
   const [ended, setEnded] = useState(false);
 
   const after = useCallback((ms, callback) => {
@@ -156,7 +201,9 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
         setLoaded(true);
       } else if (message === "gameover") {
         setGameOver(true);
-      } else if (message === "died" || message === "won" || message === "fled") {
+      } else if (message === "won") {
+        setWon(true);
+      } else if (message === "died" || message === "fled") {
         end(message);
       }
     }
@@ -174,11 +221,25 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
   useEffect(() => {
     if (!covering) return;
     function onKeyDown(event) {
-      if (event.key === "Escape") end(gameOver ? "died" : "fled");
+      if (event.key === "Escape") end(won ? "won" : gameOver ? "died" : "fled");
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [covering, gameOver, end]);
+  }, [covering, gameOver, won, end]);
+
+  // The win card waits for any key or click, or goes on its own after a while. The game had the
+  // keyboard, so the card takes it back to hear the key.
+  useEffect(() => {
+    if (!won) return;
+    winCardRef.current?.focus();
+    const finish = () => end("won");
+    const timer = setTimeout(finish, WIN_SECONDS * 1000);
+    window.addEventListener("keydown", finish);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("keydown", finish);
+    };
+  }, [won, end]);
 
   return (
     <>
@@ -186,6 +247,13 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
       <Fade $shown={covering}>
         {/* Removing it stops the music at once, while the black keeps fading */}
         {!ended && <Frame ref={frameRef} src={src} title="Sans fight" allow="autoplay" />}
+        {won && !ended && (
+          <WinCard ref={winCardRef} tabIndex={-1} role="status" onClick={() => end("won")}>
+            <h2>YOU WON!</h2>
+            <p>* You earned 0 EXP and one new hire.</p>
+            <small>{TOUCH ? "Tap to go back" : "Press any key to go back"}</small>
+          </WinCard>
+        )}
         {gameOver && !ended && (
           <ReturnHint>{TOUCH ? "* Tap Return to go back" : "* Press Esc to return"}</ReturnHint>
         )}
@@ -196,16 +264,17 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
               WAITING_LINE
             ) : (
               <Typewriter
+                options={{ delay: TYPING_DELAY }}
                 onInit={(typewriter) => {
-                  typewriter.changeDelay(TYPING_DELAY).typeString(WAITING_LINE).start();
+                  typewriter.typeString(WAITING_LINE).start();
                 }}
               />
             )}
           </Waiting>
         )}
         {covering && (
-          <RunAway onClick={() => end(gameOver ? "died" : "fled")}>
-            {gameOver ? "Return (Esc)" : "Run away (Esc)"}
+          <RunAway onClick={() => end(won ? "won" : gameOver ? "died" : "fled")}>
+            {won || gameOver ? "Return (Esc)" : "Run away (Esc)"}
             <ChromeFrame />
           </RunAway>
         )}

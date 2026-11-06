@@ -186,61 +186,61 @@
             ],
             ["t24", 11, false, [1558614189746918, 4074126684641977, 8283317758694072], 0, 0, null, [
                     ["Default", 5, false, 1, 0, false, 2276838282479599, [
-                        ["images/sanshead-sheet0.png", 1907, 1, 1, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 1, 1, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [], 0
                         ]
                     ]],
                     ["LookLeft", 5, false, 1, 0, false, 4388466239935075, [
-                        ["images/sanshead-sheet0.png", 1907, 35, 1, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 265, 1, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [], 0
                         ]
                     ]],
                     ["Wink", 5, false, 1, 0, false, 6457042623121455, [
-                        ["images/sanshead-sheet0.png", 1907, 69, 1, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 529, 1, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [], 0
                         ]
                     ]],
                     ["ClosedEyes", 5, false, 1, 0, false, 8089043188246127, [
-                        ["images/sanshead-sheet0.png", 1907, 1, 33, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 1, 249, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [], 0
                         ]
                     ]],
                     ["NoEyes", 5, false, 1, 0, false, 2373656401037775, [
-                        ["images/sanshead-sheet0.png", 1907, 35, 33, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 265, 249, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [], 0
                         ]
                     ]],
                     ["BlueEye", 5, false, 1, 0, false, 4492125680738175, [
-                        ["images/sanshead-sheet0.png", 1907, 69, 33, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 529, 249, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [], 0
                         ],
-                        ["images/sanshead-sheet0.png", 1907, 1, 65, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 1, 497, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [], 0
                         ]
                     ]],
                     ["Tired1", 5, false, 1, 0, false, 9055351961421601, [
-                        ["images/sanshead-sheet0.png", 1907, 35, 65, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 265, 497, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [-0.375, -0.8666670322418213, 0, -1, 0.375, -0.8666670322418213, 0.46875, -0.5, 0.375, -0.1333330273628235, 0, 0, -0.375, -0.1333330273628235, -0.46875, -0.5], 0
                         ]
                     ]],
                     ["Tired2", 5, false, 1, 0, false, 3836599280297155, [
-                        ["images/sanshead-sheet0.png", 1907, 69, 65, 32, 30, 1, 0.5, 1, [
+                        ["images/sanshead-sheet0.png", 222362, 529, 497, 256, 240, 1, 0.5, 1, [
                                 ["Sweat", 0.5, 0]
                             ],
                             [-0.375, -0.8666670322418213, 0, -1, 0.375, -0.8666670322418213, 0.46875, -0.5, 0.375, -0.1333330273628235, 0, 0, -0.375, -0.1333330273628235, -0.46875, -0.5], 0
@@ -376,17 +376,17 @@
             ],
             ["t27", 11, false, [], 0, 0, null, [
                     ["Sweat1", 5, false, 1, 0, false, 7107173151154428, [
-                        ["images/sanssweat-sheet0.png", 382, 1, 1, 32, 9, 1, 0.5, 0, [],
+                        ["images/sanssweat-sheet0.png", 1574, 1, 1, 256, 192, 1, 0.5, 0, [],
                             [], 0
                         ]
                     ]],
                     ["Sweat2", 5, false, 1, 0, false, 2389381723178476, [
-                        ["images/sanssweat-sheet0.png", 382, 1, 12, 32, 9, 1, 0.5, 0, [],
+                        ["images/sanssweat-sheet0.png", 1574, 1, 201, 256, 192, 1, 0.5, 0, [],
                             [], 0
                         ]
                     ]],
                     ["Sweat3", 5, false, 1, 0, false, 2164871598142847, [
-                        ["images/sanssweat-sheet0.png", 382, 1, 23, 32, 9, 1, 0.5, 0, [],
+                        ["images/sanssweat-sheet0.png", 1574, 1, 401, 256, 192, 1, 0.5, 0, [],
                             [], 0
                         ]
                     ]]
@@ -714,7 +714,7 @@
                                 [0, "Default", 0, 0]
                             ],
                             [
-                                [320, -176, 0, 64, 18, 0, 0, 1, 0.5, 0, 0, 0, []], 27, 21, [],
+                                [320, -176, 0, 64, 48, 0, 0, 1, 0.5, 0, 0, 0, []], 27, 21, [],
                                 [],
                                 [1, "Default", 0, 0]
                             ]
@@ -1287,7 +1287,7 @@
                                     [7, [10, [19, 27, [
                                             [23, "Name"]
                                         ]],
-                                        [2, "   LV 19"]
+                                        [2, ""]
                                     ]]
                                 ]]
                             ]
@@ -2354,10 +2354,10 @@
                                     [
                                         [14, 59, null, 4925109422702469, false, [
                                             [10, 4],
-                                            [7, [2, "* You felt your sins crawling\n  on your back."]]
+                                            [7, [2, "* You feel his resume crawling\n  into your inbox."]]
                                         ]]
                                     ]
-                                ],
+                                ], [0, null, false, null, 8239489011881921, [[26, 45, null, 0, false, false, false, 3520969743866418, false, [[10, 1], [8, 0], [7, [0, 2]]]]], [[14, 59, null, 8670587962962370, false, [[10, 4], [7, [2, "* Btw don't move when the\n  blue lines pass through you."]]]]]],
                                 [0, null, false, null, 8793208741086474, [
                                         [26, 45, null, 0, false, false, false, 1174001643764288, false, [
                                             [10, 1],
@@ -2373,7 +2373,7 @@
                                     [
                                         [14, 59, null, 5244377573294855, false, [
                                             [10, 4],
-                                            [7, [2, "* You feel like you're going to\n  have a bad time."]]
+                                            [7, [2, "* You feel like you're going to\n  have a hard time saying no."]]
                                         ]]
                                     ],
                                     [
@@ -2417,7 +2417,7 @@
                                     [
                                         [14, 59, null, 2670032810893258, false, [
                                             [10, 4],
-                                            [7, [2, "* Sans is taking a break."]]
+                                            [7, [2, "* Roger is taking a coffee\n  break."]]
                                         ]]
                                     ]
                                 ],
@@ -2431,7 +2431,7 @@
                                     [
                                         [14, 59, null, 3736070576317147, false, [
                                             [10, 4],
-                                            [7, [2, "* The REAL battle finally begins."]]
+                                            [7, [2, "* The REAL interview finally\n  begins."]]
                                         ]]
                                     ]
                                 ],
@@ -2445,7 +2445,7 @@
                                     [
                                         [14, 59, null, 6589808686267995, false, [
                                             [10, 4],
-                                            [7, [2, "* Reading this doesn't seem\n  like the best use of time."]]
+                                            [7, [2, "* Reading his resume would be\n  a better use of time."]]
                                         ]]
                                     ]
                                 ],
@@ -2459,7 +2459,7 @@
                                     [
                                         [14, 59, null, 5769331507923777, false, [
                                             [10, 4],
-                                            [7, [2, "* Sans is starting to look\n  really tired."]]
+                                            [7, [2, "* Roger is starting to look\n  really tired of job hunting."]]
                                         ]]
                                     ]
                                 ],
@@ -2473,7 +2473,7 @@
                                     [
                                         [14, 59, null, 6593676851472784, false, [
                                             [10, 4],
-                                            [7, [2, "* Sans is preparing something."]]
+                                            [7, [2, "* Roger is preparing his\n  cover letter."]]
                                         ]]
                                     ]
                                 ],
@@ -2487,7 +2487,7 @@
                                     [
                                         [14, 59, null, 9963026487239779, false, [
                                             [10, 4],
-                                            [7, [2, "* Sans is getting ready to\n  use his special attack."]]
+                                            [7, [2, "* Roger is getting ready to\n  ask about salary."]]
                                         ]]
                                     ]
                                 ],
@@ -2580,20 +2580,7 @@
                         ]
                     ]
                 ],
-                [0, null, false, null, 9880305470005524, [
-                        [3, 36, null, 2, false, false, false, 35700371171699, false, [
-                            [1, [2, "Win1"]]
-                        ]]
-                    ],
-                    [
-                        [3, 20, null, 522788098430892, false, [
-                            [1, [2, "SansText"]],
-                            [13, [7, [2, "alright, i guess\nyou win."]],
-                                [7, [2, "Win2"]]
-                            ]
-                        ]]
-                    ]
-                ],
+                [0, null, false, null, 9880305470005524, [[3, 36, null, 2, false, false, false, 35700371171699, false, [[1, [2, "Win1"]]]]], [[3, 20, null, 522788098430892, false, [[1, [2, "SansText"]], [13, [7, [2, "alright, i guess\nyou win."]], [7, [2, "WinCelebrate1"]]]]]]], [0, null, false, null, 5322675716232207, [[3, 36, null, 2, false, false, false, 407623096456152, false, [[1, [2, "WinCelebrate1"]]]]], [[3, 20, null, 5625808681523367, false, [[1, [2, "SansText"]], [13, [7, [2, "wow. you actually\ndid it. i'm kinda\nimpressed."]], [7, [2, "WinCelebrate2"]]]]]]], [0, null, false, null, 6930790821983689, [[3, 36, null, 2, false, false, false, 6550592183736590, false, [[1, [2, "WinCelebrate2"]]]]], [[3, 20, null, 4916725042706883, false, [[1, [2, "SansText"]], [13, [7, [2, "so... does this mean\ni'm hired?"]], [7, [2, "WinCelebrate3"]]]]]]], [0, null, false, null, 353568188650211, [[3, 36, null, 2, false, false, false, 2007717205074126, false, [[1, [2, "WinCelebrate3"]]]]], [[3, 20, null, 9075509740525801, false, [[1, [2, "SansText"]], [13, [7, [2, "go on. you earned a\nlittle something.\ncheck your hair."]], [7, [2, "Win2"]]]]]]],
                 [0, null, false, null, 6230643792485007, [
                         [3, 36, null, 2, false, false, false, 9520819468320272, false, [
                             [1, [2, "Win2"]]
@@ -2952,7 +2939,7 @@
                                                 [7, [0, 64]],
                                                 [7, [0, 272]],
                                                 [7, [0, 0]],
-                                                [7, [2, "* Sans"]],
+                                                [7, [2, "* Roger"]],
                                                 [7, [23, "Action"]]
                                             ]
                                         ]]
@@ -3306,16 +3293,7 @@
                                     [11, "MenuState"],
                                     [7, [0, 3]]
                                 ]],
-                                [3, 20, null, 250405060356076, false, [
-                                    [1, [2, "CreateMenuItem"]],
-                                    [13, [7, [2, "CombatZone"]],
-                                        [7, [0, 64]],
-                                        [7, [0, 272]],
-                                        [7, [0, 0]],
-                                        [7, [2, "* Check"]],
-                                        [7, [2, "MenuCheckSans"]]
-                                    ]
-                                ]]
+                                [3, 20, null, 7212505144773943, false, [[1, [2, "CreateMenuItem"]], [13, [7, [2, "CombatZone"]], [7, [0, 64]], [7, [0, 272]], [7, [0, 0]], [7, [2, "* Resume"]], [7, [2, "MenuActResume"]]]]], [3, 20, null, 969849637299280, false, [[1, [2, "CreateMenuItem"]], [13, [7, [2, "CombatZone"]], [7, [0, 320]], [7, [0, 272]], [7, [0, 1]], [7, [2, "* GitHub"]], [7, [2, "MenuActGithub"]]]]], [3, 20, null, 1795698339729451, false, [[1, [2, "CreateMenuItem"]], [13, [7, [2, "CombatZone"]], [7, [0, 64]], [7, [0, 304]], [7, [0, 2]], [7, [2, "* LinkedIn"]], [7, [2, "MenuActLinkedin"]]]]]
                             ]
                         ],
                         [0, null, false, null, 1692605911933929, [
@@ -3382,7 +3360,7 @@
                                     ]
                                 ]
                             ]
-                        ],
+                        ], [0, null, false, null, 3967658884173557, [[3, 36, null, 2, false, false, false, 1648284331643096, false, [[1, [2, "MenuActResume"]]]]], [[57, 47, null, 7633121096607578, false], [50, 37, null, 4435396123184015, false], [-1, 21, null, 1164840180091430, false, [[11, "MenuState"], [7, [0, 0]]]], [-1, 32, null, 1214410644737449, false, [[4, 50], [5, [2, "CombatZone"]], [0, [0, 48]], [0, [0, 272]]]], [50, 74, null, 993320541559316, false, [[0, [0, 544]], [0, [0, 96]]]], [50, 75, null, 4082658647087820, false, [[0, [0, 2]]]], [50, 26, null, 2499065044457163, false, [[7, [2, ""]]]], [50, 33, null, 7650536570361238, false, [[10, 2], [7, [2, "* You download his resume.\n* It's really good.\n* Maybe you should hire him."]]]], [50, 33, null, 9840127453439652, false, [[10, 0], [7, [2, "InfoText"]]]], [50, 33, null, 1956483210040715, false, [[10, 3], [7, [2, "StartAttack"]]]], [50, 98, null, 3484385433752903, false, [[10, 4], [3, 1]]], [55, 58, null, 1855152869847555, false, [[3, 0]]]], [[0, null, false, null, 6194424643602372, [[26, 45, null, 0, false, false, false, 9421943027712113, false, [[10, 1], [8, 4], [7, [0, 0]]]]], [[50, 33, null, 3340722237681074, false, [[10, 3], [7, [2, "MenuCheckSans2"]]]]]]]], [0, null, false, null, 9042608126162399, [[3, 36, null, 2, false, false, false, 9678621805965652, false, [[1, [2, "MenuActGithub"]]]]], [[57, 47, null, 8487535607427823, false], [50, 37, null, 6613689217983536, false], [-1, 21, null, 4575254130706349, false, [[11, "MenuState"], [7, [0, 0]]]], [-1, 32, null, 3338391573148711, false, [[4, 50], [5, [2, "CombatZone"]], [0, [0, 48]], [0, [0, 272]]]], [50, 74, null, 1574566400318459, false, [[0, [0, 544]], [0, [0, 96]]]], [50, 75, null, 5508809401806511, false, [[0, [0, 2]]]], [50, 26, null, 9019223400351521, false, [[7, [2, ""]]]], [50, 33, null, 6287509738963655, false, [[10, 2], [7, [2, "* You visit his GitHub.\n* It's covered in green squares.\n* Someone give this guy a job."]]]], [50, 33, null, 8185480931126560, false, [[10, 0], [7, [2, "InfoText"]]]], [50, 33, null, 1418670838840632, false, [[10, 3], [7, [2, "StartAttack"]]]], [50, 98, null, 9322158580027152, false, [[10, 4], [3, 1]]], [55, 58, null, 3071693962893544, false, [[3, 0]]]], [[0, null, false, null, 6194424643602372, [[26, 45, null, 0, false, false, false, 9421943027712113, false, [[10, 1], [8, 4], [7, [0, 0]]]]], [[50, 33, null, 3340722237681074, false, [[10, 3], [7, [2, "MenuCheckSans2"]]]]]]]], [0, null, false, null, 6261932701924607, [[3, 36, null, 2, false, false, false, 7696643900501890, false, [[1, [2, "MenuActLinkedin"]]]]], [[57, 47, null, 1498285307752912, false], [50, 37, null, 6227098612793804, false], [-1, 21, null, 6408253382140047, false, [[11, "MenuState"], [7, [0, 0]]]], [-1, 32, null, 9047299898662861, false, [[4, 50], [5, [2, "CombatZone"]], [0, [0, 48]], [0, [0, 272]]]], [50, 74, null, 1338722067160938, false, [[0, [0, 544]], [0, [0, 96]]]], [50, 75, null, 1786078919024894, false, [[0, [0, 2]]]], [50, 26, null, 4962796094676694, false, [[7, [2, ""]]]], [50, 33, null, 1270935491453210, false, [[10, 2], [7, [2, "* You visit his LinkedIn.\n* You feel the urge to send\n  him a job offer."]]]], [50, 33, null, 5677391708896054, false, [[10, 0], [7, [2, "InfoText"]]]], [50, 33, null, 8127950241393061, false, [[10, 3], [7, [2, "StartAttack"]]]], [50, 98, null, 6351091547968286, false, [[10, 4], [3, 1]]], [55, 58, null, 6503471803787666, false, [[3, 0]]]], [[0, null, false, null, 6194424643602372, [[26, 45, null, 0, false, false, false, 9421943027712113, false, [[10, 1], [8, 4], [7, [0, 0]]]]], [[50, 33, null, 3340722237681074, false, [[10, 3], [7, [2, "MenuCheckSans2"]]]]]]]],
                         [0, null, false, null, 7340450766097089, [
                                 [3, 36, null, 2, false, false, false, 4258958947274744, false, [
                                     [1, [2, "MenuCheckSans2"]]
@@ -3407,7 +3385,7 @@
                                 ]],
                                 [50, 33, null, 7697488528991464, false, [
                                     [10, 2],
-                                    [7, [2, "* Can't keep dodging forever.\n* Keep attacking."]]
+                                    [7, [2, "* Can't keep dodging forever.\n* Maybe just hire him."]]
                                 ]],
                                 [50, 33, null, 1065982881486434, false, [
                                     [10, 0],
@@ -3753,27 +3731,7 @@
                                 ]]
                             ]
                         ],
-                        [0, null, false, null, 9387295331607676, [
-                                [3, 36, null, 2, false, false, false, 2261434248788803, false, [
-                                    [1, [2, "MenuSpare"]]
-                                ]]
-                            ],
-                            [
-                                [57, 47, null, 6614875834860559, false],
-                                [50, 37, null, 9250353767696502, false],
-                                [-1, 21, null, 3259281702960783, false, [
-                                    [11, "MenuState"],
-                                    [7, [0, 0]]
-                                ]],
-                                [55, 58, null, 3039766785703016, false, [
-                                    [3, 0]
-                                ]],
-                                [3, 20, null, 9941547115107519, false, [
-                                    [1, [2, "StartAttack"]],
-                                    [13]
-                                ]]
-                            ]
-                        ],
+                        [0, null, false, null, 9387295331607676, [[3, 36, null, 2, false, false, false, 2261434248788803, false, [[1, [2, "MenuSpare"]]]]], [[57, 47, null, 5277912792378049, false], [50, 37, null, 7267884868693891, false], [-1, 21, null, 9044273136648880, false, [[11, "MenuState"], [7, [0, 0]]]], [-1, 32, null, 3096985575569895, false, [[4, 50], [5, [2, "CombatZone"]], [0, [0, 48]], [0, [0, 272]]]], [50, 74, null, 7335381145498114, false, [[0, [0, 544]], [0, [0, 96]]]], [50, 75, null, 5105103843514385, false, [[0, [0, 2]]]], [50, 26, null, 2566642166903129, false, [[7, [2, ""]]]], [50, 33, null, 7855589173924569, false, [[10, 2], [7, [2, "* You spare him.\n* In return, he hands you\n  his resume."]]]], [50, 33, null, 6953422982264325, false, [[10, 0], [7, [2, "InfoText"]]]], [50, 33, null, 4256849556152157, false, [[10, 3], [7, [2, "StartAttack"]]]], [50, 98, null, 1594919850148029, false, [[10, 4], [3, 1]]], [55, 58, null, 2825548348185328, false, [[3, 0]]]], [[0, null, false, null, 6194424643602372, [[26, 45, null, 0, false, false, false, 9421943027712113, false, [[10, 1], [8, 4], [7, [0, 0]]]]], [[50, 33, null, 3340722237681074, false, [[10, 3], [7, [2, "MenuCheckSans2"]]]]]]]],
                         [0, null, false, null, 7393186591573135, [
                                 [-1, 28, null, 0, false, false, false, 5888937219670024, false, [
                                     [11, "MenuState"],
@@ -11631,7 +11589,7 @@
                 [1, "EndlessStage", 0, 0, false, false, 1966297049622465, false],
                 [1, "PracticeTarget", 0, 60, false, false, 824857649224256, false],
                 [1, "SingleAttack", 1, "", false, false, 9637412728316299, false],
-                [1, "Name", 1, "Chara", false, false, 8522084662131715, false],
+                [1, "Name", 1, "Recruiter", false, false, 8522084662131715, false],
                 [1, "HP", 0, 92, false, false, 4067313995094888, false],
                 [1, "MaxHP", 0, 92, false, false, 2742940924955148, false],
                 [1, "KR", 0, 0, false, false, 2189987320058474, false],
@@ -14666,7 +14624,7 @@
             ["gasterblast2.ogg", 27218],
             ["mus_zz_megalovania.ogg", 1867146],
             ["gameover.ogg", 616109]
-        ], "media/", true, 640, 480, 4, true, false, true, "1.0.0.0", true, false, 0, 0, 67, true, false, 0, true, "Sans Fight", 0, [
+        ], "media/", true, 640, 480, 4, true, false, true, "1.0.0.0", true, false, 0, 0, 67, true, true, 0, true, "Sans Fight", 0, [
             [32, 41, 33, 42, 43],
             [35, 34]
         ]

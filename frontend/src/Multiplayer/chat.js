@@ -1,3 +1,5 @@
+import { readStore, writeStore } from "../Helpers/storage.js";
+
 // Chat between the characters in one lobby. Messages go out to whoever is there right now and
 // aren't kept anywhere, so someone arriving later only sees what's said after they arrive.
 
@@ -25,7 +27,23 @@ export function readChat(message) {
   return { id: message.id.slice(0, 64), text };
 }
 
-// Nobody picks a name, so everyone gets one made from their id. Every tab works out the same one.
+export const MAX_NAME_LENGTH = 20;
+const NAME_STORE_KEY = "chatName";
+
+// A name someone has picked for themselves, or "" for none
+export function cleanName(text) {
+  return cleanChat(text).slice(0, MAX_NAME_LENGTH).trim();
+}
+
+export function loadChatName() {
+  return cleanName(readStore(NAME_STORE_KEY) ?? "");
+}
+
+export function saveChatName(name) {
+  writeStore(NAME_STORE_KEY, cleanName(name));
+}
+
+// Until someone picks a name, they get one made from their id. Every tab works out the same one.
 const ADJECTIVES = [
   "Sleepy", "Brave", "Mossy", "Sunny", "Quiet", "Lucky", "Misty", "Cosy",
   "Swift", "Gentle", "Rusty", "Plucky", "Breezy", "Dusky", "Merry", "Wandering",

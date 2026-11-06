@@ -1,6 +1,13 @@
 import { EMOTES } from "../Game/emotes.js";
 import { sameLook, sanitizeLook } from "../Game/look/lookOptions.js";
-import { KEEP_MESSAGES, chatName, cleanChat, createChatLimiter, readChat } from "./chat.js";
+import {
+  KEEP_MESSAGES,
+  chatName,
+  cleanChat,
+  cleanName,
+  createChatLimiter,
+  readChat,
+} from "./chat.js";
 import { HAS_SERVER, createLocalTransport, createSupabaseTransport } from "./transports.js";
 
 // Each lobby holds this many characters at once. The first ten to arrive in it get the places, so
@@ -57,7 +64,14 @@ export function readState(message) {
 
 export function readMember({ id, meta }) {
   if (typeof id !== "string" || !meta || !finite(meta.joinedAt)) return null;
-  return { id: id.slice(0, 64), joinedAt: meta.joinedAt, look: sanitizeLook(meta.look) };
+  const shortId = id.slice(0, 64);
+  return {
+    id: shortId,
+    joinedAt: meta.joinedAt,
+    look: sanitizeLook(meta.look),
+    // The name they picked for chatting, or one made up for them
+    name: cleanName(meta.name) || chatName(shortId),
+  };
 }
 
 export const lobbyName = (lobby) => (lobby === 1 ? "town" : `town-${lobby}`);
@@ -79,12 +93,13 @@ export function pickPlaces(present, me) {
 // read for this character's own position each time one goes out. onChange hears who is in the
 // lobby and what's been said there, and peers holds everyone's latest snapshots for drawing each
 // frame.
-export function joinRoom({ look, localState, onChange }) {
+export function joinRoom({ look, name, localState, onChange }) {
   const id = newId();
   // Everyone else known about in this lobby, by id. Snapshots can arrive before the presence that
   // says who they're from, so they're kept here either way.
   const peers = new Map();
   let myLook = look;
+  let myName = cleanName(name) || chatName(id);
   let lobby = 1;
   // When this tab arrived in its current lobby. It starts again in each one, so moving into a
   // lobby never takes the place of someone already there.
@@ -106,7 +121,7 @@ export function joinRoom({ look, localState, onChange }) {
 
   const peerFor = (peerId) => {
     if (!peers.has(peerId)) {
-      peers.set(peerId, { id: peerId, look: null, inRoom: false, snapshots: [] });
+      peers.set(peerId, { id: peerId, look: null, name: null, inRoom: false, snapshots: [] });
     }
     return peers.get(peerId);
   };
@@ -119,7 +134,7 @@ export function joinRoom({ look, localState, onChange }) {
       count: occupants.length + (inRoom ? 1 : 0),
       peers: occupants.map(({ id: peerId, look: peerLook }) => ({ id: peerId, look: peerLook })),
       messages,
-      name: chatName(id),
+      name: myName,
     });
   };
 
@@ -170,7 +185,7 @@ export function joinRoom({ look, localState, onChange }) {
     }
     if (getsPlace && !inRoom) {
       inRoom = true;
-      transport.setPresence({ joinedAt, look: myLook });
+      share();
     }
 
     let newcomer = false;
@@ -180,6 +195,7 @@ export function joinRoom({ look, localState, onChange }) {
       // Kept as the same object while it's unchanged, so their character isn't dressed again on
       // every presence sync
       if (!peer.look || !sameLook(peer.look, member.look)) peer.look = member.look;
+      peer.name = member.name;
       peer.inRoom = placed.has(member.id);
     });
     const presentIds = new Set(present.map((member) => member.id));
@@ -269,12 +285,17 @@ export function joinRoom({ look, localState, onChange }) {
       });
   }
 
+  // Tells the lobby who this character is
+  function share() {
+    transport.setPresence({ joinedAt, look: myLook, name: myName });
+  }
+
   const addMessage = (from, text) => {
     messageCount += 1;
-    messages = [
-      ...messages,
-      { key: messageCount, from: from === id ? null : chatName(from), mine: from === id, text },
-    ].slice(-KEEP_MESSAGES);
+    const mine = from === id;
+    // Kept with the name they had when they said it, so renaming doesn't rewrite the log
+    const by = mine ? myName : (peers.get(from)?.name ?? chatName(from));
+    messages = [...messages, { key: messageCount, from: by, mine, text }].slice(-KEEP_MESSAGES);
     report();
   };
 
@@ -314,7 +335,12 @@ export function joinRoom({ look, localState, onChange }) {
     },
     setLook(next) {
       myLook = next;
-      if (inRoom) transport.setPresence({ joinedAt, look: myLook });
+      if (inRoom) share();
+    },
+    setName(next) {
+      myName = cleanName(next) || chatName(id);
+      if (inRoom) share();
+      report();
     },
     leave() {
       window.removeEventListener("pagehide", leave);

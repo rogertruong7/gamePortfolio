@@ -4,7 +4,7 @@ import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 import { NARROW_HUD } from "./hudCorner.js";
 import { ChatIcon } from "./HudIcons.jsx";
 import { isModalOpen } from "../Helpers/modal.js";
-import { MAX_CHAT_LENGTH } from "../Multiplayer/chat.js";
+import { MAX_CHAT_LENGTH, MAX_NAME_LENGTH } from "../Multiplayer/chat.js";
 
 // The lobby's chat, in the bottom left. On phones it folds away behind a small button, as the
 // screen needs the room for the town.
@@ -43,6 +43,27 @@ const Log = styled.ul`
   font-size: 14px;
   line-height: 1.35;
   overflow-wrap: anywhere;
+  /* A thin pale bar that sits inside the rounded box, rather than the browser's grey one */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 8px 0;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.7);
+  }
 
   &:empty {
     display: none;
@@ -123,6 +144,45 @@ const CloseButton = styled.button`
   }
 `;
 
+const NameBar = styled.form`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
+  font-size: 13px;
+  white-space: nowrap;
+`;
+
+const NameShown = styled.span`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  strong {
+    color: #ffe08a;
+  }
+`;
+
+const NameInput = styled(Input)`
+  padding: 5px 10px;
+  font-size: 13px;
+`;
+
+const SmallButton = styled.button`
+  ${chromeButton}
+  position: relative;
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+`;
+
 const Toggle = styled.button`
   ${chromeButton}
   position: absolute;
@@ -161,20 +221,77 @@ const Unread = styled.span`
 
 const narrow = () => window.matchMedia(NARROW_HUD).matches;
 
-function placeholderFor(status, name) {
-  if (status === "online") return name ? `Chat as ${name}…` : "Say something…";
+function placeholderFor(status) {
+  if (status === "online") return "Say something…";
   if (status === "full") return "Chat opens once you get a place";
   if (status === "offline") return "Chat is offline";
   return "Joining…";
 }
 
-const Chat = ({ room }) => {
+// Who you're chatting as, with a way to change it. Left empty, you go back to a made-up name.
+const NameEditor = ({ name, onRename }) => {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+
+  const start = () => {
+    setDraft(name);
+    setEditing(true);
+  };
+
+  if (!editing) {
+    return (
+      <NameBar as="div">
+        <NameShown title={name}>
+          Chatting as <strong>{name || "…"}</strong>
+        </NameShown>
+        <SmallButton type="button" onClick={start} disabled={!name}>
+          change name
+          <ChromeFrame spikes={false} />
+        </SmallButton>
+      </NameBar>
+    );
+  }
+
+  return (
+    <NameBar
+      onSubmit={(event) => {
+        event.preventDefault();
+        onRename(draft);
+        setEditing(false);
+      }}
+    >
+      <NameInput
+        autoFocus
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key !== "Escape") return;
+          // Escape leaves the name as it was, rather than closing the chat
+          event.stopPropagation();
+          setEditing(false);
+        }}
+        maxLength={MAX_NAME_LENGTH}
+        placeholder="Empty for a random name"
+        aria-label="Your chat name"
+        enterKeyHint="done"
+        autoComplete="off"
+      />
+      <SmallButton type="submit">
+        save
+        <ChromeFrame spikes={false} />
+      </SmallButton>
+    </NameBar>
+  );
+};
+
+const Chat = ({ room, onRename }) => {
   const { messages, status, name, say } = room;
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
   const [seen, setSeen] = useState(0);
   const inputRef = useRef(null);
   const logRef = useRef(null);
+  const panelRef = useRef(null);
   const online = status === "online";
   const latest = messages.length ? messages[messages.length - 1].key : 0;
 
@@ -206,6 +323,18 @@ const Chat = ({ room }) => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // Clicking or tapping anywhere outside the chat steps back out to walking. It listens before
+  // the town does, as the town's own handlers can stop the click from taking focus away.
+  useEffect(() => {
+    const onPointerDown = (event) => {
+      if (panelRef.current?.contains(event.target)) return;
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement && panelRef.current?.contains(focused)) focused.blur();
+    };
+    window.addEventListener("pointerdown", onPointerDown, true);
+    return () => window.removeEventListener("pointerdown", onPointerDown, true);
+  }, []);
+
   const close = () => {
     inputRef.current?.blur();
     setOpen(false);
@@ -218,11 +347,8 @@ const Chat = ({ room }) => {
       if (!narrow()) inputRef.current?.blur();
       return;
     }
-    if (say(text)) {
-      setText("");
-      // Back to walking on a keyboard. On a phone the keyboard stays up for a reply.
-      if (!narrow()) inputRef.current?.blur();
-    }
+    // The box keeps focus for the next message, until a click outside or Escape
+    if (say(text)) setText("");
   };
 
   const unread = !open && latest > seen && messages.some((m) => m.key > seen && !m.mine);
@@ -230,6 +356,7 @@ const Chat = ({ room }) => {
   return (
     <>
       <Panel
+        ref={panelRef}
         $open={open}
         // Otherwise the game hears the typing and walks the character around, or emotes
         onKeyDown={(event) => {
@@ -237,6 +364,7 @@ const Chat = ({ room }) => {
           if (event.key === "Escape") close();
         }}
       >
+        <NameEditor name={name} onRename={onRename} />
         <Log ref={logRef} aria-live="polite" aria-label="Chat messages">
           {messages.map((message) => (
             <Line key={message.key}>
@@ -254,7 +382,7 @@ const Chat = ({ room }) => {
             value={text}
             onChange={(event) => setText(event.target.value)}
             maxLength={MAX_CHAT_LENGTH}
-            placeholder={placeholderFor(status, name)}
+            placeholder={placeholderFor(status)}
             disabled={!online}
             aria-label="Chat message"
             enterKeyHint="send"

@@ -25,6 +25,7 @@ import { readStore } from "./Helpers/storage.js";
 import { prefetchSansFight } from "./Helpers/prefetchSansFight.js";
 import { loadLook, sanitizeLook, saveLook } from "./Game/look/lookOptions.js";
 import { useRoom } from "./Multiplayer/useRoom.js";
+import { cleanName, loadChatName, saveChatName } from "./Multiplayer/chat.js";
 
 const SCENE_NAMES = {
   1: "About Me",
@@ -78,9 +79,17 @@ const MainPage = () => {
   const [isFighting, setIsFighting] = useState(false);
   const [look, setLook] = useState(loadLook);
   const [showWardrobe, setShowWardrobe] = useState(false);
+  // The name picked for chatting, or "" to go by a made-up one
+  const [chatName, setChatName] = useState(loadChatName);
   const hasMovedRef = useRef(false);
   // The town is joined once the game has loaded
-  const room = useRoom(look, !loading);
+  const room = useRoom(look, chatName, !loading);
+
+  const renameChat = (next) => {
+    const clean = cleanName(next);
+    saveChatName(clean);
+    setChatName(clean);
+  };
 
   const saveWardrobe = (next) => {
     const clean = sanitizeLook(next);
@@ -153,7 +162,7 @@ const MainPage = () => {
           {currentScene === 0 && (
             <>
               <PlayerCount room={room} />
-              <Chat room={room} />
+              <Chat room={room} onRename={renameChat} />
               <WardrobeButton onOpen={() => setShowWardrobe(true)} />
             </>
           )}

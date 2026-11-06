@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { ROOM_SIZE, lobbyName, pickPlaces, readMember, readState } from "../src/Multiplayer/room.js";
 import { DEFAULT_LOOK } from "../src/Game/look/lookOptions.js";
+import { chatName } from "../src/Multiplayer/chat.js";
 
 const member = (id, joinedAt) => ({ id, joinedAt, look: DEFAULT_LOOK });
 const crowd = (count) => Array.from({ length: count }, (_, i) => member(`p${i}`, 1000 + i));
@@ -68,6 +69,13 @@ test("a member's look is cleaned up and one without an arrival time is ignored",
   const read = readMember({ id: "a", meta: { joinedAt: 5, look: { hair: "nope" } } });
   assert.equal(read.look.hair, DEFAULT_LOOK.hair);
   assert.equal(readMember({ id: "a", meta: { look: {} } }), null);
+});
+
+test("a member keeps the name they picked, or gets a made-up one", () => {
+  const named = readMember({ id: "a", meta: { joinedAt: 5, look: {}, name: "  Roger " } });
+  assert.equal(named.name, "Roger");
+  const unnamed = readMember({ id: "a", meta: { joinedAt: 5, look: {}, name: "   " } });
+  assert.equal(unnamed.name, chatName("a"));
 });
 
 test("a bad jump count reads as no jumps", () => {

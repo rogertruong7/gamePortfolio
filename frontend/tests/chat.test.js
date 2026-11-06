@@ -4,8 +4,10 @@ import {
   BURST,
   BURST_SECONDS,
   MAX_CHAT_LENGTH,
+  MAX_NAME_LENGTH,
   chatName,
   cleanChat,
+  cleanName,
   createChatLimiter,
   readChat,
 } from "../src/Multiplayer/chat.js";
@@ -40,4 +42,10 @@ test("someone who says too much too fast is held back until it's been long enoug
   assert.ok(!limiter.allow("a", BURST));
   assert.ok(limiter.allow("b", BURST), "others aren't held back");
   assert.ok(limiter.allow("a", BURST_SECONDS * 1000 + 1));
+});
+
+test("a picked name is tidied and kept short", () => {
+  assert.equal(cleanName("  Roger\n  the   Great  "), "Roger the Great");
+  assert.equal(cleanName("x".repeat(50)).length, MAX_NAME_LENGTH);
+  assert.equal(cleanName(42), "");
 });

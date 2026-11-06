@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Howl } from "howler";
 import MainGame from "./Game/MainGame.jsx";
 import LoadingScreen from "./UserInterface/LoadingScreen.jsx";
@@ -6,8 +6,6 @@ import Menu from "./UserInterface/Menu.jsx";
 import EnterPopup from "./UserInterface/EnterPopup.jsx";
 import "./App.css";
 import BackButton from "./UserInterface/BackButton.jsx";
-import FarewellDialog from "./UserInterface/FarewellDialog.jsx";
-import { FAREWELLS } from "./UserInterface/farewells.js";
 import Projects from "./Pages/Projects.jsx";
 import ResetButton from "./UserInterface/ResetButton.jsx";
 import Popup from "./UserInterface/TutorialPopup.jsx";
@@ -55,8 +53,6 @@ const AutoAudioReady = ({ loading }) => {
 
 const MainPage = () => {
   const [currentScene, setCurrentScene] = useState(0);
-  // Set while the room's cat says goodbye, before the player is back in the town
-  const [leaving, setLeaving] = useState(false);
   // The scene the character is walking through a door to reach
   const [enteringScene, setEnteringScene] = useState(null);
   const [enterPopupVisible, setEnterPopupVisible] = useState(false);
@@ -107,26 +103,11 @@ const MainPage = () => {
     }
   }, [currentScene]);
 
-  const leaveRoom = () => {
-    if (currentScene !== 0) setLeaving(true);
-  };
-
-  const finishLeaving = useCallback(() => {
-    setLeaving(false);
-    setCurrentScene(0);
-  }, []);
-
-  // A room going back to the town goes through the cat's goodbye first
-  const goToScene = (scene) => (scene === 0 ? leaveRoom() : setCurrentScene(scene));
-
-  // Reset skips the goodbye, so a half-finished one mustn't carry into the next room
-  useEffect(() => {
-    setLeaving(false);
-  }, [currentScene]);
-
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === "Escape" && currentScene !== 0) setLeaving(true);
+      if (e.key === "Escape" && currentScene !== 0) {
+        setCurrentScene(0);
+      }
     };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
@@ -199,19 +180,16 @@ const MainPage = () => {
         />
       )}
       {currentScene !== 0 && (
-        <BackButton setCurrentScene={leaveRoom}></BackButton>
+        <BackButton setCurrentScene={setCurrentScene}></BackButton>
       )}
       {currentScene === 1 && (
-        <AboutMe setCurrentScene={goToScene}></AboutMe>
+        <AboutMe setCurrentScene={setCurrentScene}></AboutMe>
       )}
       {currentScene === 2 && <Projects></Projects>}
       {currentScene === 3 && (
-        <Experiences setCurrentScene={goToScene}></Experiences>
+        <Experiences setCurrentScene={setCurrentScene}></Experiences>
       )}
-      {currentScene === 4 && <Skills setCurrentScene={goToScene}></Skills>}
-      {leaving && currentScene !== 0 && (
-        <FarewellDialog line={FAREWELLS[currentScene]} onDone={finishLeaving} />
-      )}
+      {currentScene === 4 && <Skills setCurrentScene={setCurrentScene}></Skills>}
     </AudioProvider>
   );
 };

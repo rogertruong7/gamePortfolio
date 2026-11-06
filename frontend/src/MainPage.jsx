@@ -163,7 +163,10 @@ const MainPage = () => {
             />
           )}
           {readStore("visited") !== "true" && showPopup && (
-            <Popup setShowPopup={setShowPopup}></Popup>
+            <Popup
+              setShowPopup={setShowPopup}
+              onCustomise={() => setShowWardrobe(true)}
+            ></Popup>
           )}
           {showHelp && <HelpPopup setShowHelp={setShowHelp}></HelpPopup>}
         </>

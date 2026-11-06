@@ -25,6 +25,8 @@ const Modal = ({
   // Escape and the backdrop go here when they shouldn't do the same as the action button
   onCancel = onClose,
   closeOnBackdrop = false,
+  // An optional second choice beside the action button: { label, onClick }
+  secondaryAction,
   wide = false,
   footer,
   children,
@@ -61,6 +63,12 @@ const Modal = ({
           <Content>{children}</Content>
           <Foot>
             <FootNote>{footer}</FootNote>
+            {secondaryAction && (
+              <ActionButton type="button" onClick={secondaryAction.onClick}>
+                {secondaryAction.label}
+                <ChromeFrame />
+              </ActionButton>
+            )}
             <ActionButton ref={actionRef} type="button" onClick={onClose}>
               {actionLabel}
               <ChromeFrame />
@@ -193,6 +201,11 @@ const FootNote = styled.div`
 const ActionButton = styled.button`
   ${chromeButton}
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
   flex: none;
   min-width: 170px;
   padding: 13px 26px;

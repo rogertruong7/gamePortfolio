@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import styled from "styled-components";
 import { chromeButton } from "./ChromeFrame.jsx";
 import { isModalOpen } from "../Helpers/modal.js";
+import { isActionKey } from "../Helpers/confirmKeys.js";
 
 const PopupContainer = styled.div`
   font-size: 28px;
@@ -53,10 +54,10 @@ export const ChoiceButton = styled.button`
 const ChoicePopup = ({ title, titleId, focusKey, children }) => {
   const containerRef = useRef(null);
 
-  // E goes with whichever button is focused, as Enter would
+  // E or Z goes with whichever button is focused, as Enter would
   useEffect(() => {
     const onKeyDown = (event) => {
-      if (event.key.toLowerCase() !== "e" || event.repeat || isModalOpen()) return;
+      if (!isActionKey(event) || event.repeat || isModalOpen()) return;
       const container = containerRef.current;
       const button = container?.contains(document.activeElement)
         ? document.activeElement
@@ -71,7 +72,13 @@ const ChoicePopup = ({ title, titleId, focusKey, children }) => {
     containerRef.current?.querySelector("button")?.focus();
   }, [focusKey]);
 
+  // Space is the jump key, so it mustn't also press whichever button has focus
+  const blockSpace = (e) => {
+    if (e.key === " ") e.preventDefault();
+  };
+
   const handleKeyDown = (e) => {
+    blockSpace(e);
     if (e.key === "Tab") {
       const buttons = containerRef.current?.querySelectorAll("button");
       if (!buttons || buttons.length === 0) return;
@@ -85,7 +92,7 @@ const ChoicePopup = ({ title, titleId, focusKey, children }) => {
   };
 
   return (
-    <PopupContainer ref={containerRef} onKeyDown={handleKeyDown}>
+    <PopupContainer ref={containerRef} onKeyDown={handleKeyDown} onKeyUp={blockSpace}>
       <Title id={titleId}>{title}</Title>
       <ButtonRow>{children}</ButtonRow>
     </PopupContainer>

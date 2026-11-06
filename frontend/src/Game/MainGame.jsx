@@ -25,7 +25,9 @@ import EmoteButton from "../UserInterface/EmoteButton.jsx";
 import { labels } from "./Static.jsx";
 import { createSitState, startSitting, startStanding } from "./sitting.js";
 import { startWalkingIn, startWalkingOut } from "./doorWalk.js";
-import { createEmoteState, startEmote, stopEmote } from "./emotes.js";
+import { EMOTES, createEmoteState, startEmote, stopEmote } from "./emotes.js";
+import { createJumpState, requestJump } from "./jumping.js";
+import { isModalOpen } from "../Helpers/modal.js";
 import {
   createLakeState,
   endFight,
@@ -94,6 +96,7 @@ function MainGame({
   const doorWalkRef = useRef(null);
   const lakeRef = useRef(createLakeState());
   const emoteRef = useRef(createEmoteState());
+  const jumpRef = useRef(createJumpState());
   const resetCameraAngleRef = useRef(false);
   const [walkingOut, setWalkingOut] = useState(false);
 
@@ -175,6 +178,13 @@ function MainGame({
       setKeys({});
       return;
     }
+    if (event.code === "Space") {
+      if (isModalOpen()) return;
+      // Otherwise the page scrolls, or a focused button gets pressed
+      event.preventDefault();
+      if (!event.repeat) requestJump(jumpRef.current);
+      return;
+    }
     const key = event.key.toLowerCase();
     if (!MOVEMENT_KEYS.has(key)) return;
     if (event.repeat && lakeRef.current.phase !== "none") return;
@@ -221,9 +231,20 @@ function MainGame({
       characterRef.current.position.copy(startVector);
       characterRef.current.rotation.y = -Math.PI / 4;
       setKeys({});
+      waveHello();
     }
     setReseted(false);
   }, [reseted]);
+
+  // The character turns to the camera and waves as it appears, once the town has loaded and after
+  // a reset puts it back at the start
+  function waveHello() {
+    startEmote(emoteRef.current, EMOTES.find(({ id }) => id === "wave"));
+  }
+
+  useEffect(() => {
+    if (showHud) waveHello();
+  }, [showHud]);
 
   useEffect(() => {
     if (enteringScene !== null) {
@@ -327,6 +348,7 @@ function MainGame({
           setLakePhase={setLakePhase}
           setFlipped={setFlipped}
           emoteRef={emoteRef}
+          jumpRef={jumpRef}
         />
         <PlayerShadow characterRef={characterRef} lakeRef={lakeRef} />
         {beatSans && <SuperSaiyan characterRef={characterRef} />}

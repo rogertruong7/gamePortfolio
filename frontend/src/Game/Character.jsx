@@ -9,7 +9,8 @@ import { updateDoorWalk } from "./doorWalk";
 import { applyEmotePose, findEmoteBones, updateEmote } from "./emotes";
 import { applyLakePose, followGround, updateLake } from "./lake";
 import { isBlocked, moveAndSlide } from "./wallSliding";
-import { createWalkFeel, updateWalkFeel } from "./walkFeel";
+import { WALK_PLAYBACK, createWalkFeel, updateWalkFeel } from "./walkFeel";
+import { setDown, updateJump } from "./jumping";
 import { readStore } from "../Helpers/storage.js";
 
 const WALLS = [
@@ -53,6 +54,7 @@ const Character = React.forwardRef(
       setLakePhase,
       setFlipped,
       emoteRef,
+      jumpRef,
     },
     ref
   ) => {
@@ -263,7 +265,7 @@ const Character = React.forwardRef(
       if (mixer.current) {
         // The clip speeds up and slows down with the walk instead of snapping between speeds
         const weight = walkFeel ? walkFeel.weight : moving ? 1 : 0;
-        mixer.current.update(delta * THREE.MathUtils.lerp(IDLE_ANIMATION_SPEED, 1, weight));
+        mixer.current.update(delta * THREE.MathUtils.lerp(IDLE_ANIMATION_SPEED, WALK_PLAYBACK, weight));
       }
       if (walkFeel && walkAction.current && ref.current) {
         updateWalkFeel(walkFeel, {
@@ -279,6 +281,8 @@ const Character = React.forwardRef(
 
       if (currentScene !== 0) return;
 
+      const jump = jumpRef.current;
+      setDown(jump, ref.current);
       const moveDelta = Math.min(delta, MAX_FRAME_DELTA);
       let finalDirection = keyboardMovement();
       // The picture is upside down, so going up the screen means walking back towards the camera
@@ -295,6 +299,8 @@ const Character = React.forwardRef(
         delta,
         finalDirection.lengthSq() > 0 ||
           clickMoving ||
+          jump.airborne ||
+          jump.requested ||
           doorWalk !== null ||
           lake.phase !== "none" ||
           sit.phase !== "none",
@@ -318,6 +324,10 @@ const Character = React.forwardRef(
           finalDirection.lengthSq() > 0 || targetPosition !== sit.clickTarget;
         updateSit(sit, ref.current, delta, wantsToMove, updateRotation);
       }
+
+      // Only a hop from the ground, never while sitting, in the pond or walking through a door
+      const canJump = sit.phase === "none" && lake.phase === "none" && !doorWalk;
+      updateJump(jump, ref.current, moveDelta, canJump);
 
       if (ref.current !== undefined) {
         setPlayerPos(ref.current.position);

@@ -67,6 +67,14 @@ const WalkKeys = () => (
   </Clusters>
 );
 
+// A long key, like the space bar
+const WideKey = ({ children }) => (
+  <KeyCap $wide>
+    {children}
+    <ChromeFrame spikes={false} radius={10} />
+  </KeyCap>
+);
+
 const Row = ({ input, children }) => (
   <RowItem>
     <Input>{input}</Input>
@@ -119,12 +127,13 @@ const ControlsList = ({ showReset = false }) => {
           >
             Move the camera
           </Row>
+          <Row input={<WideKey>space</WideKey>}>Jump</Row>
         </>
       )}
       <Row
         input={
           <Chip>
-            Enter
+            {touchOnly ? "Enter" : "Enter (E)"}
             <ChromeFrame />
           </Chip>
         }
@@ -227,6 +236,7 @@ const KeyCap = styled.span`
   background: linear-gradient(#fff, #e6eaf1);
   color: ${ink};
   font: 700 17px / 1 ${pixel};
+  ${({ $wide }) => ($wide ? "width: 120px; height: 32px;" : "")}
 `;
 
 const Chip = styled.span`

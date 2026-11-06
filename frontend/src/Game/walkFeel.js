@@ -1,15 +1,28 @@
 import * as THREE from "three";
 
-// The walk clip only swings the arms and legs, so the body glides along at one height. This adds
-// what it leaves out, on top of whatever the clip has posed: the hips dip as each foot lands and
-// rise as it passes, roll a little over the leg that's carrying the weight, and the whole body
-// leans forward into the walk and into its turns. It all eases in and out with the walk.
+// The walk clip is a small shuffle: the feet move about a twentieth of the character's height
+// while it covers several heights a second, and the body glides along at one height. This adds
+// what it leaves out, on top of whatever the clip has posed. The clip plays faster and the arms
+// and legs swing further, the hips dip as each foot lands and rise as it passes, roll a little
+// over the leg that's carrying the weight, and the whole body leans forward into the walk and
+// into its turns. It all eases in and out with the walk.
 
 const HIPS = "Hips_100_03";
 const STRIDE_LEG = "LeftUpLeg_300_022.quaternion";
 
+// How much faster than the clip it steps while walking
+export const WALK_PLAYBACK = 1.5;
+// How many times further than the clip each bone swings either side of its usual angle
+const SWINGS = {
+  LeftUpLeg_300_022: 1.9,
+  RightUpLeg_400_024: 1.9,
+  LeftLeg_310_023: 1.6,
+  RightLeg_410_025: 1.6,
+  LeftArm_510_06: 1.5,
+  RightArm_610_010: 1.5,
+};
 // In the hips bone's own units, where a leg is about 2.25 long
-const BOB_HEIGHT = 0.09;
+const BOB_HEIGHT = 0.14;
 const ROLL_DEGREES = 2.5;
 const LEAN_DEGREES = 6;
 // How far it leans into a turn for each radian a second it's turning, and the most it will
@@ -27,6 +40,21 @@ const FORWARD = new THREE.Vector3(0, 0, 1);
 const _q = new THREE.Quaternion();
 const _mean = new THREE.Quaternion();
 const _key = new THREE.Quaternion();
+const _offset = new THREE.Quaternion();
+
+// The middle of a rotation track's keys, which a bone swings either side of
+function averageRotation(track, out) {
+  const { values } = track;
+  const sum = [0, 0, 0, 0];
+  for (let i = 0; i < values.length; i += 4) {
+    // Keys on the far side of the sphere point the same way, so they're flipped before adding
+    let dot = 0;
+    for (let k = 0; k < 4; k += 1) dot += values[i + k] * values[k];
+    const sign = dot < 0 ? -1 : 1;
+    for (let k = 0; k < 4; k += 1) sum[k] += sign * values[i + k];
+  }
+  return out.set(...sum).normalize();
+}
 
 // When in the clip the left leg is furthest from the middle of its swing. A foot lands then and
 // half a cycle later, so that's where the hips should be lowest.
@@ -34,13 +62,7 @@ function findFootfall(clip) {
   const track = clip.tracks.find((t) => t.name === STRIDE_LEG);
   if (!track) return 0;
   const { times, values } = track;
-  const sum = [0, 0, 0, 0];
-  for (let i = 0; i < times.length; i += 1) {
-    // Keys on the far side of the sphere point the same way, so they're flipped before adding
-    const sign = i > 0 && values[i * 4 + 3] * values[3] + values[i * 4] * values[0] < 0 ? -1 : 1;
-    for (let k = 0; k < 4; k += 1) sum[k] += sign * values[i * 4 + k];
-  }
-  _mean.set(...sum).normalize();
+  averageRotation(track, _mean);
   let furthest = 0;
   let footfall = 0;
   for (let i = 0; i < times.length; i += 1) {
@@ -54,8 +76,47 @@ function findFootfall(clip) {
   return footfall;
 }
 
+// Each swinging bone, the middle of its swing, and what the clip and this last set it to. The
+// mixer only writes a bone when the clip's value changes, so this keeps its own copy of the clip's
+// value to swing from, rather than swinging an already swung pose further each frame.
+function findSwingers(scene, clip) {
+  return Object.entries(SWINGS).flatMap(([name, swing]) => {
+    const bone = scene.getObjectByName(name);
+    const track = clip.tracks.find((t) => t.name === `${name}.quaternion`);
+    if (!bone || !track) return [];
+    return [
+      {
+        bone,
+        swing,
+        middle: averageRotation(track, new THREE.Quaternion()),
+        clipPose: new THREE.Quaternion(),
+        written: null,
+      },
+    ];
+  });
+}
+
+// Turns a bone further from the middle of its swing, by the same axis it was already turned
+function swingFurther(swinger, amount) {
+  const { bone, middle, clipPose } = swinger;
+  if (!swinger.written || !bone.quaternion.equals(swinger.written)) clipPose.copy(bone.quaternion);
+  // How the clip's pose is turned from the middle, then that turn made bigger
+  _offset.copy(middle).invert().multiply(clipPose);
+  if (_offset.w < 0) _offset.set(-_offset.x, -_offset.y, -_offset.z, -_offset.w);
+  const angle = 2 * Math.acos(Math.min(1, _offset.w));
+  const sine = Math.sqrt(Math.max(0, 1 - _offset.w * _offset.w));
+  if (sine > 1e-6) {
+    const bigger = (angle * (1 + (swinger.swing - 1) * amount)) / 2;
+    const scale = Math.sin(bigger) / sine;
+    _offset.set(_offset.x * scale, _offset.y * scale, _offset.z * scale, Math.cos(bigger));
+  }
+  bone.quaternion.copy(middle).multiply(_offset);
+  swinger.written = (swinger.written || new THREE.Quaternion()).copy(bone.quaternion);
+}
+
 export function createWalkFeel(scene, clip) {
   return {
+    swingers: findSwingers(scene, clip),
     hips: scene.getObjectByName(HIPS),
     // Where the clip holds the hips, measured once it has run
     restPosition: null,
@@ -90,6 +151,9 @@ export function updateWalkFeel(feel, { moving, delta, clipTime, yaw }) {
   );
   feel.bank += (bankTarget - feel.bank) * (1 - Math.exp(-BANK_FOLLOW_SPEED * delta));
 
+  const amount = THREE.MathUtils.smoothstep(feel.weight, 0, 1);
+  feel.swingers.forEach((swinger) => swingFurther(swinger, amount));
+
   const hips = feel.hips;
   if (!hips) return;
   if (!feel.restPosition) {
@@ -98,7 +162,6 @@ export function updateWalkFeel(feel, { moving, delta, clipTime, yaw }) {
   }
   hips.position.copy(feel.restPosition);
   hips.quaternion.copy(feel.restQuaternion);
-  const amount = THREE.MathUtils.smoothstep(feel.weight, 0, 1);
   if (amount === 0) return;
 
   // 0 when the left foot lands, going once round for every full stride

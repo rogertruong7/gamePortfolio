@@ -14,6 +14,13 @@ const CLIP_BIAS = 0.001;
 // The ripples hide the softer picture, and this keeps the memory it needs well down
 const RESOLUTION = 0.5;
 
+// Builds the shaders for everything in view, without waiting for them where the browser can
+export function compileInBackground(gl, scene, camera) {
+  if (gl.compileAsync) return gl.compileAsync(scene, camera);
+  gl.compile(scene, camera);
+  return Promise.resolve();
+}
+
 // Draws the town as seen from a camera mirrored under the water, into a texture the water can
 // show. That's a second pass over the whole scene, so it only runs while someone's looking.
 export function createPondReflection(waterY) {
@@ -26,6 +33,14 @@ export function createPondReflection(waterY) {
   const worldToTexture = new THREE.Matrix4();
   const surfacePoint = new THREE.Vector3(0, waterY, 0);
   let holdingMemory = false;
+
+  function fitTarget(gl) {
+    gl.getDrawingBufferSize(_size).multiplyScalar(RESOLUTION).floor();
+    if (target.width !== _size.x || target.height !== _size.y) {
+      target.setSize(_size.x, _size.y);
+    }
+    holdingMemory = true;
+  }
 
   function mirrorY(vector) {
     vector.y = 2 * waterY - vector.y;
@@ -75,11 +90,7 @@ export function createPondReflection(waterY) {
     texture: target.texture,
     worldToTexture,
     render(gl, scene, mainCamera, water) {
-      gl.getDrawingBufferSize(_size).multiplyScalar(RESOLUTION).floor();
-      if (target.width !== _size.x || target.height !== _size.y) {
-        target.setSize(_size.x, _size.y);
-      }
-      holdingMemory = true;
+      fitTarget(gl);
 
       placeCamera(mainCamera);
       clipAtSurface();
@@ -96,6 +107,19 @@ export function createPondReflection(waterY) {
       water.visible = true;
       gl.shadowMap.autoUpdate = updatedShadows;
       gl.setRenderTarget(previousTarget);
+    },
+    // Drawing into the texture needs its own build of every material in view, and building them
+    // all on the first look holds the page up for a moment. This builds them ahead of time,
+    // in the background where the browser can.
+    warmUp(gl, scene, mainCamera) {
+      fitTarget(gl);
+      placeCamera(mainCamera);
+      const previousTarget = gl.getRenderTarget();
+      gl.setRenderTarget(target);
+      // The materials are chosen as this is called, so the target can go straight back after
+      const built = compileInBackground(gl, scene, mirrorCamera);
+      gl.setRenderTarget(previousTarget);
+      return built;
     },
     // The next render sets the texture up again
     release() {

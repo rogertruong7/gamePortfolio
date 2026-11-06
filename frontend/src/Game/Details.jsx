@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { clone as cloneWithSkeleton } from "three/examples/jsm/utils/SkeletonUtils.js";
 import { WATER_Y, createGroundMap } from "./pondShape.js";
-import { createPondReflection } from "./pondReflection.js";
+import { compileInBackground, createPondReflection } from "./pondReflection.js";
 import { createPondWater } from "./pondWater.js";
 import {
   FLOOR_DETAILS_SCALE,
@@ -15,6 +15,9 @@ import {
 
 // How fast the wind plays, as a fraction of the clip's real speed
 const WIND_SPEED = 0.24;
+
+// How long after the town appears the reflection's shaders start building
+const WARM_UP_DELAY_MS = 1500;
 
 // How far the view has moved to the reflection when the trees start to dissolve, and finish
 const TREE_FADE_START = 0.05;
@@ -129,6 +132,42 @@ const Details = ({ characterRef, lakeRef }) => {
   const pondWater = useMemo(() => createPondWater(pondReflection), [pondReflection]);
   const pond = floorDetails.getObjectByName("pond_ice001_0");
   useEffect(() => () => pondReflection.release(), [pondReflection]);
+
+  // Builds what the reflection needs while nobody's looking at it, so the first look is smooth
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    let cancelled = false;
+    const timeout = setTimeout(() => {
+      if (lakeRef.current.reflection > 0) return;
+      // The trees only wear their dissolving copies for the moment it takes to pick them up
+      treeDissolve.set(true);
+      const built = Promise.all([
+        pondReflection.warmUp(gl, scene, camera),
+        compileInBackground(gl, scene, camera),
+      ]);
+      treeDissolve.set(false);
+      built
+        .then(() => {
+          if (cancelled || lakeRef.current.reflection > 0) return;
+          // Without the browser building shaders in the background, they're only really built
+          // the first time something's drawn with them. One real pass of each makes sure of it,
+          // and also builds the sky behind everything, which isn't one of the scene's materials.
+          // The trees aren't dissolving yet, so the town looks just the same.
+          treeDissolve.set(true);
+          pondReflection.render(gl, scene, camera, pond);
+          gl.render(scene, camera);
+          treeDissolve.set(false);
+        })
+        .catch((error) => console.warn("Couldn't build the reflection's shaders ahead of time", error))
+        .finally(() => {
+          if (!cancelled && lakeRef.current.reflection === 0) pondReflection.release();
+        });
+    }, WARM_UP_DELAY_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
+  }, [gl, scene, camera, pond, pondReflection, treeDissolve, lakeRef]);
 
   useEffect(() => {
     return plantFrontCornerBushes(floorDetails);

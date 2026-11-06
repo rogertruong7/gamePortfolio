@@ -58,6 +58,8 @@
         function stop() {
           if (!fighting || gameOver) return;
           gameOver = true;
+          // Its music keeps playing while the player reads the offer that opens in another tab
+          window.keepPlayingInBackground = true;
           tell("gameover");
           // Losing means hiring him, so the offer's already written, and here's his resume. Opening
           // the tab uses up the key press, so the resume downloads rather than asking where to go.
@@ -183,6 +185,14 @@
     <script>
       jQuery(document).ready(function () {
         cr_createRuntime("c2canvas");
+        // Leaving the tab or the window suspends the game, which pauses its sound. Every way of
+        // doing that goes through this, so the GAME OVER music can be kept going.
+        const runtime = cr_getC2Runtime();
+        const setSuspended = runtime.setSuspended;
+        runtime.setSuspended = function (suspend) {
+          if (suspend && window.keepPlayingInBackground) return;
+          setSuspended.call(this, suspend);
+        };
         // In decibels: this is 15% of the game's original volume
         cr.plugins_.Audio.prototype.acts.SetMasterVolume(-16.48);
         // The site's mute button is out of reach once the fight is up, so it carries over

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import resume from "../assets/RogerTruongResume.pdf";
 import MuteButton from "./MuteButton.jsx";
+import ContactPopup from "./ContactPopup.jsx";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 
 // Styled components for Menu and Button
@@ -118,13 +119,6 @@ const LINKS = [
   { label: "github", href: "https://github.com/rogertruong7", external: true },
   { label: "linkedin", href: "https://www.linkedin.com/in/roger-truong/", external: true },
   { label: "download cv", href: resume, download: "RogerTruongResume.pdf" },
-  // A blank Gmail draft to Roger. A mailto link only opens a blank tab for anyone without an
-  // email app set up in their browser.
-  {
-    label: "email",
-    href: "https://mail.google.com/mail/?view=cm&fs=1&to=rogertruong7@gmail.com",
-    external: true,
-  },
 ];
 
 const Links = ({ onPick }) =>
@@ -146,6 +140,7 @@ const Links = ({ onPick }) =>
 
 const Menu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showContact, setShowContact] = useState(false);
   const [lessThan1100, setLessThan1100] = useState(false);
   const menuRef = useRef(null);
   const toggleRef = useRef(null);
@@ -194,6 +189,10 @@ const Menu = () => {
         <MenuContainer>
           <MenuRow>
             <Links />
+            <DefaultButton onClick={() => setShowContact(true)}>
+              contact
+              <ChromeFrame spikes={false} />
+            </DefaultButton>
             <MuteButton />
           </MenuRow>
         </MenuContainer>
@@ -201,9 +200,19 @@ const Menu = () => {
       {lessThan1100 && isMenuOpen && (
         <SmallMenuContainer ref={menuRef} aria-label="Links">
           <Links onPick={() => setIsMenuOpen(false)} />
+          <DefaultButton
+            onClick={() => {
+              setIsMenuOpen(false);
+              setShowContact(true);
+            }}
+          >
+            contact
+            <ChromeFrame spikes={false} />
+          </DefaultButton>
           <MuteButton />
         </SmallMenuContainer>
       )}
+      {showContact && <ContactPopup onClose={() => setShowContact(false)} />}
     </>
   );
 };

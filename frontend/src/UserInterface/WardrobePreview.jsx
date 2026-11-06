@@ -74,7 +74,8 @@ const Stage = styled.div`
   height: 100%;
   border-radius: 18px;
   overflow: hidden;
-  touch-action: none;
+  /* Sideways drags turn the character, and up and down still scrolls the options */
+  touch-action: pan-y;
   cursor: grab;
   background:
     radial-gradient(ellipse 34% 6% at 50% 86%, rgba(20, 35, 90, 0.22), transparent 70%),

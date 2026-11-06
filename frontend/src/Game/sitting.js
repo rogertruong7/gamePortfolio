@@ -15,7 +15,7 @@ const CLEAR_IN_FRONT = 8.5;
 const CLEAR_AT_ENDS = 17;
 
 // Whoever was on the bench already scoots over at this speed to make room (benchSeats.js)
-const SCOOT_SPEED = 12;
+export const SCOOT_SPEED = 12;
 
 const WALK_SPEED = 100;
 const SIT_SECONDS = 0.7;
@@ -119,6 +119,11 @@ function benchPoint({ seat, facing }, along, out, target = new THREE.Vector3()) 
     FLOOR_Y,
     seat[1] + facing[1] * out + facing[0] * along
   );
+}
+
+// Where someone sitting this far along the bench is, for drawing other players there
+export function seatPoint(bench, along, out) {
+  return benchPoint(bench, along, SIT_DISTANCE, out);
 }
 
 // From beside or behind the bench, the walk goes around its nearer end rather than through it

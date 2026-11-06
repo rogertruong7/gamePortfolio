@@ -1,7 +1,7 @@
 import { lazy, Suspense, useId, useState } from "react";
 import styled from "styled-components";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
-import Modal, { WIDE_FROM, body, focusBlue, ink, inkSoft, pixel } from "./Modal.jsx";
+import Modal, { WIDE_FROM, body, focusBlue, ink, inkSoft, paper, pixel } from "./Modal.jsx";
 import { ExtraIcon, HairIcon, OutfitIcon } from "./wardrobeIcons.jsx";
 import {
   BODIES,
@@ -95,6 +95,7 @@ const Wardrobe = ({ look, onSave, onClose }) => {
       onClose={() => onSave(draft)}
       onCancel={onClose}
       wide
+      taglineOnPhones={false}
       footer={
         <FooterButton type="button" onClick={onClose}>
           Cancel
@@ -264,17 +265,32 @@ const PreviewColumn = styled.div`
     min-height: 260px;
   }
 
+  /* Stacked above the options, it stays pinned at the top while they scroll under it, so the
+     character is always in view while picking */
   @media (max-width: ${WIDE_FROM - 1}px) {
+    position: sticky;
+    /* Out to the edges of the popup's scrolling area, past its padding */
+    top: -26px;
+    z-index: 2;
+    margin: -26px -32px 0;
+    padding: 26px 32px 12px;
+    background: ${paper};
+    box-shadow: 0 10px 12px -12px rgba(20, 35, 90, 0.35);
+
     & > :first-child {
       flex: none;
       height: 260px;
     }
   }
 
-  /* Leaves room on a phone to see the options under it */
   @media (max-width: 520px) {
+    gap: 10px;
+    top: -22px;
+    margin: -22px -22px 0;
+    padding: 22px 22px 10px;
+
     & > :first-child {
-      height: 210px;
+      height: 190px;
       min-height: 0;
     }
   }
@@ -323,6 +339,11 @@ const Tabs = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+
+  @media (max-width: 520px) {
+    gap: 6px;
+  }
+
   margin-bottom: 20px;
 `;
 
@@ -346,6 +367,12 @@ const Tab = styled.button`
     background: ${ink};
     border-color: ${ink};
     color: #fff;
+  }
+
+  /* All four fit on one line on a phone */
+  @media (max-width: 520px) {
+    padding: 7px 12px;
+    font-size: 16px;
   }
 `;
 

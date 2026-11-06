@@ -12,7 +12,7 @@ export const crimson = "#A8123F";
 // ring can show as soon as the popup appears, and it reads as "this is the default button".
 export const focusBlue = "#1F7FD6";
 const sky = "#86CDEB";
-const paper = "#F7FBFD";
+export const paper = "#F7FBFD";
 export const body = '"Zen Kaku Gothic New", "Hiragino Sans", system-ui, sans-serif';
 export const pixel = '"Pixelify Sans", "Zen Kaku Gothic New", sans-serif';
 
@@ -28,6 +28,8 @@ const Modal = ({
   // An optional second choice beside the action button: { label, onClick }
   secondaryAction,
   wide = false,
+  // Drops the tagline on phones, for a popup that needs the room more than the words
+  taglineOnPhones = true,
   footer,
   children,
 }) => {
@@ -58,7 +60,7 @@ const Modal = ({
         <Inner>
           <Head>
             <Title id="modal-title">{title}</Title>
-            {tagline && <Tagline>{tagline}</Tagline>}
+            {tagline && <Tagline $onPhones={taglineOnPhones}>{tagline}</Tagline>}
           </Head>
           <Content>{children}</Content>
           <Foot>
@@ -159,6 +161,10 @@ const Title = styled.h2`
 const Tagline = styled.p`
   margin: 8px 0 0;
   font: 500 18px / 1.45 ${body};
+
+  @media (max-width: 520px) {
+    display: ${({ $onPhones }) => ($onPhones ? "block" : "none")};
+  }
 `;
 
 const Content = styled.div`

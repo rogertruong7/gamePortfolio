@@ -4,7 +4,9 @@ import * as THREE from "three";
 import PlayerShadow from "./PlayerShadow.jsx";
 import { useCharacterModel } from "./look/useCharacterModel.js";
 import { EMOTES, applyEmotePose, createEmoteState, findEmoteBones, startEmote, stopEmote } from "./emotes.js";
-import { applySitPose, findSitBones } from "./sitting.js";
+import { SCOOT_SPEED, applySitPose, findSitBones, seatPoint } from "./sitting.js";
+import { seatAlong } from "./benchSeats.js";
+import { benches } from "./Static.jsx";
 import { WALK_PLAYBACK, createWalkFeel, updateWalkFeel } from "./walkFeel.js";
 import { createJumpState, requestJump, updateJump } from "./jumping.js";
 
@@ -18,6 +20,7 @@ const SCALE = 0.08;
 const IDLE_ANIMATION_SPEED = 0.06;
 
 const _from = new THREE.Vector3();
+const _seat = new THREE.Vector3();
 const _to = new THREE.Vector3();
 
 function turnBetween(from, to, t) {
@@ -46,7 +49,15 @@ function sample(snapshots, at) {
   return { position: _from.lerp(_to, t), ry: turnBetween(before.ry, after.ry, t), state: after };
 }
 
-function RemotePlayer({ id, look, roomRef, lakeRef }) {
+// Everyone on a bench or heading for one: the others in the lobby, and this player
+function allBenchClaims(room, localState) {
+  const claims = room.benchClaims();
+  const local = localState.current;
+  if (local.bench >= 0) claims.push({ id: room.id, bench: local.bench, since: local.benchSince });
+  return claims;
+}
+
+function RemotePlayer({ id, look, roomRef, lakeRef, localState }) {
   const { model, animations, dress } = useCharacterModel(look);
   const ref = useRef();
   const mixer = useMemo(() => new THREE.AnimationMixer(model), [model]);
@@ -66,6 +77,8 @@ function RemotePlayer({ id, look, roomRef, lakeRef }) {
   const emote = useRef(createEmoteState());
   const sit = useRef({ phase: "none", progress: 0 });
   const jump = useRef(createJumpState());
+  // How far along its bench this player is drawn, while seated
+  const seatedAlong = useRef(null);
   // The jump count last seen, or null until the first snapshot so old jumps aren't replayed
   const jumpsSeen = useRef(null);
 
@@ -86,6 +99,29 @@ function RemotePlayer({ id, look, roomRef, lakeRef }) {
     character.position.copy(now.position);
     character.rotation.y = now.ry;
     const { moving } = now.state;
+
+    // Once seated, where they sit comes from the same rule every player uses (benchSeats.js), not
+    // from where their own tab last put them. A tab in the background stops drawing, so it
+    // wouldn't scoot over to make room, but everyone else still sees it do so.
+    const bench = benches[now.state.bench];
+    const along =
+      bench && now.state.sit >= 1
+        ? seatAlong(
+            { id, bench: now.state.bench, since: now.state.since },
+            allBenchClaims(roomRef.current, localState)
+          )
+        : null;
+    if (along === null) {
+      seatedAlong.current = null;
+    } else {
+      const from = seatedAlong.current ?? along;
+      const step = SCOOT_SPEED * delta;
+      seatedAlong.current =
+        Math.abs(along - from) <= step ? along : from + Math.sign(along - from) * step;
+      seatPoint(bench, seatedAlong.current, _seat);
+      character.position.x = _seat.x;
+      character.position.z = _seat.z;
+    }
 
     // The hop is played here, on top of where they're standing
     if (jumpsSeen.current !== null && now.state.jumps > jumpsSeen.current) requestJump(jump.current);
@@ -127,9 +163,16 @@ function RemotePlayer({ id, look, roomRef, lakeRef }) {
 }
 
 // Everyone else in the town
-function RemotePlayers({ peers, roomRef, lakeRef }) {
+function RemotePlayers({ peers, roomRef, lakeRef, localState }) {
   return peers.map((peer) => (
-    <RemotePlayer key={peer.id} id={peer.id} look={peer.look} roomRef={roomRef} lakeRef={lakeRef} />
+    <RemotePlayer
+      key={peer.id}
+      id={peer.id}
+      look={peer.look}
+      roomRef={roomRef}
+      lakeRef={lakeRef}
+      localState={localState}
+    />
   ));
 }
 

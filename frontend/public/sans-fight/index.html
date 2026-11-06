@@ -183,8 +183,8 @@
     <script>
       jQuery(document).ready(function () {
         cr_createRuntime("c2canvas");
-        // In decibels: this is 30% of the game's original volume
-        cr.plugins_.Audio.prototype.acts.SetMasterVolume(-10.46);
+        // In decibels: this is 15% of the game's original volume
+        cr.plugins_.Audio.prototype.acts.SetMasterVolume(-16.48);
         // The site's mute button is out of reach once the fight is up, so it carries over
         if (new URLSearchParams(location.search).has("muted")) {
           cr.plugins_.Audio.prototype.acts.SetSilent(0);

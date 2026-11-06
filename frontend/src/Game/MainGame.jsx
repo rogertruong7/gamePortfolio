@@ -367,7 +367,12 @@ function MainGame({
           roomRef={roomRef}
         />
         <PlayerShadow characterRef={characterRef} lakeRef={lakeRef} look={look} />
-        <RemotePlayers peers={roomPeers} roomRef={roomRef} lakeRef={lakeRef} />
+        <RemotePlayers
+          peers={roomPeers}
+          roomRef={roomRef}
+          lakeRef={lakeRef}
+          localState={netStateRef}
+        />
         {beatSans && <SuperSaiyan characterRef={characterRef} />}
         <group visible={!flipped}>
           {labels.map(({ text, position, fontSize, showcaseName }) => (

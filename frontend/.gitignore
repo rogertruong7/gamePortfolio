@@ -26,3 +26,5 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+# Written by `vercel link`, with a token for the Vercel CLI
+.env.local

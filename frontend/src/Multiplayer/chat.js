@@ -27,6 +27,20 @@ export function readChat(message) {
   return { id: message.id.slice(0, 64), text };
 }
 
+// How long something said stays over the speaker's head (Game/ChatBubble.jsx)
+export const SHOW_SAID_SECONDS = 6;
+
+// The newest thing a sender said that's still worth showing. A null sender is this tab.
+export function latestSaid(messages, sender) {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const message = messages[i];
+    if (sender === null ? message.mine : message.sender === sender) {
+      return Date.now() - message.at < SHOW_SAID_SECONDS * 1000 ? message : null;
+    }
+  }
+  return null;
+}
+
 export const MAX_NAME_LENGTH = 20;
 const NAME_STORE_KEY = "chatName";
 

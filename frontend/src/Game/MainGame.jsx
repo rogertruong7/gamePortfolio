@@ -8,6 +8,8 @@ import MainCamera from "./MainCamera.jsx";
 import Character from "./Character.jsx";
 import PlayerShadow from "./PlayerShadow.jsx";
 import RemotePlayers from "./RemotePlayers.jsx";
+import ChatBubble from "./ChatBubble.jsx";
+import { latestSaid } from "../Multiplayer/chat.js";
 import Floor from "./Floor.jsx";
 import Island from "./Island.jsx";
 import Buildings from "./Buildings.jsx";
@@ -94,6 +96,7 @@ function MainGame({
   netStateRef,
   roomPeers,
   roomRef,
+  chatMessages,
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
@@ -372,8 +375,10 @@ function MainGame({
           roomRef={roomRef}
         />
         <PlayerShadow characterRef={characterRef} lakeRef={lakeRef} look={look} />
+        <ChatBubble characterRef={characterRef} message={latestSaid(chatMessages, null)} />
         <RemotePlayers
           peers={roomPeers}
+          chatMessages={chatMessages}
           roomRef={roomRef}
           lakeRef={lakeRef}
           localState={netStateRef}

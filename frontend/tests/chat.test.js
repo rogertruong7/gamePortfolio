@@ -5,10 +5,12 @@ import {
   BURST_SECONDS,
   MAX_CHAT_LENGTH,
   MAX_NAME_LENGTH,
+  SHOW_SAID_SECONDS,
   chatName,
   cleanChat,
   cleanName,
   createChatLimiter,
+  latestSaid,
   readChat,
 } from "../src/Multiplayer/chat.js";
 
@@ -48,4 +50,18 @@ test("a picked name is tidied and kept short", () => {
   assert.equal(cleanName("  Roger\n  the   Great  "), "Roger the Great");
   assert.equal(cleanName("x".repeat(50)).length, MAX_NAME_LENGTH);
   assert.equal(cleanName(42), "");
+});
+
+test("the bubble shows a sender's newest message, until it's been up long enough", () => {
+  const now = Date.now();
+  const messages = [
+    { key: 1, sender: "a", mine: false, text: "old", at: now - 1000 },
+    { key: 2, sender: "me", mine: true, text: "mine", at: now },
+    { key: 3, sender: "a", mine: false, text: "new", at: now },
+    { key: 4, sender: "b", mine: false, text: "stale", at: now - SHOW_SAID_SECONDS * 1000 - 1 },
+  ];
+  assert.equal(latestSaid(messages, "a").text, "new");
+  assert.equal(latestSaid(messages, null).text, "mine");
+  assert.equal(latestSaid(messages, "b"), null);
+  assert.equal(latestSaid(messages, "c"), null);
 });

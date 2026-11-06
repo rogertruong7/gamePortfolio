@@ -295,7 +295,11 @@ export function joinRoom({ look, name, localState, onChange }) {
     const mine = from === id;
     // Kept with the name they had when they said it, so renaming doesn't rewrite the log
     const by = mine ? myName : (peers.get(from)?.name ?? chatName(from));
-    messages = [...messages, { key: messageCount, from: by, mine, text }].slice(-KEEP_MESSAGES);
+    messages = [
+      ...messages,
+      // sender and at are for the bubble over their head (Game/ChatBubble.jsx)
+      { key: messageCount, sender: from, from: by, mine, text, at: Date.now() },
+    ].slice(-KEEP_MESSAGES);
     report();
   };
 

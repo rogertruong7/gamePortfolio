@@ -214,6 +214,7 @@ const MainPage = () => {
           netStateRef={room.localState}
           roomPeers={room.peers}
           roomRef={room.roomRef}
+          chatMessages={room.messages}
         />
       </div>
       {enterPopupVisible && currentScene === 0 && enteringScene === null && (

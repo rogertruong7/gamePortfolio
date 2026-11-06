@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import PlayerShadow from "./PlayerShadow.jsx";
+import ChatBubble from "./ChatBubble.jsx";
+import { latestSaid } from "../Multiplayer/chat.js";
 import SuperSaiyan from "./SuperSaiyan.jsx";
 import { useCharacterModel } from "./look/useCharacterModel.js";
 import { EMOTES, applyEmotePose, createEmoteState, findEmoteBones, startEmote, stopEmote } from "./emotes.js";
@@ -58,7 +60,7 @@ function allBenchClaims(room, localState) {
   return claims;
 }
 
-function RemotePlayer({ id, look, roomRef, lakeRef, localState }) {
+function RemotePlayer({ id, look, roomRef, lakeRef, localState, said }) {
   const { model, animations, dress } = useCharacterModel(look);
   const ref = useRef();
   const mixer = useMemo(() => new THREE.AnimationMixer(model), [model]);
@@ -162,13 +164,14 @@ function RemotePlayer({ id, look, roomRef, lakeRef, localState }) {
     <>
       <primitive ref={ref} object={model} scale={[SCALE, SCALE, SCALE]} visible={false} />
       <PlayerShadow characterRef={ref} lakeRef={lakeRef} look={look} />
+      <ChatBubble characterRef={ref} message={said} />
       {gold && <SuperSaiyan characterRef={ref} />}
     </>
   );
 }
 
 // Everyone else in the town
-function RemotePlayers({ peers, roomRef, lakeRef, localState }) {
+function RemotePlayers({ peers, roomRef, lakeRef, localState, chatMessages }) {
   return peers.map((peer) => (
     <RemotePlayer
       key={peer.id}
@@ -177,6 +180,7 @@ function RemotePlayers({ peers, roomRef, lakeRef, localState }) {
       roomRef={roomRef}
       lakeRef={lakeRef}
       localState={localState}
+      said={latestSaid(chatMessages, peer.id)}
     />
   ));
 }

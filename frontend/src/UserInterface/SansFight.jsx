@@ -19,6 +19,11 @@ const PROGRESS_CHECK_MS = 250;
 // What the game downloads before its battle starts, measured from its page. Only for the bar, so
 // it doesn't matter if it's a little out.
 const FIGHT_BYTES = 3230000;
+// Downloading only fills the bar this far. After that the game still has to get ready, mostly
+// decoding its music, which takes a few seconds more the first time. It moves on a little more
+// once the game has started up, and the bar keeps breathing until the battle begins.
+const DOWNLOADED_SHARE = 0.85;
+const STARTED_UP_SHARE = 0.92;
 // Long enough to read the line saying it didn't work
 const FAILED_MS = 2500;
 const FAILED_LINE = "But nothing happened.";
@@ -95,7 +100,8 @@ const LoadFill = styled.div`
   background: white;
   transition: width 0.25s linear;
 
-  /* Before the game can say how far along it is, the whole bar breathes instead */
+  /* Breathes while there's no amount to show: before anything has arrived, and once it's all
+     downloaded and the game is getting ready */
   &[data-unknown] {
     animation: ${pulse} 0.9s ease-in-out infinite alternate;
   }
@@ -121,6 +127,23 @@ function downloadedBytes(frame) {
   } catch {
     return 0;
   }
+}
+
+// Whether the game has finished loading and put up its first screen, though not the battle yet
+function startedUp(frame) {
+  try {
+    return Boolean(frame.contentWindow.cr_getC2Runtime?.()?.running_layout);
+  } catch {
+    return false;
+  }
+}
+
+// How far along the bar is, from 0 to 1, or null before anything has arrived
+function barProgress(frame) {
+  if (startedUp(frame)) return STARTED_UP_SHARE;
+  const bytes = downloadedBytes(frame);
+  if (bytes === 0) return null;
+  return Math.min(1, bytes / FIGHT_BYTES) * DOWNLOADED_SHARE;
 }
 
 // Shown under the GAME OVER screen, which waits for the player rather than ending on its own
@@ -273,14 +296,14 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
         after(FAILED_MS, () => end("failed"));
       };
       const loadTimeout = setTimeout(giveUp, LOAD_TIMEOUT_MS);
-      let lastBytes = -1;
+      let lastProgress;
       let lastMovedAt = performance.now();
       const progressCheck = setInterval(() => {
-        const bytes = downloadedBytes(frameRef.current);
-        if (bytes !== lastBytes) {
-          lastBytes = bytes;
+        const now = barProgress(frameRef.current);
+        if (now !== lastProgress) {
+          lastProgress = now;
           lastMovedAt = performance.now();
-          setProgress(bytes > 0 ? Math.min(1, bytes / FIGHT_BYTES) : null);
+          setProgress(now);
         } else if (performance.now() - lastMovedAt > NO_PROGRESS_MS) {
           giveUp();
         }
@@ -406,7 +429,9 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
                 aria-valuenow={progress === null ? undefined : Math.round(progress * 100)}
               >
                 <LoadFill
-                  data-unknown={progress === null ? "" : undefined}
+                  data-unknown={
+                    progress === null || progress >= DOWNLOADED_SHARE ? "" : undefined
+                  }
                   style={{ width: progress === null ? "100%" : `${progress * 100}%` }}
                 />
               </LoadBar>

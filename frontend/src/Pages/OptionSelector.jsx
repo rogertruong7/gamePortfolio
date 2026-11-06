@@ -8,6 +8,9 @@ const PER_SIDE = 2;
 // Below this the book closes to a single page with all four entries on it
 const SINGLE_PAGE_QUERY = "(max-width: 650px)";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+// A turning page swings for TURN_MS, and the second page of a spread starts TURN_STAGGER_MS late
+const TURN_MS = 260;
+const TURN_STAGGER_MS = 90;
 
 // What goes under an entry's title: a project's kind, or the job an experience was
 function subtitle(entry) {
@@ -43,6 +46,9 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   // Which way the last page turn went, so the new page swings in from the right side
   const [turn, setTurn] = useState(null);
+  // True while a page is mid-swing. Its near edge pokes past the book then, so the book clips it
+  // rather than let the menu's box flash a scrollbar.
+  const [turning, setTurning] = useState(false);
   const singlePage = useSinglePage();
 
   const spreadCount = Math.ceil(entries.length / PER_PAGE);
@@ -53,9 +59,16 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
     if (next < 0 || next >= spreadCount) return;
     const count = Math.min(PER_PAGE, entries.length - next * PER_PAGE);
     setTurn(next > spread ? "forward" : "back");
+    if (!REDUCED_MOTION) setTurning(true);
     setSpread(next);
     setSelectedIndex(Math.min(index, count - 1));
   };
+
+  useEffect(() => {
+    if (!turning) return;
+    const timer = setTimeout(() => setTurning(false), TURN_MS + TURN_STAGGER_MS);
+    return () => clearTimeout(timer);
+  }, [turning, spread]);
 
   const open = (index) => {
     const entry = onSpread[index];
@@ -132,7 +145,7 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
 
   return (
     <Book>
-      <Pages $singlePage={singlePage}>
+      <Pages $singlePage={singlePage} $turning={turning}>
         {sides.map((side, sideIndex) => (
           <Page
             key={`${spread}-${sideIndex}`}
@@ -246,6 +259,7 @@ const Pages = styled.div`
   min-height: 0;
   display: grid;
   grid-template-columns: ${({ $singlePage }) => ($singlePage ? "1fr" : "1fr 1fr")};
+  overflow: ${({ $turning }) => ($turning ? "hidden" : "visible")};
 `;
 
 const Page = styled.div`
@@ -269,8 +283,8 @@ const Page = styled.div`
     $turn &&
     css`
       --turn-from: ${$side === "left" ? "70deg" : "-70deg"};
-      animation: ${turnFromSpine} 260ms ease-out both;
-      animation-delay: ${($turn === "forward") === ($side === "left") ? "0ms" : "90ms"};
+      animation: ${turnFromSpine} ${TURN_MS}ms ease-out both;
+      animation-delay: ${($turn === "forward") === ($side === "left") ? 0 : TURN_STAGGER_MS}ms;
     `}
 `;
 

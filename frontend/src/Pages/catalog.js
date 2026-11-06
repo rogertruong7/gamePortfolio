@@ -17,12 +17,3 @@ const ofKind = (kind) =>
 export const projects = ofKind("project");
 export const experiences = ofKind("experience");
 export const allEntries = [...projects, ...experiences];
-
-// The in-game menu shows four options a page.
-export const toOptionPages = (list) => {
-  const pages = [];
-  for (let i = 0; i < list.length; i += 4) {
-    pages.push(list.slice(i, i + 4).map((e) => e.option));
-  }
-  return pages;
-};

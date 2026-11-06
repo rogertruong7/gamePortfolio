@@ -1,331 +1,388 @@
 import { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { track } from "../Analytics/tracker.js";
 
-// Data is an array of strings
-// `active` is false while a page is open over the menu, so its keys stay with that page.
-const OptionSelector = ({ setPageToShow, data, section, active }) => {
-  const [currentPage, setCurrentPage] = useState(0); // Current page index
-  const [selectedIndex, setSelectedIndex] = useState(0); // Default: Top Left
+const PER_PAGE = 4;
+const PER_SIDE = 2;
+// Below this the book closes to a single page with all four entries on it
+const SINGLE_PAGE_QUERY = "(max-width: 650px)";
+const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const currentOptions = data[currentPage];
+// What goes under an entry's title: a project's kind, or the job an experience was
+function subtitle(entry) {
+  if (entry.kind === "experience") return entry.option.split(" - ").slice(1).join(" - ");
+  return entry.category;
+}
 
-  const [isMobileView, setIsMobileView] = useState(false);
-
+function useSinglePage() {
+  const [singlePage, setSinglePage] = useState(() => window.matchMedia(SINGLE_PAGE_QUERY).matches);
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 650px)");
-
-    // Function to update state based on media query
-    const handleMediaChange = (e) => {
-      setIsMobileView(e.matches); // `e.matches` is `true` if media query matches
-    };
-
-    // Initial check and add listener
-    handleMediaChange(mediaQuery);
-    mediaQuery.addEventListener("change", handleMediaChange);
-
-    // Cleanup listener on component unmount
-    return () => mediaQuery.removeEventListener("change", handleMediaChange);
+    const mediaQuery = window.matchMedia(SINGLE_PAGE_QUERY);
+    const onChange = (e) => setSinglePage(e.matches);
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
   }, []);
+  return singlePage;
+}
 
-  const handleKeyDown = (e) => {
-    if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") {
-      if (selectedIndex + 1 === currentOptions.length && selectedIndex !== 3) {
-        console.log("last option");
-      } else if (selectedIndex === 3 && currentPage < data.length - 1) {
-        setCurrentPage((prev) => prev + 1);
-        setSelectedIndex(0);
-      } else if (selectedIndex < 3) {
-        setSelectedIndex((prev) => prev + 1);
+// The menu reads like the contents of an open book: two entries on the left page, two on the
+// right, and the arrows turn to the next spread. Entries are the catalog's, four to a spread.
+// `active` is false while a page is open over the menu, so its keys stay with that page.
+const OptionSelector = ({ setPageToShow, entries, section, active }) => {
+  const [spread, setSpread] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  // Which way the last page turn went, so the new page swings in from the right side
+  const [turn, setTurn] = useState(null);
+  const singlePage = useSinglePage();
+
+  const spreadCount = Math.ceil(entries.length / PER_PAGE);
+  const onSpread = entries.slice(spread * PER_PAGE, (spread + 1) * PER_PAGE);
+  const lastIndex = onSpread.length - 1;
+
+  const turnTo = (next, index) => {
+    if (next < 0 || next >= spreadCount) return;
+    const count = Math.min(PER_PAGE, entries.length - next * PER_PAGE);
+    setTurn(next > spread ? "forward" : "back");
+    setSpread(next);
+    setSelectedIndex(Math.min(index, count - 1));
+  };
+
+  const open = (index) => {
+    const entry = onSpread[index];
+    if (!entry) return;
+    track("open_item", `${section}: ${entry.option}`);
+    setPageToShow(spread * PER_PAGE + index + 1);
+  };
+
+  // On one page the entries run straight down. On two, up and down stay on a page, and left and
+  // right cross the spine, turning the page at either edge.
+  const move = (direction) => {
+    const column = Math.floor(selectedIndex / PER_SIDE);
+    const row = selectedIndex % PER_SIDE;
+    if (singlePage) {
+      if (direction === "left") turnTo(spread - 1, 0);
+      if (direction === "right") turnTo(spread + 1, 0);
+      if (direction === "up") {
+        if (selectedIndex > 0) setSelectedIndex(selectedIndex - 1);
+        else turnTo(spread - 1, PER_PAGE - 1);
       }
-    } else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") {
-      if (selectedIndex === 0 && currentPage > 0) {
-        setCurrentPage((prev) => prev - 1);
-        setSelectedIndex(3);
-      } else if (selectedIndex > 0) {
-        setSelectedIndex((prev) => prev - 1);
+      if (direction === "down") {
+        if (selectedIndex < lastIndex) setSelectedIndex(selectedIndex + 1);
+        else turnTo(spread + 1, 0);
       }
-    } else if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") {
-      if (isMobileView) {
-        if (selectedIndex === 0 && currentPage > 0) {
-          setCurrentPage((prev) => prev - 1);
-          setSelectedIndex(3);
-        } else if (selectedIndex > 0) {
-          setSelectedIndex((prev) => prev - 1);
-        }
-      } else if (selectedIndex === 2 || selectedIndex === 3) {
-        setSelectedIndex((prev) => prev - 2);
-      }
-    } else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") {
-      if (isMobileView) {
-        if (
-          selectedIndex + 1 === currentOptions.length &&
-          selectedIndex !== 3
-        ) {
-          console.log("last option");
-        } else if (selectedIndex === 3 && currentPage < data.length - 1) {
-          setCurrentPage((prev) => prev + 1);
-          setSelectedIndex(0);
-        } else if (selectedIndex < 3) {
-          setSelectedIndex((prev) => prev + 1);
-        }
-      } else if (selectedIndex + 2 < currentOptions.length) {
-        // The last page can be short, so the option below may not exist.
-        setSelectedIndex((prev) => prev + 2);
-      }
-    } else if (e.key === "Enter") {
-      handleClickOption(selectedIndex);
+      return;
+    }
+    if (direction === "up" && row > 0) setSelectedIndex(selectedIndex - 1);
+    if (direction === "down" && row < PER_SIDE - 1 && selectedIndex < lastIndex) {
+      setSelectedIndex(selectedIndex + 1);
+    }
+    if (direction === "left") {
+      if (column === 1) setSelectedIndex(row);
+      else turnTo(spread - 1, PER_SIDE + row);
+    }
+    if (direction === "right") {
+      if (column === 0 && lastIndex >= PER_SIDE) setSelectedIndex(Math.min(PER_SIDE + row, lastIndex));
+      else if (column === 1 || lastIndex < PER_SIDE) turnTo(spread + 1, row);
     }
   };
 
   useEffect(() => {
     if (!active) return;
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [active, currentPage, selectedIndex, isMobileView]);
+    const KEYS = {
+      arrowleft: "left",
+      a: "left",
+      arrowright: "right",
+      d: "right",
+      arrowup: "up",
+      w: "up",
+      arrowdown: "down",
+      s: "down",
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Enter") {
+        open(selectedIndex);
+        return;
+      }
+      const direction = KEYS[e.key.toLowerCase()];
+      if (!direction) return;
+      e.preventDefault();
+      move(direction);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
 
-  const goToPreviousPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage((prev) => prev - 1);
-      setSelectedIndex(3); // Default to last option of the previous page
-    }
-  };
-
-  const goToNextPage = ({ setPageToShow }) => {
-    if (currentPage < data.length - 1) {
-      setCurrentPage((prev) => prev + 1);
-      setSelectedIndex(0); // Default to first option of the next page
-    }
-  };
-
-  const handleClickOption = (index) => {
-    track("open_item", `${section}: ${currentOptions[index]}`);
-    setPageToShow(currentPage * 4 + (index + 1));
-  };
+  const sides = singlePage ? [onSpread] : [onSpread.slice(0, PER_SIDE), onSpread.slice(PER_SIDE)];
+  const firstPageNumber = spread * (singlePage ? 1 : 2) + 1;
 
   return (
-    <Container>
-      {/* Arrows */}
-      {currentPage > 0 && (
-        <LeftArrowButton onClick={goToPreviousPage}>
-          &#9664; {/* Left Arrow */}
-        </LeftArrowButton>
-      )}
-      {currentPage < data.length - 1 && (
-        <RightArrowButton onClick={goToNextPage}>
-          &#9654; {/* Right Arrow */}
-        </RightArrowButton>
-      )}
-
-      {/* Options Grid */}
-      <Grid>
-        {currentOptions.map((option, index) => (
-          <Option
-            key={index}
-            onMouseEnter={() => setSelectedIndex(index)}
-            onClick={() => handleClickOption(index)}
+    <Book>
+      <Pages $singlePage={singlePage}>
+        {sides.map((side, sideIndex) => (
+          <Page
+            key={`${spread}-${sideIndex}`}
+            $side={sideIndex === 0 ? "left" : "right"}
+            $turn={REDUCED_MOTION ? null : turn}
           >
-            <PixelBook selected={selectedIndex === index} />
-            <Text selected={selectedIndex === index}>{option}</Text>
-          </Option>
+            {side.map((entry, i) => {
+              const index = sideIndex * PER_SIDE + i;
+              const selected = selectedIndex === index;
+              return (
+                <Entry
+                  key={entry.slug}
+                  type="button"
+                  onMouseEnter={() => setSelectedIndex(index)}
+                  onFocus={() => setSelectedIndex(index)}
+                  onClick={() => open(index)}
+                  aria-current={selected}
+                >
+                  <SoulSlot aria-hidden="true">{selected && <Soul />}</SoulSlot>
+                  <EntryText>
+                    <TitleLine>
+                      <Title>{entry.title}</Title>
+                      <Leader aria-hidden="true" />
+                      <Period>{entry.period}</Period>
+                    </TitleLine>
+                    <Subtitle>{subtitle(entry)}</Subtitle>
+                  </EntryText>
+                </Entry>
+              );
+            })}
+          </Page>
         ))}
-      </Grid>
-    </Container>
+      </Pages>
+      <Footer $singlePage={singlePage}>
+        <FooterSide>
+          <TurnButton
+            type="button"
+            onClick={() => turnTo(spread - 1, 0)}
+            disabled={spread === 0}
+            aria-label="Previous page"
+          >
+            &#9664;
+          </TurnButton>
+          <PageNumber>
+            {singlePage ? `page ${spread + 1} / ${spreadCount}` : `- ${firstPageNumber} -`}
+          </PageNumber>
+          {singlePage && (
+            <TurnButton
+              type="button"
+              onClick={() => turnTo(spread + 1, 0)}
+              disabled={spread === spreadCount - 1}
+              aria-label="Next page"
+            >
+              &#9654;
+            </TurnButton>
+          )}
+        </FooterSide>
+        {!singlePage && (
+          <FooterSide $right>
+            <span aria-hidden="true" />
+            <PageNumber>{`- ${firstPageNumber + 1} -`}</PageNumber>
+            <TurnButton
+              type="button"
+              onClick={() => turnTo(spread + 1, 0)}
+              disabled={spread === spreadCount - 1}
+              aria-label="Next page"
+            >
+              &#9654;
+            </TurnButton>
+          </FooterSide>
+        )}
+      </Footer>
+    </Book>
   );
 };
 
-const Text = styled.div`
-  margin: 0;
-  color: white;
-  width: 100%;
-  font-family: "Determination Mono", "Pixelify Sans", serif;
-  font-size: 1.6rem;
-  padding-left: 10px;
-  padding-right: 10px;
-  border-radius: 20px;
-  height: 100%;
-  display: flex;
-  justify-content: left;
-  align-items: center;
-  border: ${({ selected }) =>
-    selected ? "2px dashed white" : "2px solid transparent"};
+// Undertale's red SOUL, the cursor beside whichever entry is picked
+const Soul = () => (
+  <svg viewBox="0 0 7 6" shapeRendering="crispEdges" width="100%" height="100%">
+    <path
+      fill="#ff0000"
+      d="M1 0h2v1h1V0h2v1h1v2H6v1H5v1H4v1H3V5H2V4H1V3H0V1h1z"
+    />
+  </svg>
+);
 
-  @media (max-width: 800px) {
-    font-size: 1rem;
-  }
+const turnFromSpine = keyframes`
+  from { transform: perspective(1200px) rotateY(var(--turn-from)); opacity: 0; }
+  to { transform: perspective(1200px) rotateY(0deg); opacity: 1; }
 `;
 
-const D = "#201a3d";
-const P = "#f0e8d0";
-const L = "#b0a898";
-const R = "#9b2848";
-const H = "#d44868";
-const G = "#e08030";
-const S = "#5c3a1e";
-
-const pageRow = (y) => (
-  <>
-    <rect x="0" y={y} width="1" height="1" fill={D}/>
-    <rect x="1" y={y} width="8" height="1" fill={P}/>
-    <rect x="11" y={y} width="8" height="1" fill={P}/>
-    <rect x="19" y={y} width="1" height="1" fill={D}/>
-  </>
-);
-
-const textRow = (y) => (
-  <>
-    <rect x="0" y={y} width="1" height="1" fill={D}/>
-    <rect x="1" y={y} width="2" height="1" fill={P}/>
-    <rect x="3" y={y} width="4" height="1" fill={L}/>
-    <rect x="7" y={y} width="2" height="1" fill={P}/>
-    <rect x="11" y={y} width="2" height="1" fill={P}/>
-    <rect x="13" y={y} width="4" height="1" fill={L}/>
-    <rect x="17" y={y} width="2" height="1" fill={P}/>
-    <rect x="19" y={y} width="1" height="1" fill={D}/>
-  </>
-);
-
-const PixelBook = ({ selected }) => (
-  <BookWrapper>
-    <svg
-      viewBox="0 0 20 14"
-      xmlns="http://www.w3.org/2000/svg"
-      shapeRendering="crispEdges"
-      style={{ height: "100%", width: "auto", opacity: selected ? 1 : 0 }}
-    >
-      {/* Row 0: top outline */}
-      <rect x="2" y="0" width="6" height="1" fill={D}/>
-      <rect x="12" y="0" width="6" height="1" fill={D}/>
-      {/* Row 1: stepped page + spine */}
-      <rect x="1" y="1" width="1" height="1" fill={D}/>
-      <rect x="2" y="1" width="6" height="1" fill={P}/>
-      <rect x="8" y="1" width="1" height="1" fill={D}/>
-      <rect x="9" y="1" width="2" height="1" fill={S}/>
-      <rect x="11" y="1" width="1" height="1" fill={D}/>
-      <rect x="12" y="1" width="6" height="1" fill={P}/>
-      <rect x="18" y="1" width="1" height="1" fill={D}/>
-      {/* Spine column for rows 2-10 */}
-      <rect x="9" y="2" width="2" height="9" fill={S}/>
-      {/* Rows 2-9: alternating page / text */}
-      {pageRow(2)}
-      {textRow(3)}
-      {pageRow(4)}
-      {textRow(5)}
-      {pageRow(6)}
-      {textRow(7)}
-      {pageRow(8)}
-      {textRow(9)}
-      {/* Row 10: cover top */}
-      <rect x="0" y="10" width="1" height="1" fill={D}/>
-      <rect x="1" y="10" width="1" height="1" fill={H}/>
-      <rect x="2" y="10" width="7" height="1" fill={R}/>
-      <rect x="11" y="10" width="7" height="1" fill={R}/>
-      <rect x="18" y="10" width="1" height="1" fill={H}/>
-      <rect x="19" y="10" width="1" height="1" fill={D}/>
-      {/* Row 11: cover */}
-      <rect x="1" y="11" width="1" height="1" fill={D}/>
-      <rect x="2" y="11" width="7" height="1" fill={R}/>
-      <rect x="9" y="11" width="2" height="1" fill={D}/>
-      <rect x="11" y="11" width="7" height="1" fill={R}/>
-      <rect x="18" y="11" width="1" height="1" fill={D}/>
-      {/* Row 12: cover + clasp */}
-      <rect x="2" y="12" width="1" height="1" fill={D}/>
-      <rect x="3" y="12" width="5" height="1" fill={R}/>
-      <rect x="8" y="12" width="4" height="1" fill={G}/>
-      <rect x="12" y="12" width="5" height="1" fill={R}/>
-      <rect x="17" y="12" width="1" height="1" fill={D}/>
-      {/* Row 13: bottom outline */}
-      <rect x="3" y="13" width="14" height="1" fill={D}/>
-    </svg>
-  </BookWrapper>
-);
-
-const BookWrapper = styled.div`
-  height: 25%;
-  flex-shrink: 0;
+const Book = styled.div`
+  flex: 1;
+  min-height: 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  border: 2px solid white;
+  border-radius: 4px;
+  /* The edges of the pages underneath */
+  box-shadow:
+    0 4px 0 -1px black,
+    0 5px 0 0 #8a8a8a,
+    0 9px 0 -1px black,
+    0 10px 0 0 #4a4a4a;
+  margin-bottom: 10px;
 `;
 
-// Styled components
-const Container = styled.div`
-  width: 100%;
-  height: 80%;
+const Pages = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: ${({ $singlePage }) => ($singlePage ? "1fr" : "1fr 1fr")};
+`;
+
+const Page = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  padding-top: 30px;
+  gap: clamp(10px, 3.5vh, 36px);
+  min-width: 0;
+  padding: clamp(8px, 1.6vw, 24px) clamp(8px, 2vw, 32px);
+  transform-origin: ${({ $side }) => ($side === "left" ? "right" : "left")} center;
+
+  /* The spine: a double line down the middle */
+  ${({ $side }) =>
+    $side === "right" &&
+    css`
+      border-left: 6px double white;
+    `}
+
+  /* Pages turning forward swing in from the right, and back from the left */
+  ${({ $turn, $side }) =>
+    $turn &&
+    css`
+      --turn-from: ${$side === "left" ? "70deg" : "-70deg"};
+      animation: ${turnFromSpine} 260ms ease-out both;
+      animation-delay: ${($turn === "forward") === ($side === "left") ? "0ms" : "90ms"};
+    `}
 `;
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 5px;
-  height: 90%;
-  flex: 1;
-  width: 85%;
-
-  @media (max-width: 650px) {
-    grid-template-columns: 1fr;
-    grid-template-rows: repeat(4, 1fr);
-  }
-`;
-
-const LeftArrowButton = styled.button`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  color: grey;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  left: 10px;
-  box-sizing: border-box;
-  border-radius: 10px;
-  background-color: transparent;
-  border: 2px solid transparent;
-
-  &:hover {
-    border: 2px solid white;
-    color: white;
-  }
-`;
-
-const RightArrowButton = styled.button`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  color: grey;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  right: 10px;
-  background-color: transparent;
-  box-sizing: border-box;
-  border-radius: 10px;
-  border: 2px solid transparent;
-
-  &:hover {
-    border: 2px solid white;
-    color: white;
-  }
-`;
-
-const Option = styled.div`
+const Entry = styled.button`
   display: flex;
-  align-items: center;
-  justify-content: left;
-  height: 100%;
+  align-items: flex-start;
+  gap: clamp(6px, 1vw, 14px);
+  width: 100%;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: white;
+  text-align: left;
+  font-family: "Determination Mono", "Pixelify Sans", serif;
   cursor: pointer;
-  position: relative;
-  gap: 20px;
+
+  &:focus-visible {
+    outline: 2px dashed white;
+    outline-offset: 4px;
+  }
+`;
+
+const SoulSlot = styled.span`
+  flex-shrink: 0;
+  width: clamp(14px, 1.6vw, 22px);
+  height: clamp(12px, 1.4vw, 19px);
+  /* Sits level with the middle of the title's first line */
+  margin-top: calc((1.25em - clamp(12px, 1.4vw, 19px)) / 2);
+  font-size: clamp(1.05rem, 0.8rem + 0.85vw, 1.7rem);
+`;
+
+const EntryText = styled.span`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+`;
+
+const TitleLine = styled.span`
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: clamp(1.05rem, 0.8rem + 0.85vw, 1.7rem);
+  line-height: 1.25;
+`;
+
+const Title = styled.span`
+  min-width: 0;
+  overflow-wrap: anywhere;
+`;
+
+// The row of dots that leads from a title to its date, as in a book's contents
+const Leader = styled.span`
+  flex: 1;
+  min-width: 12px;
+  border-bottom: 3px dotted #8a8a8a;
+  transform: translateY(-0.2em);
+`;
+
+const Period = styled.span`
+  flex-shrink: 0;
+  font-size: 0.7em;
+  color: #cfcfcf;
+  white-space: nowrap;
+`;
+
+const Subtitle = styled.span`
+  font-size: clamp(0.72rem, 0.62rem + 0.35vw, 1rem);
+  color: #9a9a9a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+`;
+
+const Footer = styled.div`
+  display: grid;
+  grid-template-columns: ${({ $singlePage }) => ($singlePage ? "1fr" : "1fr 1fr")};
+  border-top: 2px solid white;
+`;
+
+// A page's number in the middle, with the arrow that turns it on its outside edge
+const FooterSide = styled.div`
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 2px 8px 4px;
+
+  & > :first-child {
+    justify-self: start;
+  }
+
+  & > :last-child {
+    justify-self: end;
+  }
+
+  ${({ $right }) =>
+    $right &&
+    css`
+      border-left: 6px double white;
+    `}
+`;
+
+const PageNumber = styled.span`
+  font-family: "Determination Mono", "Pixelify Sans", serif;
+  font-size: clamp(0.8rem, 0.7rem + 0.3vw, 1rem);
+  color: #9a9a9a;
+  white-space: nowrap;
+`;
+
+const TurnButton = styled.button`
+  padding: 2px 10px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: #9a9a9a;
+  font-size: clamp(1rem, 0.8rem + 0.6vw, 1.5rem);
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    border-color: white;
+    color: white;
+    outline: none;
+  }
+
+  &:disabled {
+    visibility: hidden;
+  }
 `;
 
 export default OptionSelector;

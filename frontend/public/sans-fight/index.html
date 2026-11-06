@@ -59,6 +59,8 @@
           if (!fighting || gameOver) return;
           gameOver = true;
           tell("gameover");
+          // Losing means hiring him, so here's his resume
+          window.saveResume();
           setTimeout(() => tell("died"), GAME_OVER_SECONDS * 1000);
         }
 
@@ -100,13 +102,14 @@
           return loadTexture.call(this, img, tiling, smooth, ...rest);
         };
 
-        // The ACT options are Roger's links, and sparing him gets you his resume. The game runs
-        // these by name when they're picked, and the page does the rest. The site passes the
-        // resume's address, since its file name changes with every build.
+        // The ACT options are Roger's links, and sparing him gets you his resume, as does dying.
+        // The game runs these by name when they're picked, and the page does the rest. The site
+        // passes the resume's address, since its file name changes with every build.
         const resume = new URLSearchParams(location.search).get("resume");
+        const RESUME_NAME = "RogerTruongResume.pdf";
         const LINKS = {
-          menuactresume: () => download(resume),
-          menuspare: () => download(resume),
+          menuactresume: saveResume,
+          menuspare: saveResume,
           menuactgithub: () => openTab("https://github.com/rogertruong7"),
           menuactlinkedin: () => openTab("https://www.linkedin.com/in/roger-truong/"),
         };
@@ -116,14 +119,39 @@
         }
 
         function download(url) {
-          if (!url) return;
           const link = document.createElement("a");
           link.href = url;
-          link.download = "RogerTruongResume.pdf";
+          link.download = RESUME_NAME;
           document.body.appendChild(link);
           link.click();
           link.remove();
         }
+
+        // Asks where to save it where the browser can (Chrome and Edge), and otherwise downloads
+        // it as usual. The picker has to open straight away, while the key press that got here
+        // still counts, so the file is only fetched once a spot has been picked.
+        async function saveResume() {
+          if (!resume) return;
+          if (window.showSaveFilePicker) {
+            try {
+              const handle = await window.showSaveFilePicker({
+                suggestedName: RESUME_NAME,
+                types: [{ description: "PDF", accept: { "application/pdf": [".pdf"] } }],
+              });
+              const file = await (await fetch(resume)).blob();
+              const writable = await handle.createWritable();
+              await writable.write(file);
+              await writable.close();
+              return;
+            } catch (error) {
+              // Closing the picker means they didn't want it
+              if (error.name === "AbortError") return;
+              console.warn("Couldn't ask where to save the resume, so downloading it instead", error);
+            }
+          }
+          download(resume);
+        }
+        window.saveResume = saveResume;
 
         const acts = cr.plugins_.Function.prototype.acts;
         const callFunction = acts.CallFunction;

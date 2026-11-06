@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { benches } from "./Static";
+import { seatAlong } from "./benchSeats.js";
 
 const FLOOR_Y = -8;
 // The seat is taller than the character's legs, so its feet dangle once it's up there
@@ -13,6 +14,9 @@ const REACH = 18;
 const CLEAR_IN_FRONT = 8.5;
 const CLEAR_AT_ENDS = 17;
 
+// Whoever was on the bench already scoots over at this speed to make room (benchSeats.js)
+const SCOOT_SPEED = 12;
+
 const WALK_SPEED = 100;
 const SIT_SECONDS = 0.7;
 const STAND_SECONDS = 0.5;
@@ -22,6 +26,8 @@ const FOOT_SWING_SPEED = 2.2;
 const SHIN_DEGREES = 72;
 
 const _toNextStop = new THREE.Vector3();
+// Where it sits on the bench, worked out each frame while seated
+const _seat = new THREE.Vector3();
 const _swing = new THREE.Quaternion();
 const _swingEuler = new THREE.Euler();
 
@@ -77,7 +83,25 @@ export function createSitState() {
     fromAngle: 0,
     // Tells a new click on the floor apart from the one that's already been dealt with
     clickTarget: null,
+    // When this character claimed its place on the bench, which sets who sits where
+    since: 0,
+    // How far along the bench from its middle it sits, and where it's scooting to
+    along: 0,
+    alongTarget: 0,
   };
+}
+
+// Keeps this character's place on its bench up to date with who else is on it. It gives up on
+// a bench that filled up before it got there, and stands up if two others were there first.
+export function shareBench(sit, me, claims) {
+  if (sit.phase === "none" || sit.phase === "standingUp") return;
+  const along = seatAlong({ ...me, bench: benches.indexOf(sit.bench), since: sit.since }, claims);
+  if (along === null) {
+    if (sit.phase === "approaching") sit.phase = "none";
+    else startStanding(sit);
+    return;
+  }
+  sit.alongTarget = along;
 }
 
 export function nearestBench(position) {
@@ -89,8 +113,8 @@ export function nearestBench(position) {
 }
 
 // A spot measured from the bench's middle: along its length, and out in the way it faces
-function benchPoint({ seat, facing }, along, out) {
-  return new THREE.Vector3(
+function benchPoint({ seat, facing }, along, out, target = new THREE.Vector3()) {
+  return target.set(
     seat[0] + facing[0] * out - facing[1] * along,
     FLOOR_Y,
     seat[1] + facing[1] * out + facing[0] * along
@@ -98,8 +122,8 @@ function benchPoint({ seat, facing }, along, out) {
 }
 
 // From beside or behind the bench, the walk goes around its nearer end rather than through it
-function routeToBench(bench, position) {
-  const standSpot = benchPoint(bench, 0, STAND_DISTANCE);
+function routeToBench(bench, position, seat) {
+  const standSpot = benchPoint(bench, seat, STAND_DISTANCE);
   const offsetX = position.x - bench.seat[0];
   const offsetZ = position.z - bench.seat[1];
   const out = offsetX * bench.facing[0] + offsetZ * bench.facing[1];
@@ -110,15 +134,19 @@ function routeToBench(bench, position) {
   return [benchPoint(bench, end, out), benchPoint(bench, end, STAND_DISTANCE), standSpot];
 }
 
-export function startSitting(sit, bench, clickTarget, position) {
+// along is where it'll sit, from seatAlong
+export function startSitting(sit, bench, clickTarget, position, along = 0) {
   sit.phase = "approaching";
   sit.bench = bench;
   sit.clickTarget = clickTarget;
-  sit.route = routeToBench(bench, position);
+  sit.since = Date.now();
+  sit.along = along;
+  sit.alongTarget = along;
+  sit.route = routeToBench(bench, position, along);
 }
 
 export function startStanding(sit) {
-  const standSpot = benchPoint(sit.bench, 0, STAND_DISTANCE);
+  const standSpot = benchPoint(sit.bench, sit.along, STAND_DISTANCE);
   sit.phase = "standingUp";
   sit.fromX = standSpot.x;
   sit.fromZ = standSpot.z;
@@ -137,8 +165,7 @@ function shortestTurn(from, to) {
 function placeOnBench(character, sit) {
   const { progress, bench } = sit;
   const moved = THREE.MathUtils.smoothstep(progress, 0, 1);
-  const seatX = bench.seat[0] + bench.facing[0] * SIT_DISTANCE;
-  const seatZ = bench.seat[1] + bench.facing[1] * SIT_DISTANCE;
+  const { x: seatX, z: seatZ } = benchPoint(bench, sit.along, SIT_DISTANCE, _seat);
 
   character.position.x = THREE.MathUtils.lerp(sit.fromX, seatX, moved);
   character.position.z = THREE.MathUtils.lerp(sit.fromZ, seatZ, moved);
@@ -186,10 +213,19 @@ export function updateSit(sit, character, delta, wantsToMove, walkTowards) {
     }
   }
 
+  if (sit.phase === "sittingDown" || sit.phase === "seated") {
+    // Scoots along to make room, or back to the middle once the other one has gone
+    const step = SCOOT_SPEED * delta;
+    const gap = sit.alongTarget - sit.along;
+    sit.along = Math.abs(gap) <= step ? sit.alongTarget : sit.along + Math.sign(gap) * step;
+  }
+
   if (sit.phase === "sittingDown") {
     sit.progress = Math.min(1, sit.progress + delta / SIT_SECONDS);
     placeOnBench(character, sit);
     if (sit.progress === 1) sit.phase = "seated";
+  } else if (sit.phase === "seated") {
+    placeOnBench(character, sit);
   } else if (sit.phase === "standingUp") {
     sit.progress = Math.max(0, sit.progress - delta / STAND_SECONDS);
     placeOnBench(character, sit);

@@ -4,6 +4,7 @@ import resume from "../assets/RogerTruongResume.pdf";
 import MuteButton from "./MuteButton.jsx";
 import ContactPopup from "./ContactPopup.jsx";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
+import PlayerCount from "./PlayerCount.jsx";
 
 // Styled components for Menu and Button
 const MenuContainer = styled.div`
@@ -46,7 +47,7 @@ const SmallMenuContainer = styled.nav`
     animation: ${dropIn} 180ms ease-out both;
   }
 
-  ${[1, 2, 3, 4, 5].map(
+  ${[1, 2, 3, 4, 5, 6].map(
     (n) => css`
       & > :nth-child(${n}) {
         animation-delay: ${(n - 1) * 40}ms;
@@ -138,7 +139,7 @@ const Links = ({ onPick }) =>
     </a>
   ));
 
-const Menu = () => {
+const Menu = ({ room }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [lessThan1100, setLessThan1100] = useState(false);
@@ -199,6 +200,7 @@ const Menu = () => {
       )}
       {lessThan1100 && isMenuOpen && (
         <SmallMenuContainer ref={menuRef} aria-label="Links">
+          {room && <PlayerCount room={room} where="menu" />}
           <Links onPick={() => setIsMenuOpen(false)} />
           <DefaultButton
             onClick={() => {

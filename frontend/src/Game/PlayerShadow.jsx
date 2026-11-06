@@ -56,7 +56,8 @@ function shadowMaterial(floorHeight) {
   return material;
 }
 
-function PlayerShadow({ characterRef, lakeRef }) {
+// look is only there to rebuild the shadow when the character's look adds or takes away pieces
+function PlayerShadow({ characterRef, lakeRef, look }) {
   const floorHeight = useMemo(() => ({ value: FLOOR_HEIGHT }), []);
   const material = useMemo(() => shadowMaterial(floorHeight), [floorHeight]);
 
@@ -70,13 +71,17 @@ function PlayerShadow({ characterRef, lakeRef }) {
     material.opacity = SHADOW_OPACITY * (1 - lake.reflection);
   });
 
+  useEffect(() => () => material.dispose(), [material]);
+
   useEffect(() => {
     const character = characterRef.current;
     if (!character) return undefined;
 
     const bodyParts = [];
+    const pieces = [];
     character.traverse((node) => {
       if (node.isSkinnedMesh) bodyParts.push(node);
+      else if (node.isMesh && node.userData.lookPiece) pieces.push(node);
     });
 
     const shadows = bodyParts.map((part) => {
@@ -85,17 +90,26 @@ function PlayerShadow({ characterRef, lakeRef }) {
       shadow.position.copy(part.position);
       shadow.quaternion.copy(part.quaternion);
       shadow.scale.copy(part.scale);
+      // Shares the hairstyle's morph, so the shadow has the same hair
+      if (part.morphTargetInfluences) shadow.morphTargetInfluences = part.morphTargetInfluences;
       shadow.frustumCulled = false;
       shadow.layers.set(SHADOW_LAYER);
       part.parent.add(shadow);
       return shadow;
     });
+    // Hair and hats ride on a bone, so their shadows go inside them and move with them
+    pieces.forEach((piece) => {
+      const shadow = new THREE.Mesh(piece.geometry, material);
+      shadow.frustumCulled = false;
+      shadow.layers.set(SHADOW_LAYER);
+      piece.add(shadow);
+      shadows.push(shadow);
+    });
 
     return () => {
       shadows.forEach((shadow) => shadow.removeFromParent());
-      material.dispose();
     };
-  }, [characterRef, material]);
+  }, [characterRef, material, look]);
 
   return null;
 }

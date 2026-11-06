@@ -178,7 +178,31 @@ HTML elements positioned absolutely over the 3D canvas.
 | BackButton | 103 | Returns to game view (scene 0). Only visible on content pages. |
 | ResetButton | 103 | Resets character position and returns to game view. |
 | HelpButton | 103 | Opens HelpPopup. |
+| WardrobeButton | 103 | The shirt button above the help button. Opens Wardrobe. |
+| Wardrobe | top layer | Character customiser on `Modal`, with a live 3D preview (`WardrobePreview.jsx`) and tabs for body, hair, outfit and extras. Saving stores the look in localStorage. |
+| PlayerCount | 103 | How many people are in this lobby, and which lobby past the first, in the top left. Below 820px it moves into the hamburger menu. |
 | Menu | 106 | Top-right nav bar (GitHub, LinkedIn, Download CV). Collapses to hamburger menu below 1100px. |
+
+## Character Looks (`src/Game/look/`)
+
+Every character on screen, including the player's own and the wardrobe preview, is its own copy of `cloudme.glb` made by `useCharacterModel`. `dressCharacter` gives each copy its own materials and adds the pieces its look needs.
+
+- **Looks:** `lookOptions.js` lists every choice. A look is a small object of ids and hex colours, and `sanitizeLook` keeps only listed values, so anything from storage or the network is safe to use.
+- **Base model:** the spiky hair is shrink-wrapped onto an ellipsoid inside the head as a morph target. Every hairstyle but "spiky" turns the morph on, which leaves a close head of hair to build on.
+- **Recolouring:** `lookMaterial.js` keeps the model's texture and repaints parts of it in the shader. The hair is the right half of the texture, the irises are the only blue, and skin is matched by colour. Outfits are painted on the body from where each vertex sits in the rest pose and whether it belongs to an arm or a leg.
+- **Pieces:** `pieces.js` builds the extra hair, skirts, hats and so on from simple shapes, attached to the head or hips bone. `PlayerShadow` copies them into the shadow.
+- **Shared uniforms:** the look material also carries the left arm's draw-in-front trick for emotes, and `uGold`, which `SuperSaiyan.jsx` turns up after beating Sans.
+
+## Multiplayer (`src/Multiplayer/`)
+
+Up to 10 visitors share a town and see each other walking around. Anyone past that goes into another copy of the town, called a lobby.
+
+- **Transport:** with `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` set, each lobby is a Supabase Realtime channel: `town`, then `town-2`, `town-3` and so on. Presence holds each player's look and arrival time, and broadcast messages carry positions. Without them, tabs on the same device find each other through a `BroadcastChannel` instead (`transports.js`).
+- **Lobbies:** `room.js` joins `town` first. Everyone present is sorted by when they arrived in that lobby, and the first ten get a place. Every client works out the same ten. Anyone else moves on to the next lobby and tries again. The arrival time restarts in each lobby, so nobody already in one loses their place to someone moving in. Players stay in their lobby even if an earlier one frees up, and only after `MAX_LOBBIES` does a visitor wait for a place instead.
+- **Jumps:** a hop is over too quickly to send smoothly, so the character sends its height without the hop plus a count of its jumps. Everyone else plays the hop themselves when the count goes up.
+- **Benches:** two people can share a bench. Each sitter sends which bench they're on and when they claimed it, and `benchSeats.js` sorts each bench's sitters the same way on every client. Someone on their own sits in the middle. With two, the first scoots to one end and the second takes the other. A bench with two on it doesn't offer "Sit down", and if three claim one at once, the last stands back up.
+- **Sending:** `Character.jsx` writes its position, facing, walking, emote, sitting and whether it's off in the upside-down world into a ref each frame. The room sends it every 150ms while it changes, and every 3 seconds otherwise.
+- **Drawing:** `RemotePlayers.jsx` draws each other player 220ms in the past, moving between the snapshots either side of that moment. It plays their walk, emotes and sitting pose with the same code as the player's own character.
 
 ## Routing (`App.jsx`)
 

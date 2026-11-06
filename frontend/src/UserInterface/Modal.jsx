@@ -22,6 +22,8 @@ const Modal = ({
   tagline,
   actionLabel,
   onClose,
+  // Escape and the backdrop go here when they shouldn't do the same as the action button
+  onCancel = onClose,
   closeOnBackdrop = false,
   wide = false,
   footer,
@@ -42,12 +44,12 @@ const Modal = ({
       aria-labelledby="modal-title"
       onCancel={(e) => {
         e.preventDefault();
-        onClose();
+        onCancel();
       }}
       // Otherwise the game hears these keys and walks the player around behind the popup.
       onKeyDown={(e) => e.stopPropagation()}
       onMouseDown={(e) => {
-        if (closeOnBackdrop && e.target === e.currentTarget) onClose();
+        if (closeOnBackdrop && e.target === e.currentTarget) onCancel();
       }}
     >
       <Card>

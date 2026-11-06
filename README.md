@@ -1,6 +1,6 @@
 # Game Portfolio
 
-A portfolio website styled as a 3D isometric pixel-art game. Navigate a character through a small town using keyboard or mouse controls - enter buildings to explore portfolio sections like About Me, Projects, Experiences, and Skills.
+A portfolio website styled as a 3D isometric pixel-art game. Navigate a character through a small town using keyboard or mouse controls - enter buildings to explore portfolio sections like About Me, Projects, Experiences, and Skills. Dress your character up in the wardrobe and walk around with up to 9 other visitors. When a town is full, the next visitors get a town of their own.
 
 Built with React 18, react-three-fiber, and styled-components. Deployed on Vercel.
 
@@ -12,6 +12,7 @@ Built with React 18, react-three-fiber, and styled-components. Deployed on Verce
 - **Content:** MDX pages plus JSON metadata in `frontend/src/content`
 - **Demo films:** HyperFrames click-through videos, see `videos/README.md`
 - **Routing:** react-router-dom v7
+- **Multiplayer:** Supabase Realtime (presence and broadcast), 10 visitors per town, with more towns opening as each fills
 - **Fonts:** Pixelify Sans (game UI), Zen Kaku Gothic New (body text)
 - **Deployment:** Vercel with SPA rewrites
 

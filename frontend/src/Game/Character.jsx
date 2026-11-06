@@ -1,17 +1,18 @@
 import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import { benchEdges, invisWalls, walkArea } from "./Static";
+import { benchEdges, benches, invisWalls, walkArea } from "./Static";
 import { createPathfinder } from "./pathfinding";
-import { applySitPose, findSitBones, nearestBench, updateSit } from "./sitting";
+import { applySitPose, findSitBones, nearestBench, shareBench, updateSit } from "./sitting";
+import { benchIsFull } from "./benchSeats.js";
 import { updateDoorWalk } from "./doorWalk";
 import { applyEmotePose, findEmoteBones, updateEmote } from "./emotes";
-import { applyLakePose, followGround, updateLake } from "./lake";
+import { applyLakePose, followGround, isJumping, updateLake } from "./lake";
 import { isBlocked, moveAndSlide } from "./wallSliding";
 import { WALK_PLAYBACK, createWalkFeel, updateWalkFeel } from "./walkFeel";
 import { setDown, updateJump } from "./jumping";
 import { readStore } from "../Helpers/storage.js";
+import { useCharacterModel } from "./look/useCharacterModel.js";
 
 const WALLS = [
   ...invisWalls.map((wall) => ({
@@ -55,10 +56,13 @@ const Character = React.forwardRef(
       setFlipped,
       emoteRef,
       jumpRef,
+      look,
+      netStateRef,
+      roomRef,
     },
     ref
   ) => {
-    const { scene, animations } = useGLTF("/models/cloudme.glb");
+    const { model: scene, animations, dress } = useCharacterModel(look);
     const [arrowMoving, setArrowMoving] = useState(false);
     const mixer = useRef();
     const walkAction = useRef(null);
@@ -68,7 +72,10 @@ const Character = React.forwardRef(
     );
     const sitBones = useMemo(() => findSitBones(scene), [scene]);
     const headBone = useMemo(() => scene.getObjectByName("Head_210_015"), [scene]);
-    const emoteBones = useMemo(() => findEmoteBones(scene), [scene]);
+    const emoteBones = useMemo(
+      () => findEmoteBones(scene, dress.uniforms.uLeftArmInFront),
+      [scene, dress]
+    );
     const clickRoute = useRef({ target: null, stops: [], next: 0 });
 
     function clickToMove(delta) {
@@ -283,6 +290,9 @@ const Character = React.forwardRef(
 
       const jump = jumpRef.current;
       setDown(jump, ref.current);
+      // Others in the lobby on a bench or heading for one
+      const room = roomRef?.current;
+      const benchClaims = room ? room.benchClaims() : [];
       const moveDelta = Math.min(delta, MAX_FRAME_DELTA);
       let finalDirection = keyboardMovement();
       // The picture is upside down, so going up the screen means walking back towards the camera
@@ -322,7 +332,8 @@ const Character = React.forwardRef(
       } else {
         const wantsToMove =
           finalDirection.lengthSq() > 0 || targetPosition !== sit.clickTarget;
-        updateSit(sit, ref.current, delta, wantsToMove, updateRotation);
+        shareBench(sit, { id: room?.id ?? "me" }, benchClaims);
+        if (sit.phase !== "none") updateSit(sit, ref.current, delta, wantsToMove, updateRotation);
       }
 
       // Only a hop from the ground, never while sitting, in the pond or walking through a door
@@ -332,7 +343,9 @@ const Character = React.forwardRef(
       if (ref.current !== undefined) {
         setPlayerPos(ref.current.position);
 
-        const near = nearestBench(ref.current.position);
+        // A bench two others are on can't be sat on, so it doesn't offer
+        let near = nearestBench(ref.current.position);
+        if (near && benchIsFull(benches.indexOf(near), benchClaims)) near = null;
         if (near !== sit.near) {
           sit.near = near;
           setNearBench(near);
@@ -346,6 +359,27 @@ const Character = React.forwardRef(
       setSitPhase(sit.phase);
       setLakePhase(lake.phase);
       setFlipped(lake.flipped);
+
+      // What everyone else in the town sees of this character (Multiplayer/room.js)
+      if (netStateRef && ref.current) {
+        const net = netStateRef.current;
+        net.ready = true;
+        net.x = ref.current.position.x;
+        // Without the hop, which everyone plays for themselves when they hear about it, as it's
+        // over too quickly to send smoothly
+        net.y = ref.current.position.y - jump.height;
+        if (jump.airborne && !net.airborne) net.jumps = (net.jumps ?? 0) + 1;
+        net.airborne = jump.airborne;
+        net.z = ref.current.position.z;
+        net.ry = ref.current.rotation.y;
+        net.moving = moving;
+        net.emote = emoteRef.current.emote?.id ?? null;
+        net.sit = sit.phase === "none" || sit.phase === "approaching" ? 0 : sit.progress;
+        net.bench = sit.phase === "none" ? -1 : benches.indexOf(sit.bench);
+        net.benchSince = sit.since;
+        // Off in the upside-down world, or on the way there
+        net.away = lake.flipped || isJumping(lake.phase) || lake.phase === "fighting";
+      }
     });
 
     return (

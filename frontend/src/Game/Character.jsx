@@ -9,6 +9,7 @@ import { updateDoorWalk } from "./doorWalk";
 import { applyEmotePose, findEmoteBones, updateEmote } from "./emotes";
 import { applyLakePose, followGround, updateLake } from "./lake";
 import { isBlocked, moveAndSlide } from "./wallSliding";
+import { createWalkFeel, updateWalkFeel } from "./walkFeel";
 import { readStore } from "../Helpers/storage.js";
 
 const WALLS = [
@@ -58,6 +59,11 @@ const Character = React.forwardRef(
     const { scene, animations } = useGLTF("/models/cloudme.glb");
     const [arrowMoving, setArrowMoving] = useState(false);
     const mixer = useRef();
+    const walkAction = useRef(null);
+    const walkFeel = useMemo(
+      () => (animations.length > 0 ? createWalkFeel(scene, animations[0]) : null),
+      [scene, animations]
+    );
     const sitBones = useMemo(() => findSitBones(scene), [scene]);
     const headBone = useMemo(() => scene.getObjectByName("Head_210_015"), [scene]);
     const emoteBones = useMemo(() => findEmoteBones(scene), [scene]);
@@ -146,8 +152,8 @@ const Character = React.forwardRef(
           angleDifference += 2 * Math.PI;
         }
 
-        // Smoothly interpolate the character's current rotation to the target angle
-        const smoothFactor = 13 * delta; // Adjust this value for rotation speed
+        // Eases towards the target angle, without overshooting it on a slow frame
+        const smoothFactor = 1 - Math.exp(-13 * delta);
         const newAngle = currentAngle + angleDifference * smoothFactor;
         // Apply the new angle back, removing the offset adjustment
         ref.current.rotation.y = newAngle - Math.PI / 4;
@@ -230,8 +236,8 @@ const Character = React.forwardRef(
     useEffect(() => {
       if (animations.length > 0) {
         mixer.current = new THREE.AnimationMixer(scene);
-        const action = mixer.current.clipAction(animations[0]);
-        action.play();
+        walkAction.current = mixer.current.clipAction(animations[0]);
+        walkAction.current.play();
       }
 
       scene.traverse((child) => {
@@ -255,7 +261,17 @@ const Character = React.forwardRef(
           : sit.phase === "approaching");
 
       if (mixer.current) {
-        mixer.current.update(moving ? delta : delta * IDLE_ANIMATION_SPEED);
+        // The clip speeds up and slows down with the walk instead of snapping between speeds
+        const weight = walkFeel ? walkFeel.weight : moving ? 1 : 0;
+        mixer.current.update(delta * THREE.MathUtils.lerp(IDLE_ANIMATION_SPEED, 1, weight));
+      }
+      if (walkFeel && walkAction.current && ref.current) {
+        updateWalkFeel(walkFeel, {
+          moving,
+          delta,
+          clipTime: walkAction.current.time,
+          yaw: ref.current.rotation.y,
+        });
       }
       applySitPose(sit, sitBones, clock.elapsedTime);
       applyLakePose(lake, headBone);

@@ -109,6 +109,16 @@ const WinCard = styled.div`
   }
 `;
 
+const ResumeLink = styled.a`
+  ${chromeButton}
+  position: relative;
+  padding: 10px 22px;
+  color: #14235a;
+  font-size: clamp(0.95rem, 0.8rem + 0.5vw, 1.2rem);
+  font-weight: 700;
+  text-decoration: none;
+`;
+
 // Stops clicks reaching the town and the buttons over it until the fight has gone
 const ClickBlocker = styled.div`
   position: fixed;
@@ -238,11 +248,16 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
     if (!won) return;
     winCardRef.current?.focus();
     const finish = () => end("won");
+    // Enter or Space on the resume link downloads it instead of leaving
+    const onKeyDown = (event) => {
+      if (event.target.closest?.("a")) return;
+      finish();
+    };
     const timer = setTimeout(finish, WIN_SECONDS * 1000);
-    window.addEventListener("keydown", finish);
+    window.addEventListener("keydown", onKeyDown);
     return () => {
       clearTimeout(timer);
-      window.removeEventListener("keydown", finish);
+      window.removeEventListener("keydown", onKeyDown);
     };
   }, [won, end]);
 
@@ -255,7 +270,16 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
         {won && !ended && (
           <WinCard ref={winCardRef} tabIndex={-1} role="status" onClick={() => end("won")}>
             <h2>YOU WON!</h2>
-            <p>* You earned 0 EXP and one new hire.</p>
+            <p>* You earned 0 EXP. No hire this time.</p>
+            <p>* But my resume&apos;s still worth a look.</p>
+            <ResumeLink
+              href={resume}
+              download="RogerTruongResume.pdf"
+              onClick={(event) => event.stopPropagation()}
+            >
+              Download resume
+              <ChromeFrame />
+            </ResumeLink>
             <small>{TOUCH ? "Tap to go back" : "Press any key to go back"}</small>
           </WinCard>
         )}

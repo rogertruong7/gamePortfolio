@@ -45,6 +45,7 @@ test("a state message is read when it's well formed", () => {
     jumps: 3,
     bench: -1,
     since: 0,
+    gold: false,
   });
 });
 
@@ -97,4 +98,10 @@ test("a bench claim is read, and a nonsense bench means none", () => {
   assert.equal(readState({ ...base, b: 1.5 }).bench, -1);
   assert.equal(readState({ ...base, b: -3 }).bench, -1);
   assert.equal(readState({ ...base, b: 9999 }).bench, -1);
+});
+
+test("beating Sans comes through as gold", () => {
+  const base = { id: "a", x: 0, y: 0, z: 0, ry: 0, s: 0 };
+  assert.equal(readState({ ...base, g: 1 }).gold, true);
+  assert.equal(readState({ ...base, g: "1" }).gold, false);
 });

@@ -284,6 +284,11 @@ function MainGame({
     }
   }
 
+  // Everyone else in the lobby sees the flame too
+  useEffect(() => {
+    if (netStateRef) netStateRef.current.gold = beatSans;
+  }, [beatSans, netStateRef]);
+
   useEffect(() => {
     setIsPlunging(lakePhase === "sinking");
   }, [lakePhase, setIsPlunging]);

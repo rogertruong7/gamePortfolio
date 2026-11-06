@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import PlayerShadow from "./PlayerShadow.jsx";
+import SuperSaiyan from "./SuperSaiyan.jsx";
 import { useCharacterModel } from "./look/useCharacterModel.js";
 import { EMOTES, applyEmotePose, createEmoteState, findEmoteBones, startEmote, stopEmote } from "./emotes.js";
 import { SCOOT_SPEED, applySitPose, findSitBones, seatPoint } from "./sitting.js";
@@ -77,6 +78,8 @@ function RemotePlayer({ id, look, roomRef, lakeRef, localState }) {
   const emote = useRef(createEmoteState());
   const sit = useRef({ phase: "none", progress: 0 });
   const jump = useRef(createJumpState());
+  // Beating Sans lasts until they reload, so this only ever turns on
+  const [gold, setGold] = useState(false);
   // How far along its bench this player is drawn, while seated
   const seatedAlong = useRef(null);
   // The jump count last seen, or null until the first snapshot so old jumps aren't replayed
@@ -98,6 +101,7 @@ function RemotePlayer({ id, look, roomRef, lakeRef, localState }) {
 
     character.position.copy(now.position);
     character.rotation.y = now.ry;
+    if (now.state.gold && !gold) setGold(true);
     const { moving } = now.state;
 
     // Once seated, where they sit comes from the same rule every player uses (benchSeats.js), not
@@ -158,6 +162,7 @@ function RemotePlayer({ id, look, roomRef, lakeRef, localState }) {
     <>
       <primitive ref={ref} object={model} scale={[SCALE, SCALE, SCALE]} visible={false} />
       <PlayerShadow characterRef={ref} lakeRef={lakeRef} look={look} />
+      {gold && <SuperSaiyan characterRef={ref} />}
     </>
   );
 }

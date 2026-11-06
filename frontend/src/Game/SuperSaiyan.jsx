@@ -85,6 +85,8 @@ function SuperSaiyan({ characterRef }) {
     if (!REDUCED_MOTION) auraMaterial.uniforms.uTime.value += delta;
 
     const aura = auraRef.current;
+    // Another player can be out of sight, off in the upside-down world
+    aura.visible = characterRef.current.visible;
     const feet = characterRef.current.position;
     _toCamera.subVectors(camera.position, feet).normalize().multiplyScalar(AURA_TOWARDS_CAMERA);
     aura.position.copy(feet).add(_toCamera);

@@ -49,6 +49,8 @@ export function readState(message) {
     // The bench they're sitting on or heading for, and when they claimed it
     bench: Number.isInteger(message.b) && message.b >= 0 && message.b < MAX_BENCH ? message.b : -1,
     since: finite(message.bt) ? message.bt : 0,
+    // Beat Sans, so has the gold hair and the flame
+    gold: message.g === 1,
   };
 }
 
@@ -130,6 +132,7 @@ export function joinRoom({ look, localState, onChange }) {
       a: state.away ? 1 : 0,
       j: state.jumps ?? 0,
       b: state.bench ?? -1,
+      g: state.gold ? 1 : 0,
       bt: state.benchSince ?? 0,
     };
     const now = performance.now();

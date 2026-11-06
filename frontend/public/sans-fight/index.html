@@ -59,8 +59,10 @@
           if (!fighting || gameOver) return;
           gameOver = true;
           tell("gameover");
-          // Losing means hiring him, so here's his resume
-          window.saveResume();
+          // Losing means hiring him, so the offer's already written, and here's his resume. Opening
+          // the tab uses up the key press, so the resume downloads rather than asking where to go.
+          window.emailOffer();
+          window.downloadResume();
           setTimeout(() => tell("died"), GAME_OVER_SECONDS * 1000);
         }
 
@@ -102,7 +104,8 @@
           return loadTexture.call(this, img, tiling, smooth, ...rest);
         };
 
-        // The ACT options are Roger's links, and sparing him gets you his resume, as does dying.
+        // The ACT options are Roger's links and a way to email him, sparing him gets you his
+        // resume, and dying has you email him a job offer.
         // The game runs these by name when they're picked, and the page does the rest. The site
         // passes the resume's address, since its file name changes with every build.
         const resume = new URLSearchParams(location.search).get("resume");
@@ -112,6 +115,7 @@
           menuspare: saveResume,
           menuactgithub: () => openTab("https://github.com/rogertruong7"),
           menuactlinkedin: () => openTab("https://www.linkedin.com/in/roger-truong/"),
+          menuactcontact: () => emailOffer(),
         };
 
         function openTab(url) {
@@ -151,7 +155,22 @@
           }
           download(resume);
         }
-        window.saveResume = saveResume;
+
+        const OFFER = {
+          to: "rogertruong7@gmail.com",
+          subject: "I lost, so you're hired",
+          body: "Hi Roger,\n\nI lost the boss fight, so as agreed, you're hired.\n\nWhen can you start?",
+        };
+
+        // Opens the job offer, already written, as a Gmail draft in a new tab. A mailto link only
+        // opens a blank tab for anyone without an email app set up in their browser. The browser
+        // allows the tab because a key was just pressed.
+        function emailOffer() {
+          const draft = new URLSearchParams({ view: "cm", fs: "1", to: OFFER.to, su: OFFER.subject, body: OFFER.body });
+          openTab(`https://mail.google.com/mail/?${draft}`);
+        }
+        window.emailOffer = emailOffer;
+        window.downloadResume = () => resume && download(resume);
 
         const acts = cr.plugins_.Function.prototype.acts;
         const callFunction = acts.CallFunction;

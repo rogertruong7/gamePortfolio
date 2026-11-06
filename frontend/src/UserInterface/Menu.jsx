@@ -45,7 +45,7 @@ const SmallMenuContainer = styled.nav`
     animation: ${dropIn} 180ms ease-out both;
   }
 
-  ${[1, 2, 3, 4].map(
+  ${[1, 2, 3, 4, 5].map(
     (n) => css`
       & > :nth-child(${n}) {
         animation-delay: ${(n - 1) * 40}ms;
@@ -118,6 +118,13 @@ const LINKS = [
   { label: "github", href: "https://github.com/rogertruong7", external: true },
   { label: "linkedin", href: "https://www.linkedin.com/in/roger-truong/", external: true },
   { label: "download cv", href: resume, download: "RogerTruongResume.pdf" },
+  // A blank Gmail draft to Roger. A mailto link only opens a blank tab for anyone without an
+  // email app set up in their browser.
+  {
+    label: "email",
+    href: "https://mail.google.com/mail/?view=cm&fs=1&to=rogertruong7@gmail.com",
+    external: true,
+  },
 ];
 
 const Links = ({ onPick }) =>

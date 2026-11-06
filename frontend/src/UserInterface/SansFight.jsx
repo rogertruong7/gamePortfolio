@@ -20,17 +20,22 @@ const PROGRESS_CHECK_MS = 250;
 // it doesn't matter if it's a little out.
 const FIGHT_BYTES = 3230000;
 // Downloading only fills the bar this far. After that the game still has to get ready, mostly
-// decoding its music, which takes a few seconds more the first time. It moves on a little more
-// once the game has started up, and the bar keeps breathing until the battle begins.
+// decoding its music, which takes a few seconds more the first time. Starting up counts as
+// progress too, so a game that's still getting somewhere isn't given up on.
 const DOWNLOADED_SHARE = 0.85;
 const STARTED_UP_SHARE = 0.92;
+// While it gets ready, the bar creeps on towards this over a few seconds rather than sitting still.
+// Once the battle starts it fills up, and stays full for a moment before the fight shows.
+const GETTING_READY_SHARE = 0.97;
+const GETTING_READY_SECONDS = 8;
+const FULL_BAR_MS = 400;
 // Long enough to read the line saying it didn't work
 const FAILED_MS = 2500;
 const FAILED_LINE = "But nothing happened.";
 // How long the game can keep the player waiting after the dive before the screen goes dark to say
 // it's on its way. Short enough that it doesn't look stuck, long enough not to flash up and vanish.
 const STALL_DELAY_MS = 300;
-const WAITING_LINE = "Something strange is happening...";
+const WAITING_LINE = "Roger is making his way here...";
 const TYPING_DELAY = 45;
 
 // Fades as a whole, button included, so the town shows through while the fight comes in and goes away
@@ -77,6 +82,36 @@ const Line = styled.div`
   gap: 0.6em;
 `;
 
+const spin = keyframes`
+  to {
+    transform: rotate(360deg);
+  }
+`;
+
+// Eight square dots in a ring, turning a dot at a time so it stays blocky like the bar
+const Spinner = styled.div`
+  position: relative;
+  width: 1.6em;
+  height: 1.6em;
+  animation: ${spin} 0.8s steps(8) infinite;
+
+  & > span {
+    position: absolute;
+    top: 0;
+    left: calc(50% - 0.12em);
+    width: 0.24em;
+    height: 0.24em;
+    background: white;
+    transform-origin: 0.12em 0.8em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
+
+const SPINNER_DOTS = Array.from({ length: 8 }, (_, i) => i);
+
 const pulse = keyframes`
   from {
     opacity: 0.25;
@@ -98,10 +133,11 @@ const LoadBar = styled.div`
 const LoadFill = styled.div`
   height: 100%;
   background: white;
-  transition: width 0.25s linear;
+  transition: width
+    ${({ $creeping }) =>
+      $creeping ? `${GETTING_READY_SECONDS}s cubic-bezier(0.2, 0.7, 0.3, 1)` : "0.25s linear"};
 
-  /* Breathes while there's no amount to show: before anything has arrived, and once it's all
-     downloaded and the game is getting ready */
+  /* Breathes while there's no amount to show, before anything has arrived */
   &[data-unknown] {
     animation: ${pulse} 0.9s ease-in-out infinite alternate;
   }
@@ -235,7 +271,7 @@ const RunAway = styled.button`
 // The game runs from public/sans-fight in a frame of its own. It's mounted as the jump starts, so
 // it can load during the dive, and waits paused until ready is true. Its page says when the battle
 // has started, when the player has died, and how it ended. If it isn't ready by the time the dive
-// ends, the screen goes dark with a line and a loading bar until it is. onEnd runs as it starts fading away, and onClosed once it has,
+// ends, the screen goes dark with a spinner, a line and a loading bar until it is. onEnd runs as it starts fading away, and onClosed once it has,
 // with "died", "won", "fled" or "failed".
 const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
   const frameRef = useRef(null);
@@ -249,6 +285,8 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
   const [shown, setShown] = useState(false);
   const [stalled, setStalled] = useState(false);
   const [progress, setProgress] = useState(null);
+  // The loading screen stays up a moment after the battle starts, so the full bar can be seen
+  const [revealed, setRevealed] = useState(false);
   const [failed, setFailed] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
@@ -347,6 +385,16 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
     };
   }, [end]);
 
+  useEffect(() => {
+    if (!loaded) return undefined;
+    const timer = setTimeout(() => setRevealed(true), FULL_BAR_MS);
+    return () => clearTimeout(timer);
+  }, [loaded]);
+
+  // What the bar shows: full once the battle has started, and creeping on while it gets ready
+  const gettingReady = progress !== null && progress >= DOWNLOADED_SHARE;
+  const barShows = loaded ? 1 : gettingReady ? GETTING_READY_SHARE : progress;
+
   const covering = (shown || stalled) && !ended;
 
   // Until the game has the keyboard, Escape arrives here
@@ -404,7 +452,17 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
           <ReturnHint>{TOUCH ? "* Tap Return to go back" : "* Press Esc to return"}</ReturnHint>
         )}
         {stalled && (
-          <Waiting $hidden={loaded} role="status">
+          <Waiting $hidden={revealed} role="status">
+            {!failed && (
+              <Spinner aria-hidden="true">
+                {SPINNER_DOTS.map((dot) => (
+                  <span
+                    key={dot}
+                    style={{ transform: `rotate(${dot * 45}deg)`, opacity: 0.3 + dot * 0.1 }}
+                  />
+                ))}
+              </Spinner>
+            )}
             <Line>
               <span aria-hidden="true">*</span>
               {failed ? (
@@ -426,13 +484,12 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
                 aria-label="Loading the fight"
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-valuenow={progress === null ? undefined : Math.round(progress * 100)}
+                aria-valuenow={barShows === null ? undefined : Math.round(barShows * 100)}
               >
                 <LoadFill
-                  data-unknown={
-                    progress === null || progress >= DOWNLOADED_SHARE ? "" : undefined
-                  }
-                  style={{ width: progress === null ? "100%" : `${progress * 100}%` }}
+                  $creeping={gettingReady && !loaded}
+                  data-unknown={barShows === null ? "" : undefined}
+                  style={{ width: barShows === null ? "100%" : `${barShows * 100}%` }}
                 />
               </LoadBar>
             )}

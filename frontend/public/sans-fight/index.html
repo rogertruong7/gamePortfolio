@@ -41,55 +41,7 @@
         window.startFight = function () {
           waiting = false;
           cr_setSuspended(false);
-          readOpeningLines();
         };
-
-        // Sans's opening lines each wait for Z before the next, which left players stuck on the
-        // first one. Each is given time to be read and then moved on, until the attack starts.
-        const OPENING_LINES = 3;
-        const READ_SECONDS_PER_CHARACTER = 0.045;
-        const MIN_READ_SECONDS = 1.4;
-        const Z_KEY = 90;
-
-        function sansSpeech() {
-          const type = cr_getC2Runtime().types_by_index.find(
-            (t) => t.instances[0]?.instance_vars?.[1] === "SansSpeak"
-          );
-          return type?.instances[0] ?? null;
-        }
-
-        function pressZ() {
-          jQuery(document).trigger(jQuery.Event("keydown", { which: Z_KEY }));
-          setTimeout(() => jQuery(document).trigger(jQuery.Event("keyup", { which: Z_KEY })), 60);
-        }
-
-        function readOpeningLines() {
-          let advanced = 0;
-          let line = null;
-          let typedAt = 0;
-          const timer = setInterval(() => {
-            if (gameOver || advanced >= OPENING_LINES) {
-              clearInterval(timer);
-              return;
-            }
-            const speech = sansSpeech();
-            if (!speech || !speech.visible) return;
-            // The line in full, and how many of its letters have been typed so far
-            const full = speech.instance_vars[2];
-            const typed = speech.instance_vars[5];
-            if (full !== line) {
-              line = full;
-              typedAt = 0;
-            }
-            if (typed < full.length) return;
-            if (!typedAt) typedAt = performance.now();
-            const readSeconds = Math.max(MIN_READ_SECONDS, full.length * READ_SECONDS_PER_CHARACTER);
-            if (performance.now() - typedAt < readSeconds * 1000) return;
-            pressZ();
-            advanced += 1;
-            line = null;
-          }, 100);
-        }
 
         document.addEventListener("visibilitychange", () => {
           cr_setSuspended(document.hidden || waiting);

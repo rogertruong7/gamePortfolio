@@ -25,6 +25,7 @@ import { readStore } from "./Helpers/storage.js";
 import { prefetchSansFight } from "./Helpers/prefetchSansFight.js";
 import { loadLook, sanitizeLook, saveLook } from "./Game/look/lookOptions.js";
 import { useRoom } from "./Multiplayer/useRoom.js";
+import { useBenchGame } from "./BenchGames/useBenchGame.js";
 import { cleanName, loadChatName, saveChatName } from "./Multiplayer/chat.js";
 
 const SCENE_NAMES = {
@@ -84,6 +85,13 @@ const MainPage = () => {
   const hasMovedRef = useRef(false);
   // The town is joined once the game has loaded
   const room = useRoom(look, chatName, !loading);
+  // Games with anyone else in the town, started from a bench or the list of who's here
+  const games = useBenchGame(
+    room.roomRef,
+    room.peers,
+    room.status === "online",
+    !loading && currentScene === 0
+  );
 
   const renameChat = (next) => {
     const clean = cleanName(next);
@@ -149,7 +157,7 @@ const MainPage = () => {
         isPlunging={isPlunging}
         isFighting={isFighting}
       />
-      <Menu room={room} />
+      <Menu room={room} onPlay={games.openMenu} />
       {loading && currentScene === 0 && <LoadingScreen progress={progress} />}
       {!loading && (
         <>
@@ -161,7 +169,7 @@ const MainPage = () => {
           <HelpButton setShowHelp={setShowHelp} aboveEmotes={currentScene === 0}></HelpButton>
           {currentScene === 0 && (
             <>
-              <PlayerCount room={room} />
+              <PlayerCount room={room} onPlay={games.openMenu} />
               <Chat room={room} onRename={renameChat} />
               <WardrobeButton onOpen={() => setShowWardrobe(true)} />
             </>
@@ -215,6 +223,7 @@ const MainPage = () => {
           roomPeers={room.peers}
           roomRef={room.roomRef}
           chatMessages={room.messages}
+          games={games}
         />
       </div>
       {enterPopupVisible && currentScene === 0 && enteringScene === null && (

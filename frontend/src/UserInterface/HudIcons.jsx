@@ -41,3 +41,16 @@ export const ChatIcon = ({ size = 22 }) => (
     <path fill="#fff" d="M3 4h2v2H3zM6 4h2v2H6zM9 4h2v2H9z" />
   </svg>
 );
+
+export const ChevronIcon = ({ size = 10, open = false }) => (
+  <svg
+    viewBox="0 0 7 4"
+    width={size}
+    height={(size * 4) / 7}
+    shapeRendering="crispEdges"
+    aria-hidden="true"
+    style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 150ms" }}
+  >
+    <path fill="currentColor" d="M0 0h1v1h1v1h1v1h1V2h1V1h1V0h1v1H6v1H5v1H4v1H3V3H2V2H1V1H0z" />
+  </svg>
+);

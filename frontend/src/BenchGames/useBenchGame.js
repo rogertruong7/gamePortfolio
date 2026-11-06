@@ -2,17 +2,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { keepsOwnInvite } from "./protocol.js";
 import { newId as newSessionId } from "../Multiplayer/room.js";
 
-// A game between the two on a bench, from picking one to playing it. session is null with nothing
-// going on, or { id, game, host, partner, phase, match, again, note }:
+// A game between this player and one other in the town, from picking one to playing it. It can
+// start from sharing a bench or from the list of who's here. session is null with nothing going
+// on, or { id, game, host, partner, phase, match, again, note }:
 // - phase is picking (choosing a game), inviting (waiting for a yes), invited (asked to play),
 //   playing, or over (it ended without a winner, for the reason in note)
 // - host is whether this player sent the invite. The host goes first and picks the race's words.
 // - match counts rematches, and again says who has asked for the next one
-// partner is whoever else is sat on the bench, from room.benchPartner.
-export function useBenchGame(roomRef, partner, seated) {
+// players is everyone else in the lobby (room.peers), online is whether this tab has a place in
+// it, and active is whether a game can be played right now (in the town, not inside a building).
+export function useBenchGame(roomRef, players, online, active) {
   const [session, setSession] = useState(null);
   const sessionRef = useRef(null);
-  const partnerRef = useRef(partner);
+  const playersRef = useRef(players);
+  const activeRef = useRef(active);
   // The game on screen hears its moves here, as { match, listener }. Moves arriving before it's
   // ready wait in the inbox.
   const moveListener = useRef(null);
@@ -70,19 +73,34 @@ export function useBenchGame(roomRef, partner, seated) {
     [update, deliver]
   );
 
+  // Turns down an invite without it ever showing, so whoever sent it isn't left waiting
+  const turnDown = useCallback(
+    (message) => {
+      roomRef.current?.sendGame({ to: message.id, session: message.session, kind: "decline" });
+    },
+    [roomRef]
+  );
+
   const onMessage = useCallback(
     (message) => {
       const current = sessionRef.current;
-      const from = partnerRef.current;
-      // Only the one sat beside this player can play with them
-      if (!from || message.id !== from.id) return;
+      const known = playersRef.current.find((player) => player.id === message.id);
+      if (!known) return;
+      const from = { id: known.id, name: known.name };
 
       if (message.kind === "invite") {
-        const busy = current && (current.phase === "playing" || current.phase === "invited");
-        if (busy) return;
-        if (current?.phase === "inviting") {
+        if (!activeRef.current) {
+          turnDown(message);
+          return;
+        }
+        const withThem = current?.partner.id === from.id;
+        if (current?.phase === "inviting" && withThem) {
           // Both asked at once. One invite is kept and the other is quietly dropped by both.
           if (keepsOwnInvite(roomRef.current?.id ?? "", from.id)) return;
+        } else if (current && current.phase !== "picking" && current.phase !== "over") {
+          // Already asking, being asked or playing, with someone
+          turnDown(message);
+          return;
         }
         update({
           id: message.session,
@@ -97,7 +115,7 @@ export function useBenchGame(roomRef, partner, seated) {
         return;
       }
 
-      if (!current || message.session !== current.id) return;
+      if (!current || message.session !== current.id || message.id !== current.partner.id) return;
 
       if (message.kind === "cancel") {
         if (current.phase === "invited") update(null);
@@ -105,7 +123,7 @@ export function useBenchGame(roomRef, partner, seated) {
         if (current.phase === "inviting") update({ ...current, phase: "playing" });
       } else if (message.kind === "decline") {
         if (current.phase === "inviting") {
-          const note = `${from.name} doesn't want to play right now.`;
+          const note = `${from.name} can't play right now.`;
           update({ ...current, phase: "over", note });
         }
       } else if (message.kind === "leave") {
@@ -122,45 +140,58 @@ export function useBenchGame(roomRef, partner, seated) {
         deliver();
       }
     },
-    [roomRef, update, deliver, startNextMatch]
+    [roomRef, update, deliver, startNextMatch, turnDown]
   );
 
   useEffect(() => {
-    partnerRef.current = partner;
-  }, [partner]);
+    playersRef.current = players;
+  }, [players]);
 
-  const partnerId = partner?.id ?? null;
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+
+  // Listens the whole time this tab is in the town, so an invite is always answered, even if only
+  // with a no
   useEffect(() => {
     const room = roomRef.current;
-    if (!room || !seated || !partnerId) return undefined;
+    if (!room || !online) return undefined;
     return room.listenGames(onMessage);
-  }, [roomRef, seated, partnerId, onMessage]);
+  }, [roomRef, online, onMessage]);
 
-  // Standing up, or the other one going, ends whatever was going on
+  // Going inside a building ends whatever was going on
   useEffect(() => {
     const current = sessionRef.current;
-    if (!current) return;
-    if (seated && partnerId === current.partner.id) return;
-    if (!seated) {
-      sendEnd(current.phase);
+    if (!current || active) return;
+    sendEnd(current.phase);
+    update(null);
+  }, [active, sendEnd, update]);
+
+  // So does the other one leaving the town
+  useEffect(() => {
+    const current = sessionRef.current;
+    if (!current || current.phase === "over") return;
+    if (players.some((player) => player.id === current.partner.id)) return;
+    const note = `${current.partner.name} left the town.`;
+    if (current.phase === "playing" || current.phase === "inviting") {
+      update({ ...current, phase: "over", note });
+    } else {
       update(null);
-      return;
     }
-    if (current.phase === "playing") {
-      update({ ...current, phase: "over", note: `${current.partner.name} got up and left.` });
-    } else if (current.phase !== "over") {
-      update(null);
-    }
-  }, [seated, partnerId, sendEnd, update]);
+  }, [players, update]);
 
   const actions = {
-    openMenu() {
-      if (!partnerRef.current) return;
+    // Opens the list of games to ask partner ({ id, name }) to play. Does nothing while already
+    // asking, being asked or playing.
+    openMenu(partner) {
+      const current = sessionRef.current;
+      if (!partner || !activeRef.current) return;
+      if (current && current.phase !== "picking" && current.phase !== "over") return;
       update({
         id: "",
         game: null,
         host: true,
-        partner: partnerRef.current,
+        partner: { id: partner.id, name: partner.name },
         phase: "picking",
         match: 0,
         again: { me: false, them: false },

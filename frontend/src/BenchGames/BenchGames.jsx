@@ -4,21 +4,20 @@ import Modal, { ink, inkSoft, pixel } from "../UserInterface/Modal.jsx";
 import ChromeFrame, { chromeButton } from "../UserInterface/ChromeFrame.jsx";
 import { isModalOpen } from "../Helpers/modal.js";
 import { GAMES, gameName } from "./protocol.js";
-import { useBenchGame } from "./useBenchGame.js";
 import ConnectFour from "./ConnectFour.jsx";
 import RockPaperScissors from "./RockPaperScissors.jsx";
 import TypeRace from "./TypeRace.jsx";
 
 const SCREENS = { connect4: ConnectFour, rps: RockPaperScissors, typing: TypeRace };
 
-// Two people sat on the same bench can play a game together. One picks it, the other says yes,
-// and it opens for both of them. partner is whoever else is sat on this bench.
-const BenchGames = ({ roomRef, partner, seated }) => {
-  const games = useBenchGame(roomRef, partner, seated);
+// Two people in the town can play a game together. One picks it, the other says yes, and it opens
+// for both of them. games is from useBenchGame. partner is whoever else is sat on this player's
+// bench, who gets a button to play with them, and asking anyone else starts from the player list.
+const BenchGames = ({ games, partner, seated }) => {
   const { session } = games;
 
   if (!session) {
-    return seated && partner ? <PlayButton onPress={games.openMenu} /> : null;
+    return seated && partner ? <PlayButton onPress={() => games.openMenu(partner)} /> : null;
   }
 
   const name = session.partner.name;
@@ -29,7 +28,7 @@ const BenchGames = ({ roomRef, partner, seated }) => {
       <Modal
         key={key}
         title="Play a game"
-        tagline={`With ${name}, who's sat next to you.`}
+        tagline={`With ${name}.`}
         actionLabel="Never mind"
         onClose={games.close}
         closeOnBackdrop

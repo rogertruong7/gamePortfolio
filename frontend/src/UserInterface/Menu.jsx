@@ -139,7 +139,7 @@ const Links = ({ onPick }) =>
     </a>
   ));
 
-const Menu = ({ room }) => {
+const Menu = ({ room, onPlay }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [lessThan1100, setLessThan1100] = useState(false);
@@ -200,7 +200,16 @@ const Menu = ({ room }) => {
       )}
       {lessThan1100 && isMenuOpen && (
         <SmallMenuContainer ref={menuRef} aria-label="Links">
-          {room && <PlayerCount room={room} where="menu" />}
+          {room && (
+            <PlayerCount
+              room={room}
+              where="menu"
+              onPlay={(player) => {
+                setIsMenuOpen(false);
+                onPlay?.(player);
+              }}
+            />
+          )}
           <Links onPick={() => setIsMenuOpen(false)} />
           <DefaultButton
             onClick={() => {

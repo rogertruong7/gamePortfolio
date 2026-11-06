@@ -103,6 +103,7 @@ function MainGame({
   roomPeers,
   roomRef,
   chatMessages,
+  games,
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
@@ -463,7 +464,7 @@ function MainGame({
       )}
       {sitPhase === "seated" && <SitPrompt label="Stand up" onPress={standUp} />}
       <BenchGames
-        roomRef={roomRef}
+        games={games}
         partner={benchPartner}
         seated={sitPhase === "seated" && currentScene === 0}
       />

@@ -123,7 +123,7 @@ export function joinRoom({ look, name, localState, onChange }) {
   let messageCount = 0;
   const limiter = createChatLimiter();
   const gameLimiter = createChatLimiter(GAME_BURST, GAME_BURST_SECONDS);
-  // Whoever wants to hear bench game messages sent to this tab (BenchGames/useBenchGame.js)
+  // Whoever wants to hear game messages sent to this tab (BenchGames/useBenchGame.js)
   const gameListeners = new Set();
 
   const peerFor = (peerId) => {
@@ -139,7 +139,11 @@ export function joinRoom({ look, name, localState, onChange }) {
       status,
       lobby,
       count: occupants.length + (inRoom ? 1 : 0),
-      peers: occupants.map(({ id: peerId, look: peerLook }) => ({ id: peerId, look: peerLook })),
+      peers: occupants.map(({ id: peerId, look: peerLook, name: peerName }) => ({
+        id: peerId,
+        look: peerLook,
+        name: peerName ?? chatName(peerId),
+      })),
       messages,
       name: myName,
     });

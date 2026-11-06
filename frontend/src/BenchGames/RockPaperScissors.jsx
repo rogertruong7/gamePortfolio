@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import ChromeFrame from "../UserInterface/ChromeFrame.jsx";
 import { inkSoft } from "../UserInterface/Modal.jsx";
 import { THROWS } from "./protocol.js";
@@ -82,11 +82,14 @@ const RockPaperScissors = ({ partnerName, match, again, sendMove, listenMoves, o
       </Score>
       <Status>{status}</Status>
       {last && (
-        <Reveal aria-live="polite">
+        // Keyed by round so it pops in again each time, and two draws in a row don't look like
+        // nothing happened
+        <Reveal key={rounds.length} aria-live="polite">
           <Hand title={LABELS[last.me]}>{HANDS[last.me]}</Hand>
-          <span>
+          <Verdict>
+            <RoundLabel>Round {rounds.length}</RoundLabel>
             {lastResult === 1 ? "You take it" : lastResult === -1 ? "They take it" : "Draw"}
-          </span>
+          </Verdict>
           <Hand $flip title={LABELS[last.them]}>
             {HANDS[last.them]}
           </Hand>
@@ -115,7 +118,19 @@ const RockPaperScissors = ({ partnerName, match, again, sendMove, listenMoves, o
   );
 };
 
+const popIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
 const Reveal = styled.div`
+  animation: ${popIn} 260ms ease-out both;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,6 +138,23 @@ const Reveal = styled.div`
   margin: 0 0 20px;
   color: ${inkSoft};
   font-weight: 700;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`;
+
+const Verdict = styled.span`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const RoundLabel = styled.span`
+  font-size: 13px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 `;
 
 const Hand = styled.span`

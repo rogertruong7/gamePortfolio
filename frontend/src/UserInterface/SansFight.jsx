@@ -51,6 +51,8 @@ const Waiting = styled.div`
   font-size: clamp(1.2rem, 3.4vw, 3rem);
   opacity: ${({ $hidden }) => ($hidden ? 0 : 1)};
   transition: opacity ${FADE_MS}ms ease-in-out;
+  /* Clicks go through to the game underneath, for the same reason */
+  pointer-events: none;
 `;
 
 // Shown under the GAME OVER screen, which waits for the player rather than ending on its own
@@ -171,6 +173,9 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
     if (!loaded) {
       const stallTimeout = setTimeout(() => {
         setStalled(true);
+        // The game gets the keyboard straight away, so if it's ready and just waiting on a key,
+        // whatever the player presses reaches it and starts the fight
+        frameRef.current?.contentWindow?.focus();
         // The town can stop drawing under the dark, which leaves more of the device to the game
         after(FADE_MS, () => {
           if (!endedRef.current) onCovered();

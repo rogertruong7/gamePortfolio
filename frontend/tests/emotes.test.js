@@ -29,16 +29,8 @@ test("wave, dab and floss are all there", () => {
   );
 });
 
-test("an emote plays until its time is up", () => {
-  const state = waving();
-  updateEmote(state, WAVE.seconds / 2, false, character, camera, ignoreTurn);
-  assert.equal(state.emote, WAVE);
-  updateEmote(state, WAVE.seconds, false, character, camera, ignoreTurn);
-  assert.equal(state.emote, null);
-});
-
-test("dab and floss keep going until the player moves", () => {
-  for (const id of ["dab", "floss"]) {
+test("every emote keeps going until the player moves", () => {
+  for (const id of ["wave", "dab", "floss"]) {
     const emote = EMOTES.find((candidate) => candidate.id === id);
     const state = createEmoteState();
     startEmote(state, emote);

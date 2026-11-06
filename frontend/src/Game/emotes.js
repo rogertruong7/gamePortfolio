@@ -179,7 +179,7 @@ function poseFloss(bones, weight, seconds) {
 // the emote has been going. Seconds of Infinity keeps it going until the player moves, and
 // leftArmInFront draws that arm over the head.
 export const EMOTES = [
-  { id: "wave", label: "Wave", seconds: 2.6, pose: poseWave },
+  { id: "wave", label: "Wave", seconds: Infinity, pose: poseWave },
   { id: "dab", label: "Dab", seconds: Infinity, pose: poseDab, leftArmInFront: true },
   { id: "floss", label: "Floss", seconds: Infinity, pose: poseFloss },
 ];

@@ -79,9 +79,10 @@ const Projects = () => {
                   projectsScript[0]
                 ) : (
                   <Typewriter
+                    options={{ delay: 10 }}
                     onInit={(typewriter) => {
                       twRef.current = typewriter;
-                      typewriter.changeDelay(10).typeString(projectsScript[0]).callFunction(showOptions).start();
+                      typewriter.typeString(projectsScript[0]).callFunction(showOptions).start();
                     }}
                   />
                 ))}
@@ -91,7 +92,7 @@ const Projects = () => {
                 setPageToShow={openPage}
                 entries={projectEntries}
                 section="Project"
-                active={!pageToShow}
+                active={!pageToShow || !lessThan1700}
               />
             )}
           </SelectionContainer>

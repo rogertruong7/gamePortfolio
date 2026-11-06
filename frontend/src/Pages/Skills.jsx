@@ -38,7 +38,7 @@ const Skills = ({ setCurrentScene }) => {
     };
 
     const handleKeySkip = (event) => {
-      if (["Space", "Enter"].includes(event.code)) {
+      if (["Space", "Enter", "KeyZ", "KeyE"].includes(event.code)) {
         finishImmediately();
       }
     };
@@ -63,7 +63,7 @@ const Skills = ({ setCurrentScene }) => {
     selectionContainer.addEventListener("click", handleClick);
 
     const handleKeyDown = (event) => {
-      if (["Space", "Enter"].includes(event.code) && canClick) {
+      if (["Space", "Enter", "KeyZ", "KeyE"].includes(event.code) && canClick) {
         onNextText();
       }
     };
@@ -101,10 +101,10 @@ const Skills = ({ setCurrentScene }) => {
 
   const renderText = (index) => (
     <Typewriter
+      options={{ delay: 10 }}
       onInit={(typewriter) => {
         twRef.current = typewriter;
         typewriter
-          .changeDelay(10)
           .typeString(
             `<h1 style='margin: 0; color: white; font-family: Determination Mono, Pixelify Sans, serif; font-size: ${fontSize}rem; padding-right: 0px;'>${skillsScript[index]}</h1>`
           )

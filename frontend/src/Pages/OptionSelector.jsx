@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import styled, { css, keyframes } from "styled-components";
 import { track } from "../Analytics/tracker.js";
+import { isActionKey } from "../Helpers/confirmKeys.js";
 
 const PER_PAGE = 4;
 const PER_SIDE = 2;
@@ -12,6 +13,14 @@ const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").mat
 function subtitle(entry) {
   if (entry.kind === "experience") return entry.option.split(" - ").slice(1).join(" - ");
   return entry.category;
+}
+
+// A line or two about the entry: the short phrase from a project's menu name, such as "Speak a
+// language with AI role-play", or the start of its tagline when it doesn't have one
+function blurb(entry) {
+  const [, phrase] = entry.option.split(": ");
+  if (phrase) return phrase.replace(/\s*\([^)]*\)\s*$/, "");
+  return entry.tagline;
 }
 
 function useSinglePage() {
@@ -27,7 +36,8 @@ function useSinglePage() {
 
 // The menu reads like the contents of an open book: two entries on the left page, two on the
 // right, and the arrows turn to the next spread. Entries are the catalog's, four to a spread.
-// `active` is false while a page is open over the menu, so its keys stay with that page.
+// `active` is false while an open page covers the menu, so its keys stay with that page. When the
+// page sits beside the book instead, the book keeps its keys.
 const OptionSelector = ({ setPageToShow, entries, section, active }) => {
   const [spread, setSpread] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -99,7 +109,12 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
       s: "down",
     };
     const onKeyDown = (e) => {
-      if (e.key === "Enter") {
+      // A focused control handles its own keys: Enter presses a button or follows a link, and the
+      // arrows seek and change the volume of a video
+      const target = e.target instanceof Element ? e.target : null;
+      if (target?.closest("input, textarea, select, video, [contenteditable='true']")) return;
+      if (e.key === "Enter" || isActionKey(e)) {
+        if (target?.closest("button, a[href]")) return;
         open(selectedIndex);
         return;
       }
@@ -144,6 +159,7 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
                       <Period>{entry.period}</Period>
                     </TitleLine>
                     <Subtitle>{subtitle(entry)}</Subtitle>
+                    {!singlePage && <Blurb>{blurb(entry)}</Blurb>}
                   </EntryText>
                 </Entry>
               );
@@ -327,6 +343,16 @@ const Subtitle = styled.span`
   color: #9a9a9a;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+`;
+
+const Blurb = styled.span`
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  color: #cfcfcf;
+  font-size: clamp(0.8rem, 0.65rem + 0.4vw, 1.05rem);
+  line-height: 1.35;
 `;
 
 const Footer = styled.div`

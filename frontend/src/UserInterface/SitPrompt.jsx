@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import styled from "styled-components";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 import { isModalOpen } from "../Helpers/modal.js";
+import { isActionKey } from "../Helpers/confirmKeys.js";
 
 const SitButton = styled.button`
   ${chromeButton}
@@ -19,7 +20,7 @@ const SitButton = styled.button`
 const SitPrompt = ({ label, onPress }) => {
   useEffect(() => {
     const onKeyDown = (event) => {
-      if (event.key.toLowerCase() === "e" && !event.repeat && !isModalOpen()) onPress();
+      if (isActionKey(event) && !event.repeat && !isModalOpen()) onPress();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);

@@ -14,14 +14,14 @@ const LakePrompt = ({ flipped, onReflect, onJump }) => {
   }
   return (
     <ChoicePopup title="The water is still." titleId="lakeOptions" focusKey="normal">
-      <ChoiceButton id="reflection_button" onClick={onReflect}>
-        View your reflection
-        <ChromeFrame />
-      </ChoiceButton>
       <ChoiceButton id="jump_in_button" onClick={onJump}>
         Jump
         <br />
         in
+        <ChromeFrame />
+      </ChoiceButton>
+      <ChoiceButton id="reflection_button" onClick={onReflect}>
+        View your reflection
         <ChromeFrame />
       </ChoiceButton>
     </ChoicePopup>

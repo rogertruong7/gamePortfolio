@@ -40,7 +40,7 @@ const AboutMe = ({ setCurrentScene }) => {
     };
 
     const handleKeySkip = (event) => {
-      if (["Space", "Enter"].includes(event.code)) {
+      if (["Space", "Enter", "KeyZ", "KeyE"].includes(event.code)) {
         finishImmediately();
       }
     };
@@ -66,7 +66,7 @@ const AboutMe = ({ setCurrentScene }) => {
     selectionContainer.addEventListener("click", handleClick);
 
     const handleKeyDown = (event) => {
-      if (["Space", "Enter"].includes(event.code) && canClick) {
+      if (["Space", "Enter", "KeyZ", "KeyE"].includes(event.code) && canClick) {
         onNextText();
       }
     };
@@ -111,10 +111,10 @@ const AboutMe = ({ setCurrentScene }) => {
   // Render a Typewriter for the given script index
   const renderText = (index) => (
     <Typewriter
+      options={{ delay: 10 }}
       onInit={(typewriter) => {
         twRef.current = typewriter;
         typewriter
-          .changeDelay(10)
           .typeString(
             `<h1 style='margin: 0; color: white; font-family: Determination Mono, Pixelify Sans, serif; font-size: ${fontSize}rem; padding-right: 0px;'>${aboutMeScript[index]}</h1>`
           )

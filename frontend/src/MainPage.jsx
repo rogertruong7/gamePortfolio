@@ -18,6 +18,7 @@ import { AudioProvider, useAudio } from "./Audio/AudioContext.jsx";
 import { AudioManager } from "./Audio/AudioManager.jsx";
 import { track } from "./Analytics/tracker.js";
 import { readStore } from "./Helpers/storage.js";
+import { prefetchSansFight } from "./Helpers/prefetchSansFight.js";
 
 const SCENE_NAMES = {
   1: "About Me",
@@ -82,7 +83,9 @@ const MainPage = () => {
   }, [currentScene]);
 
   useEffect(() => {
-    if (!loading) track("game_loaded");
+    if (loading) return;
+    track("game_loaded");
+    prefetchSansFight();
   }, [loading]);
 
   useEffect(() => {

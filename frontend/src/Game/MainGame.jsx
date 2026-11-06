@@ -7,6 +7,7 @@ import Lights from "./Lights.jsx";
 import MainCamera from "./MainCamera.jsx";
 import Character from "./Character.jsx";
 import PlayerShadow from "./PlayerShadow.jsx";
+import RemotePlayers from "./RemotePlayers.jsx";
 import Floor from "./Floor.jsx";
 import Island from "./Island.jsx";
 import Buildings from "./Buildings.jsx";
@@ -22,8 +23,9 @@ import SansFight from "../UserInterface/SansFight.jsx";
 import { useAudio } from "../Audio/AudioContext.jsx";
 import ReflectionDialog from "../UserInterface/ReflectionDialog.jsx";
 import EmoteButton from "../UserInterface/EmoteButton.jsx";
-import { labels } from "./Static.jsx";
+import { benches, labels } from "./Static.jsx";
 import { createSitState, startSitting, startStanding } from "./sitting.js";
+import { seatAlong } from "./benchSeats.js";
 import { startWalkingIn, startWalkingOut } from "./doorWalk.js";
 import { EMOTES, createEmoteState, startEmote, stopEmote } from "./emotes.js";
 import { createJumpState, requestJump } from "./jumping.js";
@@ -88,6 +90,10 @@ function MainGame({
   enteringScene,
   setEnteringScene,
   onEntered,
+  look,
+  netStateRef,
+  roomPeers,
+  roomRef,
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
@@ -126,7 +132,14 @@ function MainGame({
   function sitDown() {
     setDarkspot(false);
     setClickMoving(false);
-    startSitting(sitRef.current, nearBench, targetPosition, characterRef.current.position);
+    // Takes the free end if someone's already there, and they scoot over to the other
+    const room = roomRef.current;
+    const along =
+      seatAlong(
+        { id: room?.id ?? "me", bench: benches.indexOf(nearBench), since: Date.now() },
+        room ? room.benchClaims() : []
+      ) ?? 0;
+    startSitting(sitRef.current, nearBench, targetPosition, characterRef.current.position, along);
   }
 
   function standUp() {
@@ -349,8 +362,12 @@ function MainGame({
           setFlipped={setFlipped}
           emoteRef={emoteRef}
           jumpRef={jumpRef}
+          look={look}
+          netStateRef={netStateRef}
+          roomRef={roomRef}
         />
-        <PlayerShadow characterRef={characterRef} lakeRef={lakeRef} />
+        <PlayerShadow characterRef={characterRef} lakeRef={lakeRef} look={look} />
+        <RemotePlayers peers={roomPeers} roomRef={roomRef} lakeRef={lakeRef} />
         {beatSans && <SuperSaiyan characterRef={characterRef} />}
         <group visible={!flipped}>
           {labels.map(({ text, position, fontSize, showcaseName }) => (

@@ -22,14 +22,18 @@ Vite starts at `http://localhost:5173` with hot module replacement. The dev serv
 
 ## Environment Variables
 
-Copy `frontend/.env.example` to `frontend/.env` to use `/admin` and tracking locally. The game runs fine without it.
+Copy `frontend/.env.example` to `frontend/.env` to use `/admin`, tracking and cross-device multiplayer locally. The game runs fine without it.
 
 | Variable         | Purpose                                  |
 | ---------------- | ---------------------------------------- |
 | `ADMIN_PASSWORD` | The password for `/admin`                |
 | `DATABASE_URL`   | Neon connection string for the analytics |
+| `VITE_SUPABASE_URL` | The Supabase project URL, for multiplayer across devices |
+| `VITE_SUPABASE_ANON_KEY` | The Supabase anon (publishable) key |
 
-Never give these a `VITE_` prefix, because Vite would publish them in the site's public JavaScript.
+Never give `ADMIN_PASSWORD` or `DATABASE_URL` a `VITE_` prefix, because Vite would publish them in the site's public JavaScript. The two Supabase values are meant to be public: they only let a browser join Realtime channels.
+
+Without the Supabase values, multiplayer still works between tabs on the same device.
 
 Vercel doesn't read `.env`, so production and preview have their own copies. Local and preview use the Neon `dev` branch, so testing never touches real visitor data.
 
@@ -39,6 +43,15 @@ Vercel doesn't read `.env`, so production and preview have their own copies. Loc
 npx vercel env rm ADMIN_PASSWORD production --yes
 npx vercel env add ADMIN_PASSWORD production --sensitive
 ```
+
+### Multiplayer (Supabase Realtime)
+
+Multiplayer only uses Supabase Realtime's presence and broadcast, so there are no tables to create.
+
+1. Create a Supabase project, either at supabase.com or through the Supabase integration in the Vercel Marketplace.
+2. In the project's Realtime settings, make sure public channels are allowed.
+3. Copy the project URL and anon key into `frontend/.env` as `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+4. Add the same two variables to the Vercel project for Production and Preview, then redeploy. Vite builds them into the page, so a deploy made before they were set won't have them.
 
 ## Available Scripts
 

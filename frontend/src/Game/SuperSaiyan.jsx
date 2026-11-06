@@ -4,10 +4,6 @@ import * as THREE from "three";
 
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const POWER_UP_SECONDS = 0.8;
-// The mesh holding the head and hair. The hair uses the right half of the shared texture, which is
-// otherwise solid black, so it can be told apart from the face in the same mesh.
-const HEAD_MESH = "Object_54";
-const HAIR_STARTS_AT_U = 0.51;
 const AURA_WIDTH = 36;
 const AURA_HEIGHT = 50;
 // Measured from the feet. It sits in front of the character so its glow falls over the model.
@@ -17,41 +13,6 @@ const AURA_TOWARDS_CAMERA = 6;
 const MAIN_CAMERA_ONLY_LAYER = 1;
 
 const _toCamera = new THREE.Vector3();
-
-function createHairMaterial(original, power) {
-  const material = original.clone();
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms.uPower = power;
-    shader.vertexShader = shader.vertexShader
-      .replace(
-        "#include <common>",
-        `#include <common>
-        varying float vHairLight;`
-      )
-      .replace(
-        "#include <project_vertex>",
-        `#include <project_vertex>
-        // The hair has no shading of its own, and flat yellow would lose its spikes
-        vHairLight = normalize(normalMatrix * objectNormal).y * 0.5 + 0.5;`
-      );
-    shader.fragmentShader = shader.fragmentShader
-      .replace(
-        "#include <common>",
-        `#include <common>
-        uniform float uPower;
-        varying float vHairLight;`
-      )
-      .replace(
-        "#include <map_fragment>",
-        `#include <map_fragment>
-        if (vMapUv.x > ${HAIR_STARTS_AT_U.toFixed(2)}) {
-          vec3 gold = mix(vec3(0.85, 0.42, 0.02), vec3(1.0, 0.86, 0.16), smoothstep(0.15, 0.75, vHairLight));
-          diffuseColor.rgb = mix(diffuseColor.rgb, gold, uPower);
-        }`
-      );
-  };
-  return material;
-}
 
 function createAuraMaterial(power) {
   return new THREE.ShaderMaterial({
@@ -107,21 +68,17 @@ function createAuraMaterial(power) {
 // nobody else pays for it.
 function SuperSaiyan({ characterRef }) {
   const auraRef = useRef();
-  const power = useMemo(() => ({ value: 0 }), []);
+  // The character's look turns its hair gold as this goes up, whichever hairstyle it has
+  const power = useMemo(() => characterRef.current.userData.dress.uniforms.uGold, [characterRef]);
   const auraMaterial = useMemo(() => createAuraMaterial(power), [power]);
 
   useEffect(() => {
-    const head = characterRef.current.getObjectByName(HEAD_MESH);
-    const original = head.material;
-    const hair = createHairMaterial(original, power);
-    head.material = hair;
     auraRef.current.layers.set(MAIN_CAMERA_ONLY_LAYER);
     return () => {
-      head.material = original;
-      hair.dispose();
+      power.value = 0;
       auraMaterial.dispose();
     };
-  }, [characterRef, power, auraMaterial]);
+  }, [power, auraMaterial]);
 
   useFrame(({ camera }, delta) => {
     power.value = REDUCED_MOTION ? 1 : Math.min(1, power.value + delta / POWER_UP_SECONDS);

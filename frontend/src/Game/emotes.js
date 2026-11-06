@@ -185,63 +185,19 @@ export const EMOTES = [
 ];
 
 const FADE_SECONDS = 0.2;
-// How much nearer to the camera the arm counts as being, in the depth buffer's own units. Enough to
-// get past the head, and little enough that it still goes behind anything well in front of it.
-const IN_FRONT_DEPTH = 0.0006;
-
-// The arms are shorter than the head is deep, so no pose can really bring one out in front of the
-// face. Instead each vertex remembers how much it belongs to the left arm, and the shader can draw
-// those ones as if they were nearer. They stay in the same place on screen and the same size.
-function prepareLeftArmInFront(scene) {
-  const inFront = { value: 0 };
-  const leftArmBones = new Set();
-  scene.getObjectByName(BONES.leftArm).traverse((bone) => leftArmBones.add(bone));
-
-  scene.traverse((node) => {
-    if (!node.isSkinnedMesh) return;
-    const { skinIndex, skinWeight } = node.geometry.attributes;
-    const belonging = new Float32Array(skinIndex.count);
-    for (let vertex = 0; vertex < skinIndex.count; vertex += 1) {
-      for (const [index, weight] of [
-        [skinIndex.getX(vertex), skinWeight.getX(vertex)],
-        [skinIndex.getY(vertex), skinWeight.getY(vertex)],
-        [skinIndex.getZ(vertex), skinWeight.getZ(vertex)],
-        [skinIndex.getW(vertex), skinWeight.getW(vertex)],
-      ]) {
-        if (leftArmBones.has(node.skeleton.bones[index])) belonging[vertex] += weight;
-      }
-    }
-    node.geometry.setAttribute("aLeftArm", new THREE.BufferAttribute(belonging, 1));
-
-    node.material.onBeforeCompile = (shader) => {
-      shader.uniforms.uLeftArmInFront = inFront;
-      shader.vertexShader = shader.vertexShader
-        .replace(
-          "#include <common>",
-          `#include <common>
-          attribute float aLeftArm;
-          uniform float uLeftArmInFront;`
-        )
-        .replace(
-          "#include <project_vertex>",
-          `#include <project_vertex>
-          gl_Position.z -= aLeftArm * uLeftArmInFront * ${IN_FRONT_DEPTH.toFixed(5)} * gl_Position.w;`
-        );
-    };
-    node.material.needsUpdate = true;
-  });
-  return inFront;
-}
 
 const _toCamera = new THREE.Vector3();
 
-export function findEmoteBones(scene) {
+// The arms are shorter than the head is deep, so no pose can really bring one out in front of the
+// face. Instead the character's look material (look/lookMaterial.js) draws the left arm as if it
+// were nearer while leftArmInFront is 1. It stays in the same place on screen and the same size.
+export function findEmoteBones(scene, leftArmInFront) {
   const bones = {};
   Object.entries(BONES).forEach(([part, name]) => {
     bones[part] = scene.getObjectByName(name);
   });
   bones.hipsRest = new THREE.Vector3();
-  bones.leftArmInFront = prepareLeftArmInFront(scene);
+  bones.leftArmInFront = leftArmInFront;
   return bones;
 }
 

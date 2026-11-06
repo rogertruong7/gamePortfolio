@@ -4,9 +4,11 @@ import { useAudio } from "../Audio/AudioContext.jsx";
 import { writeStore } from "../Helpers/storage.js";
 import ChromeFrame from "./ChromeFrame.jsx";
 import ControlsList from "./ControlsList.jsx";
+import { ShirtIcon } from "./HudIcons.jsx";
 import Modal, { crimson, focusBlue, ink, inkSoft } from "./Modal.jsx";
 
-const Popup = ({ setShowPopup }) => {
+// onCustomise opens the wardrobe, for anyone who wants to make the character theirs first
+const Popup = ({ setShowPopup, onCustomise }) => {
   const { setMuted, setAudioReady } = useAudio();
   const [startMuted, setStartMuted] = useState(false);
 
@@ -19,12 +21,26 @@ const Popup = ({ setShowPopup }) => {
     setShowPopup(false);
   };
 
+  const customise = () => {
+    handleClose();
+    onCustomise();
+  };
+
   return (
     <Modal
       title="Hi, I'm Roger"
       tagline="Welcome to my portfolio. Walk around the town and go into any building you like. I made the original codebase before agents like Claude Code."
       actionLabel="Start exploring"
       onClose={handleClose}
+      secondaryAction={{
+        label: (
+          <>
+            <ShirtIcon size={18} />
+            Customise character
+          </>
+        ),
+        onClick: customise,
+      }}
       footer={
         <MuteLabel>
           <Box>

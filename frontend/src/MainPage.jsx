@@ -14,11 +14,16 @@ import AboutMe from "./Pages/AboutMe.jsx";
 import Skills from "./Pages/Skills.jsx";
 import Experiences from "./Pages/Experiences.jsx";
 import HelpPopup from "./UserInterface/HelpPopup.jsx";
+import PlayerCount from "./UserInterface/PlayerCount.jsx";
+import Wardrobe from "./UserInterface/Wardrobe.jsx";
+import WardrobeButton from "./UserInterface/WardrobeButton.jsx";
 import { AudioProvider, useAudio } from "./Audio/AudioContext.jsx";
 import { AudioManager } from "./Audio/AudioManager.jsx";
 import { track } from "./Analytics/tracker.js";
 import { readStore } from "./Helpers/storage.js";
 import { prefetchSansFight } from "./Helpers/prefetchSansFight.js";
+import { loadLook, sanitizeLook, saveLook } from "./Game/look/lookOptions.js";
+import { useRoom } from "./Multiplayer/useRoom.js";
 
 const SCENE_NAMES = {
   1: "About Me",
@@ -70,7 +75,18 @@ const MainPage = () => {
   const [isWading, setIsWading] = useState(false);
   const [isPlunging, setIsPlunging] = useState(false);
   const [isFighting, setIsFighting] = useState(false);
+  const [look, setLook] = useState(loadLook);
+  const [showWardrobe, setShowWardrobe] = useState(false);
   const hasMovedRef = useRef(false);
+  // The town is joined once the game has loaded
+  const room = useRoom(look, !loading);
+
+  const saveWardrobe = (next) => {
+    const clean = sanitizeLook(next);
+    saveLook(clean);
+    setLook(clean);
+    setShowWardrobe(false);
+  };
 
   const finishEntering = (scene) => {
     doorSound.play();
@@ -123,7 +139,7 @@ const MainPage = () => {
         isPlunging={isPlunging}
         isFighting={isFighting}
       />
-      <Menu />
+      <Menu room={room} />
       {loading && currentScene === 0 && <LoadingScreen progress={progress} />}
       {!loading && (
         <>
@@ -133,8 +149,24 @@ const MainPage = () => {
             afterHome={currentScene !== 0}
           ></ResetButton>
           <HelpButton setShowHelp={setShowHelp} aboveEmotes={currentScene === 0}></HelpButton>
+          {currentScene === 0 && (
+            <>
+              <PlayerCount room={room} />
+              <WardrobeButton onOpen={() => setShowWardrobe(true)} />
+            </>
+          )}
+          {showWardrobe && (
+            <Wardrobe
+              look={look}
+              onSave={saveWardrobe}
+              onClose={() => setShowWardrobe(false)}
+            />
+          )}
           {readStore("visited") !== "true" && showPopup && (
-            <Popup setShowPopup={setShowPopup}></Popup>
+            <Popup
+              setShowPopup={setShowPopup}
+              onCustomise={() => setShowWardrobe(true)}
+            ></Popup>
           )}
           {showHelp && <HelpPopup setShowHelp={setShowHelp}></HelpPopup>}
         </>
@@ -167,6 +199,10 @@ const MainPage = () => {
           enteringScene={enteringScene}
           setEnteringScene={setEnteringScene}
           onEntered={finishEntering}
+          look={look}
+          netStateRef={room.localState}
+          roomPeers={room.peers}
+          roomRef={room.roomRef}
         />
       </div>
       {enterPopupVisible && currentScene === 0 && enteringScene === null && (

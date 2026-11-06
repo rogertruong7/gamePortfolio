@@ -2,6 +2,8 @@ import { useState } from "react";
 import styled from "styled-components";
 import ChromeFrame from "./ChromeFrame.jsx";
 import { crimson, ink, inkSoft, pixel } from "./Modal.jsx";
+import { PeopleIcon, ShirtIcon } from "./HudIcons.jsx";
+import { ROOM_SIZE } from "../Multiplayer/room.js";
 
 const Key = ({ children }) => (
   <KeyCap>
@@ -150,6 +152,31 @@ const ControlsList = ({ showReset = false }) => {
         }
       >
         {touchOnly ? "Open the emote wheel" : "Open the emote wheel, or press B"}
+      </Row>
+      <Row
+        input={
+          <Chip>
+            <ShirtIcon size={18} />
+            wardrobe
+            <ChromeFrame />
+          </Chip>
+        }
+      >
+        Customise your character: girl or boy, hair, outfit and more. It&apos;s saved on this
+        device.
+      </Row>
+      <Row
+        input={
+          <Chip>
+            <PeopleIcon size={18} />
+            {ROOM_SIZE} max
+            <ChromeFrame spikes={false} radius={14} />
+          </Chip>
+        }
+      >
+        Up to {ROOM_SIZE} visitors share a town and see each other&apos;s looks. When it&apos;s
+        full, the next visitors get a town of their own. The count is in the top left, or in the
+        menu on a phone.
       </Row>
       {showReset && (
         <Row

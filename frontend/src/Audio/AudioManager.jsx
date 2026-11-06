@@ -4,7 +4,9 @@ import { useAudio } from "./AudioContext.jsx";
 
 const BGM_VOLUME = 0.05;
 const FOOTSTEP_VOLUME = 1.5;
-const WADING_VOLUME = 0.08;
+// Bubbles only (scripts/make-water-sounds.mjs), which come out about 4 dB louder than the old
+// slosh did, so this is turned down to match
+const WADING_VOLUME = 0.05;
 const PLUNGE_VOLUME = 0.25;
 const FADE_DURATION = 1000;
 

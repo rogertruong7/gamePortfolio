@@ -2,7 +2,8 @@
 // Change the numbers and run it again to retune them. Needs ffmpeg.
 //
 // Usage (run from the repo root):
-//   node scripts/make-water-sounds.mjs
+//   node scripts/make-water-sounds.mjs           # both
+//   node scripts/make-water-sounds.mjs wading    # just one of them
 
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
@@ -14,7 +15,8 @@ const AUDIO_DIR = "frontend/public/audio";
 const WADING_SECONDS = 3.2;
 const WADING_STEPS = 10;
 
-let seed = 20261105;
+const SEED = 20261105;
+let seed = SEED;
 function random() {
   seed = (seed * 16807) % 2147483647;
   return (seed - 1) / 2147483646;
@@ -62,26 +64,19 @@ function addBubble(track, start, { pitch, seconds, gain, wraps }) {
   }
 }
 
-// Each stride is a slosh with a few bubbles after it. They wrap around the end of the track,
-// so the loop has no seam.
+// Each stride is a cluster of bubbles, which is what makes it sound like water. A burst of
+// filtered noise used to go under them too, but it hissed like wet sand. They wrap around the
+// end of the track, so the loop has no seam.
 function wadingLoop(track) {
   const length = track.length / RATE;
   for (let step = 0; step < WADING_STEPS; step += 1) {
     const start = (step / WADING_STEPS) * length + between(-0.02, 0.02) + 0.03;
-    addSlosh(track, start, {
-      seconds: between(0.2, 0.32),
-      attack: 0.012,
-      low: between(650, 950),
-      high: between(2400, 3600),
-      gain: between(0.5, 0.8),
-      wraps: true,
-    });
-    const bubbles = 2 + Math.floor(random() * 3);
+    const bubbles = 4 + Math.floor(random() * 4);
     for (let i = 0; i < bubbles; i += 1) {
-      addBubble(track, start + between(0.03, 0.2), {
-        pitch: between(500, 1300),
-        seconds: between(0.025, 0.06),
-        gain: between(0.03, 0.08),
+      addBubble(track, start + between(0, 0.18), {
+        pitch: between(320, 950),
+        seconds: between(0.04, 0.1),
+        gain: between(0.5, 1),
         wraps: true,
       });
     }
@@ -147,6 +142,9 @@ function wavFile([left, right]) {
 }
 
 function write(name, seconds, fill) {
+  if (process.argv[2] && process.argv[2] !== name) return;
+  // Each sound starts from the same seed, so retuning one doesn't change the other
+  seed = SEED;
   const tracks = [new Float64Array(Math.floor(seconds * RATE)), new Float64Array(Math.floor(seconds * RATE))];
   tracks.forEach(fill);
 

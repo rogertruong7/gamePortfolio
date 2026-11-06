@@ -25,6 +25,7 @@ import SansFight from "../UserInterface/SansFight.jsx";
 import { useAudio } from "../Audio/AudioContext.jsx";
 import ReflectionDialog from "../UserInterface/ReflectionDialog.jsx";
 import EmoteButton from "../UserInterface/EmoteButton.jsx";
+import BenchGames from "../BenchGames/BenchGames.jsx";
 import { benches, labels } from "./Static.jsx";
 import { createSitState, startSitting, startStanding } from "./sitting.js";
 import { seatAlong } from "./benchSeats.js";
@@ -41,6 +42,11 @@ import {
   startReflection,
   stopReflection,
 } from "./lake.js";
+
+// How often to look for someone sat on the same bench, and how long they can drop out of sight
+// (a late message, say) before they count as gone
+const PARTNER_CHECK_MS = 250;
+const PARTNER_GRACE_MS = 2000;
 
 let startPosition = [93, -8, -134];
 let startVector = new THREE.Vector3(...startPosition);
@@ -111,6 +117,8 @@ function MainGame({
 
   const [sitPhase, setSitPhase] = useState("none");
   const [nearBench, setNearBench] = useState(null);
+  // Whoever else is sat on this player's bench, for playing games with (BenchGames)
+  const [benchPartner, setBenchPartner] = useState(null);
   const [inWater, setInWater] = useState(false);
   const [lakePhase, setLakePhase] = useState("none");
   const [flipped, setFlipped] = useState(false);
@@ -148,6 +156,28 @@ function MainGame({
   function standUp() {
     startStanding(sitRef.current);
   }
+
+  useEffect(() => {
+    if (sitPhase !== "seated") {
+      setBenchPartner(null);
+      return undefined;
+    }
+    let lastSeen = 0;
+    const check = () => {
+      const room = roomRef.current;
+      const found = room ? room.benchPartner(benches.indexOf(sitRef.current.bench)) : null;
+      const now = performance.now();
+      if (found) lastSeen = now;
+      setBenchPartner((previous) => {
+        if (!found) return previous && now - lastSeen < PARTNER_GRACE_MS ? previous : null;
+        const same = previous && previous.id === found.id && previous.name === found.name;
+        return same ? previous : found;
+      });
+    };
+    check();
+    const timer = setInterval(check, PARTNER_CHECK_MS);
+    return () => clearInterval(timer);
+  }, [sitPhase, roomRef]);
 
   // A key held down from before would otherwise call the view straight off again
   function stopWalking() {
@@ -432,6 +462,11 @@ function MainGame({
         <EmoteButton onEmote={playEmote} />
       )}
       {sitPhase === "seated" && <SitPrompt label="Stand up" onPress={standUp} />}
+      <BenchGames
+        roomRef={roomRef}
+        partner={benchPartner}
+        seated={sitPhase === "seated" && currentScene === 0}
+      />
     </>
   );
 }

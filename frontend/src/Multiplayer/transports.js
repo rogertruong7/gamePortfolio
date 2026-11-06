@@ -1,5 +1,6 @@
 // The two ways a tab can reach the others in the town. Both hand the room the same things: who is
-// present, with what they've shared about themselves, and the messages they send.
+// present, with what they've shared about themselves, and the messages they send: where they
+// are, what they say, and the moves of any bench game they're playing.
 //
 // With Supabase set up, visitors on any device meet in a Realtime channel, one per lobby. Without
 // it, tabs open on the same device still find each other through a BroadcastChannel.
@@ -45,6 +46,7 @@ export async function createSupabaseTransport(id, handlers, name) {
     })
     .on("broadcast", { event: "state" }, ({ payload }) => handlers.onMessage(payload))
     .on("broadcast", { event: "chat" }, ({ payload }) => handlers.onChat(payload))
+    .on("broadcast", { event: "game" }, ({ payload }) => handlers.onGame(payload))
     .subscribe((status) => {
       joined = status === "SUBSCRIBED";
       // After a dropped connection the room works out again whether this tab has a place, and
@@ -65,6 +67,9 @@ export async function createSupabaseTransport(id, handlers, name) {
     sendChat(message) {
       if (joined) channel.send({ type: "broadcast", event: "chat", payload: message });
     },
+    sendGame(message) {
+      if (joined) channel.send({ type: "broadcast", event: "game", payload: message });
+    },
     close() {
       client.removeChannel(channel);
     },
@@ -79,7 +84,14 @@ const FORGET_SECONDS = 7;
 export function createLocalTransport(id, handlers, name) {
   if (typeof BroadcastChannel === "undefined") {
     handlers.onStatus("offline");
-    return { setPresence() {}, clearPresence() {}, send() {}, sendChat() {}, close() {} };
+    return {
+      setPresence() {},
+      clearPresence() {},
+      send() {},
+      sendChat() {},
+      sendGame() {},
+      close() {},
+    };
   }
   const channel = new BroadcastChannel(`portfolio-${name}`);
   const others = new Map();
@@ -114,6 +126,8 @@ export function createLocalTransport(id, handlers, name) {
       handlers.onMessage(data.message);
     } else if (data.kind === "chat") {
       handlers.onChat(data.message);
+    } else if (data.kind === "game") {
+      handlers.onGame(data.message);
     }
   };
 
@@ -148,6 +162,9 @@ export function createLocalTransport(id, handlers, name) {
     },
     sendChat(message) {
       channel.postMessage({ kind: "chat", id, message });
+    },
+    sendGame(message) {
+      channel.postMessage({ kind: "game", id, message });
     },
     close() {
       closed = true;

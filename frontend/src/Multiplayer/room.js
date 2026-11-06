@@ -9,6 +9,7 @@ import {
   readChat,
 } from "./chat.js";
 import { HAS_SERVER, createLocalTransport, createSupabaseTransport } from "./transports.js";
+import { readGameMessage, writeGameMessage } from "../BenchGames/protocol.js";
 
 // Each lobby holds this many characters at once. The first ten to arrive in it get the places, so
 // everyone works out the same ten without a server deciding. Anyone after that moves on to the
@@ -29,6 +30,9 @@ const WORLD_LIMIT = 2000;
 const EMOTE_IDS = new Set(EMOTES.map((emote) => emote.id));
 // More than the town has. A number that isn't a real bench just never matches one.
 const MAX_BENCH = 32;
+// A bench game sends a handful of messages a round, so anyone sending more than this is dropped
+const GAME_BURST = 30;
+const GAME_BURST_SECONDS = 10;
 
 function newId() {
   if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
@@ -118,6 +122,9 @@ export function joinRoom({ look, name, localState, onChange }) {
   let messages = [];
   let messageCount = 0;
   const limiter = createChatLimiter();
+  const gameLimiter = createChatLimiter(GAME_BURST, GAME_BURST_SECONDS);
+  // Whoever wants to hear bench game messages sent to this tab (BenchGames/useBenchGame.js)
+  const gameListeners = new Set();
 
   const peerFor = (peerId) => {
     if (!peers.has(peerId)) {
@@ -225,6 +232,7 @@ export function joinRoom({ look, name, localState, onChange }) {
     // Each lobby has its own conversation
     messages = [];
     limiter.clear();
+    gameLimiter.clear();
     status = "connecting";
     report();
 
@@ -249,6 +257,14 @@ export function joinRoom({ look, name, localState, onChange }) {
         if (!chat || chat.id === id || !peers.get(chat.id)?.inRoom) return;
         if (!limiter.allow(chat.id, performance.now())) return;
         addMessage(chat.id, chat.text);
+      },
+      onGame(message) {
+        if (!current()) return;
+        const game = readGameMessage(message);
+        // Only meant for this tab, and only from someone with a place in this lobby
+        if (!game || game.to !== id || !peers.get(game.id)?.inRoom) return;
+        if (!gameLimiter.allow(game.id, performance.now())) return;
+        gameListeners.forEach((listener) => listener(game));
       },
       onStatus(next) {
         if (!current()) return;
@@ -327,6 +343,28 @@ export function joinRoom({ look, name, localState, onChange }) {
         }
       });
       return claims;
+    },
+    // Whoever else is sat right down on this bench, as { id, name }, or null
+    benchPartner(bench) {
+      if (bench < 0) return null;
+      for (const peer of peers.values()) {
+        const latest = peer.snapshots[peer.snapshots.length - 1];
+        if (peer.inRoom && latest && latest.bench === bench && latest.sit >= 1 && !latest.away) {
+          return { id: peer.id, name: peer.name ?? chatName(peer.id) };
+        }
+      }
+      return null;
+    },
+    // Sends a bench game message to one other player. False if it couldn't go out.
+    sendGame(fields) {
+      if (!transport || !inRoom) return false;
+      transport.sendGame(writeGameMessage({ ...fields, id }));
+      return true;
+    },
+    // Hears every bench game message sent to this tab. Returns a function to stop listening.
+    listenGames(listener) {
+      gameListeners.add(listener);
+      return () => gameListeners.delete(listener);
     },
     // Says something to the lobby. False if it couldn't go out, so the text can be kept.
     say(raw) {

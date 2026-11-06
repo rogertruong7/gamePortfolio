@@ -1,16 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import Typewriter from "typewriter-effect";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 import { RESUME_NAME, RESUME_URL } from "../Helpers/resume.js";
+import { stopPrefetchingSansFight } from "../Helpers/prefetchSansFight.js";
 
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Phones have no Escape key, so they're pointed at the button instead
 const TOUCH = window.matchMedia("(pointer: coarse)").matches;
 const FADE_MS = REDUCED_MOTION ? 0 : 600;
-// If the game never starts, the player is let go rather than left stuck in the pond. They stay in
-// the upside-down town instead of jumping back to the normal one.
-const LOAD_TIMEOUT_MS = 20000;
+// The first time, the game has about 3.2 MB to download before it can start, most of it music,
+// which can take a while on a slow connection. It's given as long as it keeps getting files, and
+// only given up on once nothing more has arrived for a while, or after this long in all. Then the
+// player is jumped back out of the pond, rather than left in the upside-down town.
+const NO_PROGRESS_MS = 45000;
+const LOAD_TIMEOUT_MS = 180000;
+const PROGRESS_CHECK_MS = 250;
+// What the game downloads before its battle starts, measured from its page. Only for the bar, so
+// it doesn't matter if it's a little out.
+const FIGHT_BYTES = 3230000;
+// Long enough to read the line saying it didn't work
+const FAILED_MS = 2500;
+const FAILED_LINE = "But nothing happened.";
 // How long the game can keep the player waiting after the dive before the screen goes dark to say
 // it's on its way. Short enough that it doesn't look stuck, long enough not to flash up and vanish.
 const STALL_DELAY_MS = 300;
@@ -41,9 +52,10 @@ const Waiting = styled.div`
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.6em;
+  gap: 1.2em;
   padding: 0 clamp(20px, 6vw, 80px);
   background: black;
   color: white;
@@ -54,6 +66,62 @@ const Waiting = styled.div`
   /* Clicks go through to the game underneath, for the same reason */
   pointer-events: none;
 `;
+
+const Line = styled.div`
+  display: flex;
+  gap: 0.6em;
+`;
+
+const pulse = keyframes`
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 0.7;
+  }
+`;
+
+// How far the game has loaded, as a white box filling up like Undertale's own bars
+const LoadBar = styled.div`
+  box-sizing: border-box;
+  width: min(360px, 70vw);
+  height: 22px;
+  padding: 3px;
+  border: 3px solid white;
+`;
+
+const LoadFill = styled.div`
+  height: 100%;
+  background: white;
+  transition: width 0.25s linear;
+
+  /* Before the game can say how far along it is, the whole bar breathes instead */
+  &[data-unknown] {
+    animation: ${pulse} 0.9s ease-in-out infinite alternate;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &[data-unknown] {
+      animation: none;
+      opacity: 0.4;
+    }
+  }
+`;
+
+// How many bytes the game in the frame has finished downloading, counting files that came from
+// the cache. Its engine has a progress of its own, but that stays at nothing while its scripts and
+// music download, which is most of the wait.
+function downloadedBytes(frame) {
+  try {
+    return frame.contentWindow.performance
+      .getEntriesByType("resource")
+      .reduce((total, entry) => total + (entry.encodedBodySize || 0), 0);
+  } catch {
+    return 0;
+  }
+}
 
 // Shown under the GAME OVER screen, which waits for the player rather than ending on its own
 const ReturnHint = styled.p`
@@ -143,8 +211,8 @@ const RunAway = styled.button`
 
 // The game runs from public/sans-fight in a frame of its own. It's mounted as the jump starts, so
 // it can load during the dive, and waits paused until ready is true. Its page says when the battle
-// has started, when the player has died, and how it ended. If it isn't ready by the time the dive ends, the screen goes dark
-// with a line to say so until it is. onEnd runs as it starts fading away, and onClosed once it has,
+// has started, when the player has died, and how it ended. If it isn't ready by the time the dive
+// ends, the screen goes dark with a line and a loading bar until it is. onEnd runs as it starts fading away, and onClosed once it has,
 // with "died", "won", "fled" or "failed".
 const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
   const frameRef = useRef(null);
@@ -157,10 +225,16 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
   const [loaded, setLoaded] = useState(false);
   const [shown, setShown] = useState(false);
   const [stalled, setStalled] = useState(false);
+  const [progress, setProgress] = useState(null);
+  const [failed, setFailed] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [won, setWon] = useState(false);
   const winCardRef = useRef(null);
   const [ended, setEnded] = useState(false);
+
+  useEffect(() => {
+    stopPrefetchingSansFight();
+  }, []);
 
   const after = useCallback((ms, callback) => {
     timersRef.current.push(setTimeout(callback, ms));
@@ -191,10 +265,30 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
           if (!endedRef.current) onCovered();
         });
       }, STALL_DELAY_MS);
-      const loadTimeout = setTimeout(() => end("failed"), LOAD_TIMEOUT_MS);
+      // Says it didn't work before letting the player go, rather than just dropping them back
+      const giveUp = () => {
+        clearInterval(progressCheck);
+        clearTimeout(loadTimeout);
+        setFailed(true);
+        after(FAILED_MS, () => end("failed"));
+      };
+      const loadTimeout = setTimeout(giveUp, LOAD_TIMEOUT_MS);
+      let lastBytes = -1;
+      let lastMovedAt = performance.now();
+      const progressCheck = setInterval(() => {
+        const bytes = downloadedBytes(frameRef.current);
+        if (bytes !== lastBytes) {
+          lastBytes = bytes;
+          lastMovedAt = performance.now();
+          setProgress(bytes > 0 ? Math.min(1, bytes / FIGHT_BYTES) : null);
+        } else if (performance.now() - lastMovedAt > NO_PROGRESS_MS) {
+          giveUp();
+        }
+      }, PROGRESS_CHECK_MS);
       return () => {
         clearTimeout(stallTimeout);
         clearTimeout(loadTimeout);
+        clearInterval(progressCheck);
       };
     }
     setShown(true);
@@ -288,16 +382,34 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
         )}
         {stalled && (
           <Waiting $hidden={loaded} role="status">
-            <span aria-hidden="true">*</span>
-            {REDUCED_MOTION ? (
-              WAITING_LINE
-            ) : (
-              <Typewriter
-                options={{ delay: TYPING_DELAY }}
-                onInit={(typewriter) => {
-                  typewriter.typeString(WAITING_LINE).start();
-                }}
-              />
+            <Line>
+              <span aria-hidden="true">*</span>
+              {failed ? (
+                FAILED_LINE
+              ) : REDUCED_MOTION ? (
+                WAITING_LINE
+              ) : (
+                <Typewriter
+                  options={{ delay: TYPING_DELAY }}
+                  onInit={(typewriter) => {
+                    typewriter.typeString(WAITING_LINE).start();
+                  }}
+                />
+              )}
+            </Line>
+            {!failed && (
+              <LoadBar
+                role="progressbar"
+                aria-label="Loading the fight"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progress === null ? undefined : Math.round(progress * 100)}
+              >
+                <LoadFill
+                  data-unknown={progress === null ? "" : undefined}
+                  style={{ width: progress === null ? "100%" : `${progress * 100}%` }}
+                />
+              </LoadBar>
             )}
           </Waiting>
         )}

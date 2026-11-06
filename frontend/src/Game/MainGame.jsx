@@ -173,8 +173,9 @@ function MainGame({
   const onFightClosed = useCallback((outcome) => {
     setFightOpen(false);
     if (outcome === "won") setBeatSans(true);
-    // If it never loaded, nothing has covered the town, so it just carries on upside down
-    endFight(lakeRef.current, characterRef.current, outcome !== "failed");
+    // Every way out jumps back out of the pond. Even when the fight never loaded, the player has
+    // been looking at it loading, so they aren't left in the upside-down town.
+    endFight(lakeRef.current, characterRef.current, true);
   }, []);
 
   function playEmote(emote) {

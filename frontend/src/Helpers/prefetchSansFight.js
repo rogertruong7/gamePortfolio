@@ -13,6 +13,8 @@ const START_DELAY_MS = 3000;
 const IDLE_TIMEOUT_MS = 5000;
 
 let started = false;
+// Stops the downloads still to go, once the fight is fetching its own files
+const stopping = new AbortController();
 
 function whenIdle(callback) {
   if ("requestIdleCallback" in window) {
@@ -27,15 +29,23 @@ function whenIdle(callback) {
 async function download() {
   for (const file of FILES) {
     try {
-      const response = await fetch(file, { priority: "low" });
+      if (stopping.signal.aborted) return;
+      const response = await fetch(file, { priority: "low", signal: stopping.signal });
       // The body has to be read for the browser to keep the whole file
       await response.arrayBuffer();
     } catch (error) {
+      if (stopping.signal.aborted) return;
       // Not worth more than a warning: the fight downloads its own files when it opens anyway
       console.warn("Couldn't prefetch the Sans fight", error);
       return;
     }
   }
+}
+
+// Once the fight opens, it fetches the same files itself. A download still going here would only
+// share the connection with those, and finish no sooner, so it's stopped.
+export function stopPrefetchingSansFight() {
+  stopping.abort();
 }
 
 // Downloads the fight in the background after the town has loaded, so the first jump into the

@@ -5,8 +5,10 @@ import styled from "styled-components";
 import { SHOW_SAID_SECONDS } from "../Multiplayer/chat.js";
 
 // What a character last said, floating over their head for a few seconds after they say it
-// Measured from the feet, to just over the top of the hair
-const RISE = 46;
+
+// Measured from the feet. The head bone is about 9.6 up and the forehead about 6.4 past it, so
+// this is just over the top of the hair.
+const RISE = 20;
 // Under the HUD buttons and popups, which start at 100
 const Z_INDEX_RANGE = [99, 90];
 

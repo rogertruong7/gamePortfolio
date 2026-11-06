@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
-import resume from "../assets/RogerTruongResume.pdf";
+import { RESUME_NAME, RESUME_URL } from "../Helpers/resume.js";
 import MuteButton from "./MuteButton.jsx";
 import ContactPopup from "./ContactPopup.jsx";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
@@ -119,7 +119,7 @@ const HamburgerMenuButton = styled.button`
 const LINKS = [
   { label: "github", href: "https://github.com/rogertruong7", external: true },
   { label: "linkedin", href: "https://www.linkedin.com/in/roger-truong/", external: true },
-  { label: "download cv", href: resume, download: "RogerTruongResume.pdf" },
+  { label: "download cv", href: RESUME_URL, download: RESUME_NAME },
 ];
 
 const Links = ({ onPick }) =>

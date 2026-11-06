@@ -6,6 +6,7 @@ import arrowdown from "../assets/arrowdown.gif";
 import Typewriter from "typewriter-effect";
 import data from "./ShowcaseStatic.json";
 const aboutMeScript = data.aboutMe.script;
+const LAST_LINE = aboutMeScript.length - 1;
 
 const AboutMe = ({ setCurrentScene }) => {
   const twRef = useRef(null); // Reference to the Typewriter instance
@@ -33,7 +34,7 @@ const AboutMe = ({ setCurrentScene }) => {
         setCanClick(true);
         setSkipText(optionCount);
 
-        if (optionCount === 4) {
+        if (optionCount === LAST_LINE) {
           setEndOfText(true);
         }
       }
@@ -111,6 +112,7 @@ const AboutMe = ({ setCurrentScene }) => {
   // Render a Typewriter for the given script index
   const renderText = (index) => (
     <Typewriter
+      key={index}
       options={{ delay: 10 }}
       onInit={(typewriter) => {
         twRef.current = typewriter;
@@ -120,7 +122,7 @@ const AboutMe = ({ setCurrentScene }) => {
           )
           .callFunction(() => {
             setCanClick(true);
-            if (index === 4) {
+            if (index === LAST_LINE) {
               setEndOfText(true);
             }
           })
@@ -128,6 +130,9 @@ const AboutMe = ({ setCurrentScene }) => {
       }}
     />
   );
+
+  // Clicking on past the last line keeps it showing
+  const shownLine = Math.min(optionCount, LAST_LINE);
 
   // Simple component for instantly-rendered text
   const Text1 = ({ text, fontSize }) => <H1 fontSize={fontSize}>{text}</H1>;
@@ -142,44 +147,17 @@ const AboutMe = ({ setCurrentScene }) => {
           </ImageWrapper>
           <SelectionContainer id="selectionContainer">
             <TextContainer>
-              {optionCount === 0 &&
-                (skipText === 0 ? (
-                  <Text1 fontSize={fontSize} text={aboutMeScript[0]}></Text1>
+              {optionCount >= 0 &&
+                (skipText >= shownLine ? (
+                  <Text1 key={shownLine} fontSize={fontSize} text={aboutMeScript[shownLine]} />
                 ) : (
-                  renderText(0)
+                  renderText(shownLine)
                 ))}
-              {optionCount === 1 &&
-                (skipText === 1 ? (
-                  <Text1 fontSize={fontSize} text={aboutMeScript[1]} />
-                ) : (
-                  renderText(1)
-                ))}
-
-              {optionCount === 2 &&
-                (skipText === 2 ? (
-                  <Text1 fontSize={fontSize} text={aboutMeScript[2]} />
-                ) : (
-                  renderText(2)
-                ))}
-
-              {optionCount === 3 &&
-                (skipText === 3 ? (
-                  <Text1 fontSize={fontSize} text={aboutMeScript[3]} />
-                ) : (
-                  renderText(3)
-                ))}
-
-              {optionCount >= 4 &&
-                (skipText >= 4 ? (
-                  <Text1 fontSize={fontSize} text={aboutMeScript[4]} />
-                ) : (
-                  renderText(4)
-                ))}
-              {optionCount < 4 && canClick && (
+              {optionCount < LAST_LINE && canClick && (
                 <img style={arrowStyle} src={arrowdown} />
               )}
             </TextContainer>
-            {optionCount >= 4 && endOfText && (
+            {optionCount >= LAST_LINE && endOfText && (
               <ExitButton onClick={() => setCurrentScene(0)}>Exit</ExitButton>
             )}
           </SelectionContainer>

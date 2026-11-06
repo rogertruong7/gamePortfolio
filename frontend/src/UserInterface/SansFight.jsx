@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import Typewriter from "typewriter-effect";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
-import resume from "../assets/RogerTruongResume.pdf";
+import { RESUME_NAME, RESUME_URL } from "../Helpers/resume.js";
 
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Phones have no Escape key, so they're pointed at the button instead
@@ -152,7 +152,7 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
   const timersRef = useRef([]);
   // The site's mute setting only matters as the game loads
   const src = useRef(
-    `/sans-fight/index.html?mode=normal&resume=${encodeURIComponent(resume)}${muted ? "&muted" : ""}`
+    `/sans-fight/index.html?mode=normal&resume=${encodeURIComponent(RESUME_URL)}${muted ? "&muted" : ""}`
   ).current;
   const [loaded, setLoaded] = useState(false);
   const [shown, setShown] = useState(false);
@@ -273,8 +273,8 @@ const SansFight = ({ ready, muted, onCovered, onEnd, onClosed }) => {
             <p>* You earned 0 EXP. No hire this time.</p>
             <p>* But my resume&apos;s still worth a look.</p>
             <ResumeLink
-              href={resume}
-              download="RogerTruongResume.pdf"
+              href={RESUME_URL}
+              download={RESUME_NAME}
               onClick={(event) => event.stopPropagation()}
             >
               Download resume

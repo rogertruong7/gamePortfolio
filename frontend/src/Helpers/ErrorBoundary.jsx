@@ -1,6 +1,6 @@
 import { Component } from "react";
 import styled from "styled-components";
-import resume from "../assets/RogerTruongResume.pdf";
+import { RESUME_NAME, RESUME_URL } from "./resume.js";
 import { allEntries } from "../Pages/catalog.js";
 import { body, crimson, ink, inkSoft, pixel } from "../UserInterface/Modal.jsx";
 
@@ -15,7 +15,7 @@ const Fallback = () => (
         it is still here.
       </p>
       <Actions>
-        <a href={resume} target="_blank" rel="noreferrer" download="RogerTruongResume.pdf">
+        <a href={RESUME_URL} target="_blank" rel="noreferrer" download={RESUME_NAME}>
           Download CV
         </a>
         <button type="button" onClick={() => window.location.assign("/")}>

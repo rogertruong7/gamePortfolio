@@ -236,10 +236,10 @@ public/
   models/          — GLB 3D models (buildings, character, floor, cherry trees)
   videos/          — Click-through demo films and posters
   fonts/           — PixelifySans JSON font for three.js Text geometry
+  RogerTruongResume.pdf — at a fixed address, so it keeps its name when downloaded
 
 src/assets/
   roomArt/         — Pixel art cat illustrations (one per section)
-  RogerTruongResume.pdf
   arrowdown.gif    — "click to continue" indicator
   TriangleRight.svg
 ```

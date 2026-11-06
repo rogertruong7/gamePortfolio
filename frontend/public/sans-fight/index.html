@@ -109,7 +109,7 @@
         // The ACT options are Roger's links and a way to email him, sparing him gets you his
         // resume, and dying has you email him a job offer.
         // The game runs these by name when they're picked, and the page does the rest. The site
-        // passes the resume's address, since its file name changes with every build.
+        // passes the resume's address (Helpers/resume.js).
         const resume = new URLSearchParams(location.search).get("resume");
         const RESUME_NAME = "RogerTruongResume.pdf";
         const LINKS = {

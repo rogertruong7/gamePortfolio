@@ -5,7 +5,7 @@
 // it, tabs open on the same device still find each other through a BroadcastChannel.
 
 // The anon key is meant to be public: it only lets a browser join Realtime channels, and this
-// channel holds nothing but where each character is and what it's wearing.
+// channel holds nothing but where each character is, what it's wearing and what it says.
 const env = import.meta.env ?? {};
 // The dashboard also shows the project's REST address, which ends in /rest/v1. The client wants
 // the project's own address, so that ending is taken off if it was copied in by mistake.
@@ -44,6 +44,7 @@ export async function createSupabaseTransport(id, handlers, name) {
       handlers.onMembers(members);
     })
     .on("broadcast", { event: "state" }, ({ payload }) => handlers.onMessage(payload))
+    .on("broadcast", { event: "chat" }, ({ payload }) => handlers.onChat(payload))
     .subscribe((status) => {
       joined = status === "SUBSCRIBED";
       // After a dropped connection the room works out again whether this tab has a place, and
@@ -61,6 +62,9 @@ export async function createSupabaseTransport(id, handlers, name) {
     send(message) {
       if (joined) channel.send({ type: "broadcast", event: "state", payload: message });
     },
+    sendChat(message) {
+      if (joined) channel.send({ type: "broadcast", event: "chat", payload: message });
+    },
     close() {
       client.removeChannel(channel);
     },
@@ -75,7 +79,7 @@ const FORGET_SECONDS = 7;
 export function createLocalTransport(id, handlers, name) {
   if (typeof BroadcastChannel === "undefined") {
     handlers.onStatus("offline");
-    return { setPresence() {}, clearPresence() {}, send() {}, close() {} };
+    return { setPresence() {}, clearPresence() {}, send() {}, sendChat() {}, close() {} };
   }
   const channel = new BroadcastChannel(`portfolio-${name}`);
   const others = new Map();
@@ -108,6 +112,8 @@ export function createLocalTransport(id, handlers, name) {
       const other = others.get(data.id);
       if (other) other.heard = performance.now();
       handlers.onMessage(data.message);
+    } else if (data.kind === "chat") {
+      handlers.onChat(data.message);
     }
   };
 
@@ -139,6 +145,9 @@ export function createLocalTransport(id, handlers, name) {
     },
     send(message) {
       channel.postMessage({ kind: "state", id, message });
+    },
+    sendChat(message) {
+      channel.postMessage({ kind: "chat", id, message });
     },
     close() {
       closed = true;

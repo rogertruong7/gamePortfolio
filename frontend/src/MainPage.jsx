@@ -15,6 +15,7 @@ import Skills from "./Pages/Skills.jsx";
 import Experiences from "./Pages/Experiences.jsx";
 import HelpPopup from "./UserInterface/HelpPopup.jsx";
 import PlayerCount from "./UserInterface/PlayerCount.jsx";
+import Chat from "./UserInterface/Chat.jsx";
 import Wardrobe from "./UserInterface/Wardrobe.jsx";
 import WardrobeButton from "./UserInterface/WardrobeButton.jsx";
 import { AudioProvider, useAudio } from "./Audio/AudioContext.jsx";
@@ -152,6 +153,7 @@ const MainPage = () => {
           {currentScene === 0 && (
             <>
               <PlayerCount room={room} />
+              <Chat room={room} />
               <WardrobeButton onOpen={() => setShowWardrobe(true)} />
             </>
           )}

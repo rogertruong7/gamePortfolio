@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { joinRoom } from "./room.js";
 
 // Joins a lobby of the town once enabled and stays until the page goes. localState is where the character
@@ -8,7 +8,14 @@ export function useRoom(look, enabled) {
   const localState = useRef({ ready: false });
   const roomRef = useRef(null);
   const lookRef = useRef(look);
-  const [room, setRoom] = useState({ status: "connecting", lobby: 1, count: 0, peers: [] });
+  const [room, setRoom] = useState({
+    status: "connecting",
+    lobby: 1,
+    count: 0,
+    peers: [],
+    messages: [],
+    name: "",
+  });
   // The room leaves on pagehide, so a page brought back from the back/forward cache joins again
   const [visit, setVisit] = useState(0);
 
@@ -35,5 +42,7 @@ export function useRoom(look, enabled) {
     roomRef.current?.setLook(look);
   }, [look]);
 
-  return { ...room, localState, roomRef };
+  const say = useCallback((text) => roomRef.current?.say(text) ?? false, []);
+
+  return { ...room, say, localState, roomRef };
 }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import ChromeFrame from "./ChromeFrame.jsx";
 import { crimson, ink, inkSoft, pixel } from "./Modal.jsx";
-import { PeopleIcon, ShirtIcon } from "./HudIcons.jsx";
+import { ChatIcon, PeopleIcon, ShirtIcon } from "./HudIcons.jsx";
 import { ROOM_SIZE } from "../Multiplayer/room.js";
 
 const Key = ({ children }) => (
@@ -177,6 +177,19 @@ const ControlsList = ({ showReset = false }) => {
         Up to {ROOM_SIZE} visitors share a town and see each other&apos;s looks. When it&apos;s
         full, the next visitors get a town of their own. The count is in the top left, or in the
         menu on a phone.
+      </Row>
+      <Row
+        input={
+          <Chip>
+            <ChatIcon size={18} />
+            chat
+            <ChromeFrame />
+          </Chip>
+        }
+      >
+        {touchOnly
+          ? "Talk to the others in your town. Tap the chat button in the bottom left."
+          : "Talk to the others in your town. Press Enter to start typing."}
       </Row>
       {showReset && (
         <Row

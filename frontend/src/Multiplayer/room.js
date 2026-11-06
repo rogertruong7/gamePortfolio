@@ -1,5 +1,6 @@
 import { EMOTES } from "../Game/emotes.js";
 import { sameLook, sanitizeLook } from "../Game/look/lookOptions.js";
+import { KEEP_MESSAGES, chatName, cleanChat, createChatLimiter, readChat } from "./chat.js";
 import { HAS_SERVER, createLocalTransport, createSupabaseTransport } from "./transports.js";
 
 // Each lobby holds this many characters at once. The first ten to arrive in it get the places, so
@@ -76,7 +77,8 @@ export function pickPlaces(present, me) {
 
 // Joins the first lobby with a free place and keeps up with everyone else in it. localState is
 // read for this character's own position each time one goes out. onChange hears who is in the
-// lobby, and peers holds everyone's latest snapshots for drawing each frame.
+// lobby and what's been said there, and peers holds everyone's latest snapshots for drawing each
+// frame.
 export function joinRoom({ look, localState, onChange }) {
   const id = newId();
   // Everyone else known about in this lobby, by id. Snapshots can arrive before the presence that
@@ -97,6 +99,10 @@ export function joinRoom({ look, localState, onChange }) {
   let lastSent = null;
   let lastSentAt = 0;
   let members = [];
+  // What's been said in this lobby since arriving, oldest first
+  let messages = [];
+  let messageCount = 0;
+  const limiter = createChatLimiter();
 
   const peerFor = (peerId) => {
     if (!peers.has(peerId)) {
@@ -112,6 +118,8 @@ export function joinRoom({ look, localState, onChange }) {
       lobby,
       count: occupants.length + (inRoom ? 1 : 0),
       peers: occupants.map(({ id: peerId, look: peerLook }) => ({ id: peerId, look: peerLook })),
+      messages,
+      name: chatName(id),
     });
   };
 
@@ -198,6 +206,9 @@ export function joinRoom({ look, localState, onChange }) {
     connection = "connecting";
     lastSent = null;
     peers.clear();
+    // Each lobby has its own conversation
+    messages = [];
+    limiter.clear();
     status = "connecting";
     report();
 
@@ -214,6 +225,14 @@ export function joinRoom({ look, localState, onChange }) {
         const peer = peerFor(state.id);
         peer.snapshots.push({ ...state, at: performance.now() });
         if (peer.snapshots.length > KEEP_SNAPSHOTS) peer.snapshots.shift();
+      },
+      onChat(message) {
+        if (!current()) return;
+        const chat = readChat(message);
+        // Only someone with a place in this lobby can be heard in it
+        if (!chat || chat.id === id || !peers.get(chat.id)?.inRoom) return;
+        if (!limiter.allow(chat.id, performance.now())) return;
+        addMessage(chat.id, chat.text);
       },
       onStatus(next) {
         if (!current()) return;
@@ -250,6 +269,15 @@ export function joinRoom({ look, localState, onChange }) {
       });
   }
 
+  const addMessage = (from, text) => {
+    messageCount += 1;
+    messages = [
+      ...messages,
+      { key: messageCount, from: from === id ? null : chatName(from), mine: from === id, text },
+    ].slice(-KEEP_MESSAGES);
+    report();
+  };
+
   const timer = setInterval(() => sendState(), SEND_EVERY_MS);
   enter(1);
 
@@ -274,6 +302,15 @@ export function joinRoom({ look, localState, onChange }) {
         }
       });
       return claims;
+    },
+    // Says something to the lobby. False if it couldn't go out, so the text can be kept.
+    say(raw) {
+      const text = cleanChat(raw);
+      if (!text || !transport || !inRoom) return false;
+      if (!limiter.allow(id, performance.now())) return false;
+      transport.sendChat({ id, t: text });
+      addMessage(id, text);
+      return true;
     },
     setLook(next) {
       myLook = next;

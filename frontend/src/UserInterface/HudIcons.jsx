@@ -1,4 +1,4 @@
-// Pixel icons for the wardrobe and the player count, drawn on a grid like the help popup's
+// Pixel icons for the wardrobe, the player count and the chat, drawn on a grid like the help popup's
 
 export const ShirtIcon = ({ size = 22 }) => (
   <svg
@@ -26,5 +26,18 @@ export const PeopleIcon = ({ size = 20 }) => (
   >
     <path fill="currentColor" opacity="0.55" d="M9 0h3v1h1v3h-1v1H9V4H8V1h1zM8 6h5v1h1v4H9V8H8z" />
     <path fill="currentColor" d="M3 1h3v1h1v3H6v1H3V5H2V2h1zM1 7h7v1h1v3H0V8h1z" />
+  </svg>
+);
+
+export const ChatIcon = ({ size = 22 }) => (
+  <svg
+    viewBox="0 0 14 12"
+    width={size}
+    height={(size * 12) / 14}
+    shapeRendering="crispEdges"
+    aria-hidden="true"
+  >
+    <path fill="currentColor" d="M2 0h10v1h1v1h1v6h-1v1h-1v1H6v1H4v1H3V9H2V8H1V7H0V2h1V1h1z" />
+    <path fill="#fff" d="M3 4h2v2H3zM6 4h2v2H6zM9 4h2v2H9z" />
   </svg>
 );

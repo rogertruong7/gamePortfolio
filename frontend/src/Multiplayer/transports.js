@@ -67,8 +67,10 @@ export async function createSupabaseTransport(id, handlers, name) {
     sendChat(message) {
       if (joined) channel.send({ type: "broadcast", event: "chat", payload: message });
     },
+    // False while the channel isn't joined, so the game knows it didn't go out
     sendGame(message) {
       if (joined) channel.send({ type: "broadcast", event: "game", payload: message });
+      return joined;
     },
     close() {
       client.removeChannel(channel);
@@ -89,7 +91,9 @@ export function createLocalTransport(id, handlers, name) {
       clearPresence() {},
       send() {},
       sendChat() {},
-      sendGame() {},
+      sendGame() {
+        return false;
+      },
       close() {},
     };
   }
@@ -165,6 +169,7 @@ export function createLocalTransport(id, handlers, name) {
     },
     sendGame(message) {
       channel.postMessage({ kind: "game", id, message });
+      return true;
     },
     close() {
       closed = true;

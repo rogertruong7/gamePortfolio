@@ -9,6 +9,9 @@ const COUNTDOWN_MS = 3000;
 const NEXT_WORD_AFTER_MS = 2500;
 const TICK_MS = 50;
 
+// Just under the longest time protocol.js accepts, so a very slow round still gets through
+const MAX_TIME_MS = 599999;
+
 const seconds = (ms) => (typeof ms === "number" ? `${(ms / 1000).toFixed(2)}s` : "—");
 
 // The one who sent the invite picks each word and sends it over. Both count down from when it
@@ -82,8 +85,9 @@ const TypeRace = ({ host, partnerName, match, again, sendMove, listenMoves, onAg
     (time) => {
       const r = race.current;
       if (r.myTime !== undefined) return;
-      r.myTime = time;
-      sendMove("typed", { round: r.round, time });
+      // Kept exactly as it goes over the wire, so both screens compare the same two numbers
+      r.myTime = time === null ? null : Math.min(Math.round(time), MAX_TIME_MS);
+      sendMove("typed", { round: r.round, time: r.myTime });
       settle();
       redraw();
     },

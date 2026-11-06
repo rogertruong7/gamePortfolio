@@ -53,8 +53,11 @@ const ConnectFour = ({ host, partnerName, match, again, sendMove, listenMoves, o
   );
 
   const play = (column) => {
-    if (!myTurn || !canDrop(game.board, column)) return;
-    const move = game.moves;
+    // The ref, not this render's game, so two quick clicks can't both count as this player's go
+    const current = gameRef.current;
+    if (findLine(current.board) || isFull(current.board)) return;
+    if (turnAfter(current.moves, match) !== me || !canDrop(current.board, column)) return;
+    const move = current.moves;
     if (place(column, me)) sendMove("drop", { move, column });
   };
 

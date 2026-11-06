@@ -113,7 +113,10 @@ const BenchGames = ({ roomRef, partner, seated }) => {
 const PlayButton = ({ onPress }) => {
   useEffect(() => {
     const onKeyDown = (event) => {
-      if (event.key.toLowerCase() === "g" && !event.repeat && !isModalOpen()) onPress();
+      if (event.key.toLowerCase() !== "g" || event.repeat || isModalOpen()) return;
+      // Ctrl+G and the like are the browser's
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      onPress();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);

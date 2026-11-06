@@ -34,7 +34,7 @@ const MAX_BENCH = 32;
 const GAME_BURST = 30;
 const GAME_BURST_SECONDS = 10;
 
-function newId() {
+export function newId() {
   if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
@@ -358,8 +358,7 @@ export function joinRoom({ look, name, localState, onChange }) {
     // Sends a bench game message to one other player. False if it couldn't go out.
     sendGame(fields) {
       if (!transport || !inRoom) return false;
-      transport.sendGame(writeGameMessage({ ...fields, id }));
-      return true;
+      return transport.sendGame(writeGameMessage({ ...fields, id }));
     },
     // Hears every bench game message sent to this tab. Returns a function to stop listening.
     listenGames(listener) {

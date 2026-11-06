@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { keepsOwnInvite } from "./protocol.js";
-
-function newSessionId() {
-  if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-}
+import { newId as newSessionId } from "../Multiplayer/room.js";
 
 // A game between the two on a bench, from picking one to playing it. session is null with nothing
 // going on, or { id, game, host, partner, phase, match, again, note }:
@@ -43,6 +39,16 @@ export function useBenchGame(roomRef, partner, seated) {
       );
     },
     [roomRef]
+  );
+
+  // Lets the other player know this end is done with whatever was going on
+  const sendEnd = useCallback(
+    (phase) => {
+      if (phase === "inviting") send("cancel");
+      if (phase === "invited") send("decline");
+      if (phase === "playing") send("leave");
+    },
+    [send]
   );
 
   const deliver = useCallback(() => {
@@ -136,9 +142,7 @@ export function useBenchGame(roomRef, partner, seated) {
     if (!current) return;
     if (seated && partnerId === current.partner.id) return;
     if (!seated) {
-      if (current.phase === "inviting") send("cancel");
-      if (current.phase === "invited") send("decline");
-      if (current.phase === "playing") send("leave");
+      sendEnd(current.phase);
       update(null);
       return;
     }
@@ -147,7 +151,7 @@ export function useBenchGame(roomRef, partner, seated) {
     } else if (current.phase !== "over") {
       update(null);
     }
-  }, [seated, partnerId, send, update]);
+  }, [seated, partnerId, sendEnd, update]);
 
   const actions = {
     openMenu() {
@@ -179,10 +183,7 @@ export function useBenchGame(roomRef, partner, seated) {
     },
     // Says no to an invite, takes one back, leaves a game or closes the menu
     close() {
-      const current = sessionRef.current;
-      if (current?.phase === "inviting") send("cancel");
-      if (current?.phase === "invited") send("decline");
-      if (current?.phase === "playing") send("leave");
+      sendEnd(sessionRef.current?.phase);
       update(null);
     },
     askAgain() {
@@ -195,8 +196,7 @@ export function useBenchGame(roomRef, partner, seated) {
     },
   };
 
-  // For the game on screen: sends one of its moves, and hears the other player's
-  const sendMove = useCallback((kind, fields) => send(kind, fields), [send]);
+  // For the game on screen: send sends one of its moves, and this hears the other player's
   const listenMoves = useCallback(
     (match, listener) => {
       const entry = { match, listener };
@@ -209,5 +209,5 @@ export function useBenchGame(roomRef, partner, seated) {
     [deliver]
   );
 
-  return { session, ...actions, sendMove, listenMoves };
+  return { session, ...actions, sendMove: send, listenMoves };
 }

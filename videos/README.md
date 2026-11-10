@@ -1,6 +1,6 @@
 # Project demo films
 
-Silent click-through demos for the project pages. A script drives the real app in a browser, then HyperFrames composes the footage with title and end cards, click markers and popups. Finished films go to `frontend/public/videos/<slug>.{mp4,jpg}`.
+Silent click-through demos for the project pages. A script drives the real app in a browser, then HyperFrames composes the footage with title and end cards, click markers and popups. Finished films go to `web/public/videos/<slug>.{mp4,jpg}`.
 
 ```bash
 npm install
@@ -9,7 +9,7 @@ node lib/compose.mjs <slug> --draft   # quick render, for checking
 node lib/compose.mjs <slug>           # final render and compress
 ```
 
-To show a film on its page, add `"video": true` to `frontend/src/content/<slug>.json`.
+To show a film on its page, add `"video": true` to `web/src/content/<slug>.json`.
 
 ## Writing a demo
 

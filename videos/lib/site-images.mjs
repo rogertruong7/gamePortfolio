@@ -1,4 +1,4 @@
-// Generates the site's favicon set and link-preview image into frontend/public.
+// Generates the site's favicon set and link-preview image into web/public.
 // Needs the dev server on localhost:5299, because the thumbnail uses a real render of the town.
 // Usage: node lib/site-images.mjs [--reuse-town]
 import { chromium } from "playwright";
@@ -9,7 +9,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const pub = path.resolve(root, "..", "frontend", "public");
+const pub = path.resolve(root, "..", "web", "public");
 const townFile = path.join(os.tmpdir(), "portfolio-town.png");
 const SITE = "http://localhost:5299";
 

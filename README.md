@@ -9,7 +9,7 @@ Built with React 18, react-three-fiber, and styled-components. Deployed on Verce
 - **Framework:** React 18 (Vite, JSX)
 - **3D Rendering:** react-three-fiber + drei (Three.js)
 - **Styling:** styled-components
-- **Content:** MDX pages plus JSON metadata in `frontend/src/content`
+- **Content:** MDX pages plus JSON metadata in `web/src/content`
 - **Demo films:** HyperFrames click-through videos, see `videos/README.md`
 - **Routing:** react-router-dom v7
 - **Multiplayer:** Supabase Realtime (presence and broadcast), 10 visitors per town, with more towns opening as each fills
@@ -23,7 +23,7 @@ scripts/               # Shell utilities (run from repo root)
 ├── optimise.sh        # Compress GLB models with gltf-transform
 ├── search.sh          # Grep wrapper for source code
 └── dangerous-delete.sh # Delete lines matching a pattern (destructive)
-frontend/
+web/
 ├── public/
 │   ├── models/          # GLB 3D models (buildings, character, trees, floor)
 │   ├── videos/          # Click-through demo films and posters
@@ -53,4 +53,4 @@ Each project has a shareable direct URL (e.g. `/projects/balatro`) and renders i
 
 ## Adding a New Project
 
-Add `<slug>.json` and `<slug>.mdx` to `frontend/src/content/`. That creates the menu option, the page and the route; copy an existing entry for the JSON shape. To film a demo, see `videos/README.md`.
+Add `<slug>.json` and `<slug>.mdx` to `web/src/content/`. That creates the menu option, the page and the route; copy an existing entry for the JSON shape. To film a demo, see `videos/README.md`.

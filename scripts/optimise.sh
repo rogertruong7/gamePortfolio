@@ -9,7 +9,7 @@
 # Usage (run from the repo root):
 #   ./scripts/optimise.sh
 
-MODELS_DIR="frontend/public/models"
+MODELS_DIR="web/public/models"
 
 models=("floor" "cherryTree2" "cherryTree3" "cherryTree1" "floorDetails" "leftBuildingsNew" "rightBuildingsNew")
 

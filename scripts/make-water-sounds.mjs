@@ -1,4 +1,4 @@
-// Synthesises the two water sounds into frontend/public/audio, so there's no licence to track.
+// Synthesises the two water sounds into web/public/audio, so there's no licence to track.
 // Change the numbers and run it again to retune them. Needs ffmpeg.
 //
 // Usage (run from the repo root):
@@ -11,7 +11,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 const RATE = 44100;
-const AUDIO_DIR = "frontend/public/audio";
+const AUDIO_DIR = "web/public/audio";
 const WADING_SECONDS = 3.2;
 const WADING_STEPS = 10;
 

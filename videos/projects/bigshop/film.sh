@@ -2,7 +2,7 @@
 # Refilms this project's demo from nothing: copies the app, starts a throwaway database and the mocks,
 # records, composes, and stops whatever it started. Run it from anywhere.
 #
-#   videos/projects/bigshop/film.sh            final render to frontend/public/videos/bigshop.{mp4,jpg}
+#   videos/projects/bigshop/film.sh            final render to web/public/videos/bigshop.{mp4,jpg}
 #   videos/projects/bigshop/film.sh --draft    quick render, for checking
 #
 # APP_SOURCE overrides where the app is copied from. The source is only ever read.
@@ -197,4 +197,4 @@ fi
 
 say "composing"
 node lib/compose.mjs bigshop ${COMPOSE_FLAGS[@]+"${COMPOSE_FLAGS[@]}"}
-say "done: $(cd "$VIDEOS/.." && pwd)/frontend/public/videos/bigshop.mp4"
+say "done: $(cd "$VIDEOS/.." && pwd)/web/public/videos/bigshop.mp4"

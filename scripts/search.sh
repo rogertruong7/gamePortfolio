@@ -3,7 +3,7 @@
 # Usage: ./search_string.sh "string_to_search" /path/to/directory
 
 search_string=$1
-directory=${2:-'frontend/src'} # Default to current directory if no directory is provided
+directory=${2:-'web/src'} # Default to current directory if no directory is provided
 
 if [ -z "$search_string" ]; then
   echo "Usage: $0 \"string_to_search\" [directory]"

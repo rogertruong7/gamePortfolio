@@ -1,5 +1,5 @@
 // Turns a recorded take into a finished click-through film: HyperFrames project -> check ->
-// render -> compressed mp4 + poster in frontend/public/videos.
+// render -> compressed mp4 + poster in web/public/videos.
 // Usage: node lib/compose.mjs <slug> [--draft] [--no-render]
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -186,7 +186,7 @@ export function compose(slug, { draft = false, render = true } = {}) {
   const bin = path.join(root, "node_modules", ".bin", "hyperframes");
   const raw = path.join(dir, "render.mp4");
   run(bin, ["render", "--quality", draft ? "draft" : "looks", "--fps", String(FPS), "--output", raw], dir);
-  const outDir = path.resolve(root, "..", "frontend", "public", "videos");
+  const outDir = path.resolve(root, "..", "web", "public", "videos");
   fs.mkdirSync(outDir, { recursive: true });
   const out = path.join(outDir, `${slug}.mp4`);
   run("ffmpeg", ["-y", "-loglevel", "error", "-i", raw, "-an", "-c:v", "libx264", "-preset", "slow", "-crf", "27", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out], dir);

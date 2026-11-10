@@ -131,3 +131,44 @@ test("game messages survive the trip and junk is thrown away", () => {
 test("when both invite at once, exactly one invite is kept", () => {
   assert.notEqual(keepsOwnInvite("a", "b"), keepsOwnInvite("b", "a"));
 });
+
+test("play messages carry flat game data and anything odd is thrown away", async () => {
+  const { readPlayData } = await import("../src/BenchGames/protocol.js");
+  const base = { id: "a", to: "b", session: "s1", match: 0 };
+  const data = { turn: 3, cells: [1, 2, 3], word: "lantern", words: ["cat", "dog"] };
+  const read = readGameMessage(writeGameMessage({ ...base, kind: "play", data }));
+  assert.deepEqual(read.data, data);
+
+  assert.equal(readPlayData(null), null);
+  assert.equal(readPlayData([1, 2]), null);
+  assert.equal(readPlayData({ nested: { a: 1 } }), null);
+  assert.equal(readPlayData({ Bad: 1 }), null);
+  assert.equal(readPlayData({ word: "<script>" }), null);
+  assert.equal(readPlayData({ x: Infinity }), null);
+  assert.equal(readPlayData({ x: 1e7 }), null);
+  assert.equal(readPlayData({ list: Array(65).fill(0) }), null);
+  assert.equal(readPlayData({ list: [[1]] }), null);
+  const many = Object.fromEntries(Array.from({ length: 17 }, (_, i) => [`k${i}`, i]));
+  assert.equal(readPlayData(many), null);
+  assert.equal(readGameMessage({ id: "a", to: "b", s: "s1", k: "play", d: { a: {} } }), null);
+});
+
+test("the same seed gives the same numbers on both screens", async () => {
+  const { seededRandom, newSeed } = await import("../src/BenchGames/random.js");
+  const a = seededRandom(1234);
+  const b = seededRandom(1234);
+  const first = Array.from({ length: 5 }, a);
+  assert.deepEqual(first, Array.from({ length: 5 }, b));
+  assert.ok(first.every((n) => n >= 0 && n < 1));
+  assert.notDeepEqual(first, Array.from({ length: 5 }, seededRandom(1235)));
+  const seed = newSeed();
+  assert.ok(Number.isInteger(seed) && seed >= 0 && seed < 1e6);
+});
+
+test("every game in the picker has a screen", async () => {
+  const { GAMES } = await import("../src/BenchGames/protocol.js");
+  const ids = GAMES.map((game) => game.id);
+  assert.equal(new Set(ids).size, ids.length);
+  assert.ok(ids.every((id) => /^[a-z0-9]+$/.test(id)));
+  assert.equal(ids.length, 15);
+});

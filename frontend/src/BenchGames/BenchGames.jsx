@@ -7,8 +7,36 @@ import { GAMES, gameName } from "./protocol.js";
 import ConnectFour from "./ConnectFour.jsx";
 import RockPaperScissors from "./RockPaperScissors.jsx";
 import TypeRace from "./TypeRace.jsx";
+import WordHunt from "./WordHunt.jsx";
+import Anagrams from "./Anagrams.jsx";
+import SeaBattle from "./SeaBattle.jsx";
+import DotsAndBoxes from "./DotsAndBoxes.jsx";
+import FiveInARow from "./FiveInARow.jsx";
+import Checkers from "./Checkers.jsx";
+import Pool from "./Pool.jsx";
+import CupToss from "./CupToss.jsx";
+import MiniGolf from "./MiniGolf.jsx";
+import Darts from "./Darts.jsx";
+import Hoops from "./Hoops.jsx";
+import Archery from "./Archery.jsx";
 
-const SCREENS = { connect4: ConnectFour, rps: RockPaperScissors, typing: TypeRace };
+const SCREENS = {
+  connect4: ConnectFour,
+  rps: RockPaperScissors,
+  typing: TypeRace,
+  wordhunt: WordHunt,
+  anagrams: Anagrams,
+  seabattle: SeaBattle,
+  dots: DotsAndBoxes,
+  gomoku: FiveInARow,
+  checkers: Checkers,
+  pool: Pool,
+  cuptoss: CupToss,
+  minigolf: MiniGolf,
+  darts: Darts,
+  hoops: Hoops,
+  archery: Archery,
+};
 
 // Two people in the town can play a game together. One picks it, the other says yes, and it opens
 // for both of them. games is from useBenchGame. partner is whoever else is sat on this player's
@@ -32,6 +60,7 @@ const BenchGames = ({ games, partner, seated }) => {
         actionLabel="Never mind"
         onClose={games.close}
         closeOnBackdrop
+        wide
       >
         <Options>
           {GAMES.map((game) => (
@@ -143,9 +172,11 @@ const PlayGamesButton = styled.button`
   cursor: pointer;
 `;
 
+// Two across where there's room, as there are a good few games to pick from
 const Options = styled.div`
   display: grid;
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
 `;
 
 const Option = styled.button`
@@ -153,7 +184,7 @@ const Option = styled.button`
   position: relative;
   display: block;
   width: 100%;
-  padding: 16px 22px;
+  padding: 12px 18px;
   text-align: left;
   color: ${ink};
   cursor: pointer;
@@ -161,14 +192,14 @@ const Option = styled.button`
 
 const OptionName = styled.span`
   display: block;
-  font: 600 24px / 1.2 ${pixel};
+  font: 600 21px / 1.2 ${pixel};
 `;
 
 const OptionBlurb = styled.span`
   display: block;
   margin-top: 4px;
   color: ${inkSoft};
-  font-size: 16px;
+  font-size: 14px;
   font-family: "Zen Kaku Gothic New", system-ui, sans-serif;
 `;
 

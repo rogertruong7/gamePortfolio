@@ -11,6 +11,9 @@ import { newId as newSessionId } from "../Multiplayer/room.js";
 // - match counts rematches, and again says who has asked for the next one
 // players is everyone else in the lobby (room.peers), online is whether this tab has a place in
 // it, and active is whether a game can be played right now (in the town, not inside a building).
+// How long the other player can be missing from the room before the game gives up on them
+const PARTNER_GONE_MS = 6000;
+
 export function useBenchGame(roomRef, players, online, active) {
   const [session, setSession] = useState(null);
   const sessionRef = useRef(null);
@@ -84,7 +87,11 @@ export function useBenchGame(roomRef, players, online, active) {
   const onMessage = useCallback(
     (message) => {
       const current = sessionRef.current;
-      const known = playersRef.current.find((player) => player.id === message.id);
+      // The one already being played with is still heard if they've dropped off the list for a
+      // moment (room.js has already checked they have a place in this lobby)
+      const known =
+        playersRef.current.find((player) => player.id === message.id) ??
+        (current?.partner.id === message.id ? current.partner : null);
       if (!known) return;
       const from = { id: known.id, name: known.name };
 
@@ -167,18 +174,33 @@ export function useBenchGame(roomRef, players, online, active) {
     update(null);
   }, [active, sendEnd, update]);
 
-  // So does the other one leaving the town
+  // So does the other one leaving the town. The list of who's here can drop someone for a moment,
+  // while their tab is in the background or the lobby reconnects, so they only count as gone once
+  // they've been missing for a while.
+  const goneTimer = useRef(null);
   useEffect(() => {
     const current = sessionRef.current;
-    if (!current || current.phase === "over") return;
-    if (players.some((player) => player.id === current.partner.id)) return;
-    const note = `${current.partner.name} left the town.`;
-    if (current.phase === "playing" || current.phase === "inviting") {
-      update({ ...current, phase: "over", note });
-    } else {
-      update(null);
+    const isHere = (id) => playersRef.current.some((player) => player.id === id);
+    if (!current || current.phase === "over" || isHere(current.partner.id)) {
+      clearTimeout(goneTimer.current);
+      goneTimer.current = null;
+      return;
     }
-  }, [players, update]);
+    if (goneTimer.current) return;
+    goneTimer.current = setTimeout(() => {
+      goneTimer.current = null;
+      const now = sessionRef.current;
+      if (!now || now.phase === "over" || isHere(now.partner.id)) return;
+      const note = `${now.partner.name} left the town.`;
+      if (now.phase === "playing" || now.phase === "inviting") {
+        update({ ...now, phase: "over", note });
+      } else {
+        update(null);
+      }
+    }, PARTNER_GONE_MS);
+  }, [players, session, update]);
+
+  useEffect(() => () => clearTimeout(goneTimer.current), []);
 
   const actions = {
     // Opens the list of games to ask partner ({ id, name }) to play. Does nothing while already

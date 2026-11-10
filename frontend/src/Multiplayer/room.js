@@ -11,10 +11,10 @@ import {
 import { HAS_SERVER, createLocalTransport, createSupabaseTransport } from "./transports.js";
 import { readGameMessage, writeGameMessage } from "../BenchGames/protocol.js";
 
-// Each lobby holds this many characters at once. The first ten to arrive in it get the places, so
-// everyone works out the same ten without a server deciding. Anyone after that moves on to the
-// next lobby, which is another copy of the town with its own ten places.
-export const ROOM_SIZE = 10;
+// Each lobby holds this many characters at once. The first four to arrive in it get the places, so
+// everyone works out the same four without a server deciding. Anyone after that moves on to the
+// next lobby, which is another copy of the town with its own four places.
+export const ROOM_SIZE = 4;
 // Past this many lobbies, a visitor just waits in the last one for a place
 export const MAX_LOBBIES = 50;
 
@@ -178,7 +178,7 @@ export function joinRoom({ look, name, localState, onChange }) {
     lastSentAt = now;
   };
 
-  // Works out the ten from everyone present, then takes a place or moves on to the next lobby
+  // Works out the four from everyone present, then takes a place or moves on to the next lobby
   const settle = () => {
     const present = members.filter((member) => member.id !== id);
     const placed = pickPlaces(present, { id, joinedAt });

@@ -92,7 +92,7 @@ test("the first lobby keeps the plain name and the rest are numbered", () => {
 });
 
 test("someone moving into a lobby arrives after everyone already there", () => {
-  // Their arrival time restarts in each lobby, so the ten already in it keep their places
+  // Their arrival time restarts in each lobby, so the four already in it keep their places
   const settled = crowd(ROOM_SIZE).map((m) => ({ ...m, joinedAt: m.joinedAt + 10000 }));
   assert.ok(!pickPlaces(settled, member("moved", Date.now())).has("moved"));
 });

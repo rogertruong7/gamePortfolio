@@ -61,6 +61,7 @@ const BenchGames = ({ games, partner, seated }) => {
         onClose={games.close}
         closeOnBackdrop
         wide
+        fullscreenOnPhones
       >
         <Options>
           {GAMES.map((game) => (
@@ -120,6 +121,7 @@ const BenchGames = ({ games, partner, seated }) => {
       title={gameName(session.game)}
       tagline={`You vs ${name}`}
       taglineOnPhones={false}
+      fullscreenOnPhones
       actionLabel="Leave game"
       onClose={games.close}
     >

@@ -27,6 +27,9 @@ const Wrapper = styled.div`
         `
       : css`
           position: relative;
+          /* Above the menu items after it, which each get their own layer from their drop-in
+             animation and would otherwise cover the list */
+          z-index: 2;
           margin: 0 5px;
 
           @media not all and ${NARROW_HUD} {

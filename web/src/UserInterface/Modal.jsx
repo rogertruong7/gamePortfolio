@@ -30,6 +30,8 @@ const Modal = ({
   wide = false,
   // Drops the tagline on phones, for a popup that needs the room more than the words
   taglineOnPhones = true,
+  // Fills the whole screen on phones, for a popup with a game in it that needs every bit of room
+  fullscreenOnPhones = false,
   footer,
   children,
 }) => {
@@ -45,6 +47,7 @@ const Modal = ({
     <Shell
       ref={dialogRef}
       $wide={wide}
+      $full={fullscreenOnPhones}
       aria-labelledby="modal-title"
       onCancel={(e) => {
         e.preventDefault();
@@ -56,8 +59,8 @@ const Modal = ({
         if (closeOnBackdrop && e.target === e.currentTarget) onCancel();
       }}
     >
-      <Card>
-        <Inner>
+      <Card $full={fullscreenOnPhones}>
+        <Inner $full={fullscreenOnPhones}>
           <Head>
             <Title id="modal-title">{title}</Title>
             {tagline && <Tagline $onPhones={taglineOnPhones}>{tagline}</Tagline>}
@@ -85,6 +88,7 @@ const Modal = ({
 
 const MAX_HEIGHT = "calc(100dvh - 64px)";
 export const WIDE_FROM = 1060;
+const PHONE = "(max-width: 520px)";
 
 const Shell = styled.dialog`
   position: fixed;
@@ -121,6 +125,16 @@ const Shell = styled.dialog`
     outline: 3px solid ${focusBlue};
     outline-offset: 3px;
   }
+
+  @media ${PHONE} {
+    ${({ $full }) =>
+      $full &&
+      `
+        width: 100vw;
+        height: 100dvh;
+        max-height: 100dvh;
+      `}
+  }
 `;
 
 // The chrome frame measures this element and wraps around it.
@@ -130,6 +144,22 @@ const Card = styled.div`
   display: flex;
   max-height: ${MAX_HEIGHT};
   border-radius: 20px;
+
+  @media ${PHONE} {
+    ${({ $full }) =>
+      $full &&
+      `
+        height: 100%;
+        max-height: none;
+        border-radius: 0;
+
+        /* The chrome frame would sit off the edges of the screen */
+        & > img,
+        & > span {
+          display: none;
+        }
+      `}
+  }
 `;
 
 const Inner = styled.div`
@@ -140,6 +170,10 @@ const Inner = styled.div`
   overflow: hidden;
   border-radius: 20px;
   background: ${paper};
+
+  @media ${PHONE} {
+    border-radius: ${({ $full }) => ($full ? "0" : "20px")};
+  }
 `;
 
 const Head = styled.header`

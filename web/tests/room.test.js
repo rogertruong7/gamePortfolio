@@ -92,7 +92,7 @@ test("the first lobby keeps the plain name and the rest are numbered", () => {
 });
 
 test("someone moving into a lobby arrives after everyone already there", () => {
-  // Their arrival time restarts in each lobby, so the four already in it keep their places
+  // Their arrival time restarts in each lobby, so the twelve already in it keep their places
   const settled = crowd(ROOM_SIZE).map((m) => ({ ...m, joinedAt: m.joinedAt + 10000 }));
   assert.ok(!pickPlaces(settled, member("moved", Date.now())).has("moved"));
 });
@@ -112,4 +112,25 @@ test("beating Sans comes through as gold", () => {
   const base = { id: "a", x: 0, y: 0, z: 0, ry: 0, s: 0 };
   assert.equal(readState({ ...base, g: 1 }).gold, true);
   assert.equal(readState({ ...base, g: "1" }).gold, false);
+});
+
+test("rooms with a code get their own channel and the main town keeps its names", async () => {
+  assert.equal(lobbyName(1, "ABCD"), "room-abcd");
+  assert.equal(lobbyName(3, null), "town-3");
+  const { newRoomCode, readRoomCode, roomLink } = await import("../src/Multiplayer/roomCode.js");
+  assert.equal(readRoomCode("abcd"), "ABCD");
+  assert.equal(readRoomCode(" kqtz "), "KQTZ");
+  assert.equal(readRoomCode("ABC"), null);
+  assert.equal(readRoomCode("ABCDE"), null);
+  // I and O aren't used, so a code can't be mistaken for one with 1 or 0 in it
+  assert.equal(readRoomCode("ABIO"), null);
+  assert.equal(readRoomCode("AB1D"), null);
+  assert.equal(readRoomCode(null), null);
+  const code = newRoomCode();
+  assert.equal(readRoomCode(code), code);
+  assert.equal(newRoomCode(() => 0), "AAAA");
+  assert.equal(newRoomCode(() => 0.9999), "ZZZZ");
+  const location = { href: "https://example.com/?room=OLD&ref=x#top" };
+  assert.equal(roomLink("KQTZ", location), "https://example.com/?room=KQTZ");
+  assert.equal(roomLink(null, location), "https://example.com/");
 });

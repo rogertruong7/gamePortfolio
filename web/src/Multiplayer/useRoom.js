@@ -4,7 +4,8 @@ import { joinRoom } from "./room.js";
 // Joins a lobby of the town once enabled and stays until the page goes. localState is where the character
 // writes its own position for the room to send, and roomRef.current.peers is where everyone
 // else's arrives.
-export function useRoom(look, name, enabled) {
+// code is the room's code, or null for the main town (roomCode.js). A new code joins that room.
+export function useRoom(look, name, enabled, code = null) {
   const localState = useRef({ ready: false });
   const roomRef = useRef(null);
   const lookRef = useRef(look);
@@ -12,6 +13,7 @@ export function useRoom(look, name, enabled) {
   const [room, setRoom] = useState({
     status: "connecting",
     lobby: 1,
+    code: null,
     count: 0,
     peers: [],
     messages: [],
@@ -33,6 +35,7 @@ export function useRoom(look, name, enabled) {
     const handle = joinRoom({
       look: lookRef.current,
       name: nameRef.current,
+      code,
       localState,
       onChange: setRoom,
     });
@@ -41,7 +44,7 @@ export function useRoom(look, name, enabled) {
       handle.leave();
       roomRef.current = null;
     };
-  }, [enabled, visit]);
+  }, [enabled, visit, code]);
 
   useEffect(() => {
     lookRef.current = look;

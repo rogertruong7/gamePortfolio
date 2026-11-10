@@ -284,7 +284,18 @@ const NameEditor = ({ name, onRename }) => {
   );
 };
 
-const Chat = ({ room, onRename }) => {
+// Above the chat, as the people chatting are the ones a new room is for. On phones it's in the
+// menu instead (Menu.jsx).
+const NewRoomButton = styled(SmallButton)`
+  align-self: flex-start;
+
+  @media ${NARROW_HUD} {
+    display: none;
+  }
+`;
+
+// onCreateRoom moves this player to a new room with its own code
+const Chat = ({ room, onRename, onCreateRoom }) => {
   const { messages, status, name, say } = room;
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
@@ -364,6 +375,12 @@ const Chat = ({ room, onRename }) => {
           if (event.key === "Escape") close();
         }}
       >
+        {onCreateRoom && (
+          <NewRoomButton type="button" onClick={onCreateRoom}>
+            create new room
+            <ChromeFrame spikes={false} />
+          </NewRoomButton>
+        )}
         <NameEditor name={name} onRename={onRename} />
         <Log ref={logRef} aria-live="polite" aria-label="Chat messages">
           {messages.map((message) => (

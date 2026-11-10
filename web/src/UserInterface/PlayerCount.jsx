@@ -4,6 +4,7 @@ import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 import { NARROW_HUD } from "./hudCorner.js";
 import { ChevronIcon, PeopleIcon } from "./HudIcons.jsx";
 import { ROOM_SIZE } from "../Multiplayer/room.js";
+import { roomLink } from "../Multiplayer/roomCode.js";
 
 const LIVE = "#2fae5f";
 const WAITING = "#d9a400";
@@ -65,8 +66,9 @@ const List = styled.ul`
   top: calc(100% + 10px);
   ${({ $where }) => ($where === "corner" ? "left: 0;" : "right: 0;")}
   z-index: 1;
-  min-width: 220px;
+  min-width: 280px;
   max-height: 60vh;
+  overflow-x: hidden;
   overflow-y: auto;
   margin: 0;
   padding: 8px;
@@ -122,7 +124,14 @@ const Dot = styled.span`
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
 `;
 
-function describe({ status, count, lobby }) {
+function describe({ status, count, lobby, code }) {
+  if (status === "online" && code) {
+    return {
+      colour: LIVE,
+      text: `${count}/${ROOM_SIZE} · ${code}`,
+      title: `${count} of up to ${ROOM_SIZE} people in room ${code}`,
+    };
+  }
   if (status === "online") {
     // The first town is just "the town". Past that, it says which one, as the others can't be seen.
     const where = lobby > 1 ? ` · room ${lobby}` : "";
@@ -133,6 +142,13 @@ function describe({ status, count, lobby }) {
         lobby > 1
           ? `The first towns were full, so you're in room ${lobby}, with ${count} of up to ${ROOM_SIZE} people`
           : `${count} of up to ${ROOM_SIZE} people walking around the town`,
+    };
+  }
+  if (status === "full" && code) {
+    return {
+      colour: WAITING,
+      text: `${code} is full`,
+      title: `Room ${code} is full. You'll join it when someone leaves.`,
     };
   }
   if (status === "full") {
@@ -148,17 +164,39 @@ function describe({ status, count, lobby }) {
   return { colour: DOWN, text: "joining…", title: "Joining the town" };
 }
 
-// onPlay hears { id, name } of whoever this player wants to play a game with
-const PlayerCount = ({ room, where = "corner", onPlay }) => {
+const RoomActions = styled.span`
+  flex: none;
+  display: flex;
+  gap: 6px;
+`;
+
+// onPlay hears { id, name } of whoever this player wants to play a game with, and onLeaveRoom
+// takes them from a room with a code back to the main town
+const PlayerCount = ({ room, where = "corner", onPlay, onLeaveRoom }) => {
   const { colour, text, title } = describe(room);
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const canOpen = room.status === "online";
+  const [copied, setCopied] = useState(false);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(roomLink(room.code));
+      setCopied(true);
+    } catch {
+      // No clipboard (an http page, or permission refused), so the link is shown to copy by hand
+      setCopied(false);
+      window.prompt("Copy this link to invite people:", roomLink(room.code));
+    }
+  };
   const showing = open && canOpen;
 
   // Closes on a click anywhere else, or Escape
   useEffect(() => {
-    if (!showing) return undefined;
+    if (!showing) {
+      setCopied(false);
+      return undefined;
+    }
     const onPointerDown = (event) => {
       if (!wrapperRef.current?.contains(event.target)) setOpen(false);
     };
@@ -193,6 +231,30 @@ const PlayerCount = ({ room, where = "corner", onPlay }) => {
       </Pill>
       {showing && (
         <List $where={where} aria-label="Who's here">
+          {room.code && (
+            <Row>
+              <Name>Room {room.code}</Name>
+              <RoomActions>
+                <PlayButton type="button" onClick={copyLink}>
+                  {copied ? "Copied" : "Copy link"}
+                  <ChromeFrame spikes={false} />
+                </PlayButton>
+                {onLeaveRoom && (
+                  <PlayButton
+                    type="button"
+                    title="Back to the main town"
+                    onClick={() => {
+                      setOpen(false);
+                      onLeaveRoom();
+                    }}
+                  >
+                    Leave
+                    <ChromeFrame spikes={false} />
+                  </PlayButton>
+                )}
+              </RoomActions>
+            </Row>
+          )}
           <Row>
             <Name>
               {room.name}

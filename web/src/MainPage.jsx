@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Howl } from "howler";
 import MainGame from "./Game/MainGame.jsx";
 import LoadingScreen from "./UserInterface/LoadingScreen.jsx";
@@ -26,6 +27,7 @@ import { prefetchSansFight } from "./Helpers/prefetchSansFight.js";
 import { loadLook, sanitizeLook, saveLook } from "./Game/look/lookOptions.js";
 import { useRoom } from "./Multiplayer/useRoom.js";
 import { useBenchGame } from "./BenchGames/useBenchGame.js";
+import { ROOM_PARAM, newRoomCode, readRoomCode } from "./Multiplayer/roomCode.js";
 import { cleanName, loadChatName, saveChatName } from "./Multiplayer/chat.js";
 
 const SCENE_NAMES = {
@@ -83,8 +85,25 @@ const MainPage = () => {
   // The name picked for chatting, or "" to go by a made-up one
   const [chatName, setChatName] = useState(loadChatName);
   const hasMovedRef = useRef(false);
+  // The room's code from the address, or null for the main town
+  const [searchParams, setSearchParams] = useSearchParams();
+  const roomCode = readRoomCode(searchParams.get(ROOM_PARAM));
+  // Moves to another room by changing the address, so the link can be shared and Back returns
+  const goToRoom = useCallback(
+    (code) => {
+      setSearchParams((params) => {
+        const next = new URLSearchParams(params);
+        if (code) next.set(ROOM_PARAM, code);
+        else next.delete(ROOM_PARAM);
+        return next;
+      });
+    },
+    [setSearchParams]
+  );
+  const createRoom = useCallback(() => goToRoom(newRoomCode()), [goToRoom]);
+  const leaveRoom = useCallback(() => goToRoom(null), [goToRoom]);
   // The town is joined once the game has loaded
-  const room = useRoom(look, chatName, !loading);
+  const room = useRoom(look, chatName, !loading, roomCode);
   // Games with anyone else in the town, started from a bench or the list of who's here
   const games = useBenchGame(
     room.roomRef,
@@ -157,7 +176,12 @@ const MainPage = () => {
         isPlunging={isPlunging}
         isFighting={isFighting}
       />
-      <Menu room={room} onPlay={games.openMenu} />
+      <Menu
+        room={room}
+        onPlay={games.openMenu}
+        onCreateRoom={createRoom}
+        onLeaveRoom={leaveRoom}
+      />
       {loading && currentScene === 0 && <LoadingScreen progress={progress} />}
       {!loading && (
         <>
@@ -169,8 +193,8 @@ const MainPage = () => {
           <HelpButton setShowHelp={setShowHelp} aboveEmotes={currentScene === 0}></HelpButton>
           {currentScene === 0 && (
             <>
-              <PlayerCount room={room} onPlay={games.openMenu} />
-              <Chat room={room} onRename={renameChat} />
+              <PlayerCount room={room} onPlay={games.openMenu} onLeaveRoom={leaveRoom} />
+              <Chat room={room} onRename={renameChat} onCreateRoom={createRoom} />
               <WardrobeButton onOpen={() => setShowWardrobe(true)} />
             </>
           )}

@@ -11,11 +11,13 @@ import {
 import { HAS_SERVER, createLocalTransport, createSupabaseTransport } from "./transports.js";
 import { readGameMessage, writeGameMessage } from "../BenchGames/protocol.js";
 
-// Each lobby holds this many characters at once. The first four to arrive in it get the places, so
-// everyone works out the same four without a server deciding. Anyone after that moves on to the
-// next lobby, which is another copy of the town with its own four places.
-export const ROOM_SIZE = 4;
-// Past this many lobbies, a visitor just waits in the last one for a place
+// Each lobby holds this many characters at once. The first twelve to arrive in it get the
+// places, so everyone works out the same twelve without a server deciding. Anyone after that moves
+// on to the next lobby, which is another copy of the town with its own twelve places.
+export const ROOM_SIZE = 12;
+// Past this many lobbies, a visitor just waits in the last one for a place. A room with a code
+// (roomCode.js) has just the one: a full room waits for a place rather than splitting up a group
+// who came together.
 export const MAX_LOBBIES = 50;
 
 // While walking, a character's position goes out this often. Standing still, it only goes out
@@ -78,7 +80,11 @@ export function readMember({ id, meta }) {
   };
 }
 
-export const lobbyName = (lobby) => (lobby === 1 ? "town" : `town-${lobby}`);
+// The channel for a lobby: town, town-2 and so on for the main town, or room-<code>
+export const lobbyName = (lobby, code = null) => {
+  if (code) return `room-${code.toLowerCase()}`;
+  return lobby === 1 ? "town" : `town-${lobby}`;
+};
 
 const byArrival = (a, b) => a.joinedAt - b.joinedAt || (a.id < b.id ? -1 : 1);
 
@@ -97,7 +103,8 @@ export function pickPlaces(present, me) {
 // read for this character's own position each time one goes out. onChange hears who is in the
 // lobby and what's been said there, and peers holds everyone's latest snapshots for drawing each
 // frame.
-export function joinRoom({ look, name, localState, onChange }) {
+export function joinRoom({ look, name, code = null, localState, onChange }) {
+  const lastLobby = code ? 1 : MAX_LOBBIES;
   const id = newId();
   // Everyone else known about in this lobby, by id. Snapshots can arrive before the presence that
   // says who they're from, so they're kept here either way.
@@ -138,6 +145,7 @@ export function joinRoom({ look, name, localState, onChange }) {
     onChange({
       status,
       lobby,
+      code,
       count: occupants.length + (inRoom ? 1 : 0),
       peers: occupants.map(({ id: peerId, look: peerLook, name: peerName }) => ({
         id: peerId,
@@ -178,7 +186,7 @@ export function joinRoom({ look, name, localState, onChange }) {
     lastSentAt = now;
   };
 
-  // Works out the four from everyone present, then takes a place or moves on to the next lobby
+  // Works out the twelve from everyone present, then takes a place or moves on to the next lobby
   const settle = () => {
     const present = members.filter((member) => member.id !== id);
     const placed = pickPlaces(present, { id, joinedAt });
@@ -190,7 +198,7 @@ export function joinRoom({ look, name, localState, onChange }) {
     }
     // Stepping out can report the members again, and that may already have moved on
     if (here !== visit) return;
-    if (!getsPlace && lobby < MAX_LOBBIES) {
+    if (!getsPlace && lobby < lastLobby) {
       enter(lobby + 1);
       return;
     }
@@ -284,7 +292,7 @@ export function joinRoom({ look, name, localState, onChange }) {
       },
     };
 
-    const name = lobbyName(lobby);
+    const name = lobbyName(lobby, code);
     const start = HAS_SERVER
       ? createSupabaseTransport(id, handlers, name)
       : Promise.resolve(createLocalTransport(id, handlers, name));

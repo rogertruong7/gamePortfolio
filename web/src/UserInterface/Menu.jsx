@@ -5,6 +5,7 @@ import MuteButton from "./MuteButton.jsx";
 import ContactPopup from "./ContactPopup.jsx";
 import ChromeFrame, { chromeButton } from "./ChromeFrame.jsx";
 import PlayerCount from "./PlayerCount.jsx";
+import { NARROW_HUD } from "./hudCorner.js";
 
 // Styled components for Menu and Button
 const MenuContainer = styled.div`
@@ -73,6 +74,13 @@ const DefaultButton = styled.button`
   width: 130px;
 `;
 
+// Only on phones, where the chat and its new room button are folded away
+const NewRoomButton = styled(DefaultButton)`
+  @media not all and ${NARROW_HUD} {
+    display: none;
+  }
+`;
+
 const HamburgerMenuButton = styled.button`
   ${chromeButton}
   position: absolute;
@@ -139,7 +147,7 @@ const Links = ({ onPick }) =>
     </a>
   ));
 
-const Menu = ({ room, onPlay }) => {
+const Menu = ({ room, onPlay, onCreateRoom, onLeaveRoom }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [lessThan1100, setLessThan1100] = useState(false);
@@ -208,7 +216,22 @@ const Menu = ({ room, onPlay }) => {
                 setIsMenuOpen(false);
                 onPlay?.(player);
               }}
+              onLeaveRoom={() => {
+                setIsMenuOpen(false);
+                onLeaveRoom?.();
+              }}
             />
+          )}
+          {room && onCreateRoom && (
+            <NewRoomButton
+              onClick={() => {
+                setIsMenuOpen(false);
+                onCreateRoom();
+              }}
+            >
+              new room
+              <ChromeFrame spikes={false} />
+            </NewRoomButton>
           )}
           <Links onPick={() => setIsMenuOpen(false)} />
           <DefaultButton

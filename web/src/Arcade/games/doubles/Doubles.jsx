@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import { GOAL, SIZE, biggest, newGame, slide } from "./doubles.js";
 import { useFocusOnStart, useReducedMotion } from "../../../BenchGames/shared/skillCanvas.js";
-import { Status } from "../../../BenchGames/shared/gameParts.jsx";
-import { focusBlue, ink, pixel } from "../../../UserInterface/Modal.jsx";
+import { body, focusBlue, ink } from "../../../UserInterface/Modal.jsx";
 import { readBest, saveBest } from "../../best.js";
-import { EndBar, KeyHint, ScoreLine } from "../../arcadeParts.jsx";
-import { useTouchScreen } from "../../arcadeHooks.js";
+import { ArcadeStatus, EndBar, KeyHint, RestartBar, ScoreLine } from "../../arcadeParts.jsx";
+import { useHoldToRestart, useTouchScreen } from "../../arcadeHooks.js";
 
 const BEST_KEY = "doubles";
 const GAP = 10;
@@ -68,8 +67,10 @@ const Doubles = () => {
     setCheered(false);
     boardRef.current?.focus();
   };
+  const holdR = useHoldToRestart(restart);
 
   const onKeyDown = (event) => {
+    if (holdR.keyDown(event)) return;
     const direction = KEYS[event.key.toLowerCase()];
     if (!direction) return;
     event.preventDefault();
@@ -102,6 +103,8 @@ const Doubles = () => {
         role="group"
         aria-label={`Doubles board. Use the arrow keys or swipe to slide the tiles. Score ${game.score}.`}
         onKeyDown={onKeyDown}
+        onKeyUp={holdR.keyUp}
+        onBlur={holdR.cancel}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerCancel={() => {
@@ -131,7 +134,7 @@ const Doubles = () => {
         })}
         {cheering && (
           <Cheer>
-            <Status>You made {GOAL}!</Status>
+            <ArcadeStatus>You made {GOAL}!</ArcadeStatus>
             <EndBar
               label="Keep going"
               onPress={() => {
@@ -142,10 +145,12 @@ const Doubles = () => {
           </Cheer>
         )}
       </Board>
-      {!game.over && (
+      {holdR.progress > 0 && <RestartBar progress={holdR.progress} />}
+      {holdR.progress === 0 && !game.over && (
         <KeyHint>
-          {touch ? "Swipe to slide every tile." : "Arrow keys or WASD slide every tile."} Two the
-          same join into one.
+          {touch
+            ? "Swipe to slide every tile. Two the same join into one."
+            : "Arrow keys or WASD slide every tile. Two the same join into one. Hold R to start again."}
         </KeyHint>
       )}
       {game.over && (
@@ -224,7 +229,8 @@ const Face = styled.div`
   background: ${({ $background }) => $background};
   color: ${({ $colour }) => $colour};
   box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.15);
-  font: 600 ${({ $digits }) => FACE_SIZES[Math.min($digits, 5) - 1]}px / 1 ${pixel};
+  font: 600 ${({ $digits }) => FACE_SIZES[Math.min($digits, 5) - 1]}px / 1 ${body};
+  font-variant-numeric: tabular-nums;
   font-variant-ligatures: none;
   animation: ${({ $pop }) =>
     $pop === "fresh"

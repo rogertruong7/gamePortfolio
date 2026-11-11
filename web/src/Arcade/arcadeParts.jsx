@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import ChromeFrame from "../UserInterface/ChromeFrame.jsx";
-import { focusBlue, inkSoft } from "../UserInterface/Modal.jsx";
-import { GameButton, Score } from "../BenchGames/shared/gameParts.jsx";
+import { body, focusBlue, ink, inkSoft } from "../UserInterface/Modal.jsx";
+import { GameButton } from "../BenchGames/shared/gameParts.jsx";
 
 // What the arcade games share on screen: the canvas, the touch buttons and the bar at the end.
 
@@ -92,6 +92,23 @@ const Note = styled.span`
   color: ${inkSoft};
 `;
 
+// The arcade's text is in the same type as the project pages, which reads more easily than the
+// pixel font at these sizes
+const Score = styled.p`
+  margin: 0 0 8px;
+  text-align: center;
+  font: 700 18px / 1.3 ${body};
+  font-variant-numeric: tabular-nums;
+  color: ${inkSoft};
+`;
+
+export const ArcadeStatus = styled.p`
+  margin: 0 0 14px;
+  text-align: center;
+  font: 700 24px / 1.25 ${body};
+  color: ${ink};
+`;
+
 // The line above the game: the score so far and the best on this browser
 export const ScoreLine = ({ score, best, extra }) => (
   <Score>
@@ -109,4 +126,39 @@ export const EndBar = ({ note, label = "Play again", onPress }) => (
       <ChromeFrame spikes={false} />
     </GameButton>
   </Bar>
+);
+
+const RestartLine = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 520px;
+  margin: 12px auto 0;
+  color: ${inkSoft};
+  font-size: 15px;
+`;
+
+const RestartTrack = styled.div`
+  width: 120px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(20, 35, 90, 0.15);
+`;
+
+const RestartFill = styled.div`
+  height: 100%;
+  background: ${focusBlue};
+`;
+
+// Shown in place of the key hint while R is held, filling up until the game starts again
+export const RestartBar = ({ progress }) => (
+  <RestartLine role="status">
+    Keep holding R to start again
+    <RestartTrack>
+      {/* Changes every frame, which would make a new class each time as a styled prop */}
+      <RestartFill style={{ width: `${Math.round(progress * 100)}%` }} />
+    </RestartTrack>
+  </RestartLine>
 );

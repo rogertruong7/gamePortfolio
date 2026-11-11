@@ -16,10 +16,10 @@ import {
   useFocusOnStart,
   useReducedMotion,
 } from "../../../BenchGames/shared/skillCanvas.js";
-import { ink, inkSoft, pixel } from "../../../UserInterface/Modal.jsx";
+import { body, ink, inkSoft } from "../../../UserInterface/Modal.jsx";
 import { readBest, saveBest } from "../../best.js";
-import { ArcadeCanvas, EndBar, KeyHint, TouchPad } from "../../arcadeParts.jsx";
-import { usePauseWhenHidden, useTouchScreen } from "../../arcadeHooks.js";
+import { ArcadeCanvas, EndBar, KeyHint, RestartBar, TouchPad } from "../../arcadeParts.jsx";
+import { useHoldToRestart, usePauseWhenHidden, useTouchScreen } from "../../arcadeHooks.js";
 
 const { width: WIDTH, height: HEIGHT } = WORLD;
 const BEST_KEY = "foxrun";
@@ -125,7 +125,7 @@ function drawFox(context, game, still) {
   }
   if (game.over) {
     context.fillStyle = ink;
-    context.font = `600 16px ${pixel}`;
+    context.font = `700 16px ${body}`;
     context.textAlign = "center";
     context.fillText("!", x + 28, feet - 44 + (ducking ? 22 : 0));
   }
@@ -175,7 +175,7 @@ function drawCrow(context, o, now, still) {
 
 function drawScore(context, game, best) {
   context.fillStyle = inkSoft;
-  context.font = `600 16px ${pixel}`;
+  context.font = `700 16px ${body}`;
   context.textAlign = "right";
   context.textBaseline = "top";
   context.fillText(
@@ -187,7 +187,7 @@ function drawScore(context, game, best) {
 
 function drawMessage(context, text) {
   context.fillStyle = ink;
-  context.font = `600 22px ${pixel}`;
+  context.font = `700 22px ${body}`;
   context.textAlign = "center";
   context.textBaseline = "middle";
   context.fillText(text, WIDTH / 2, 64);
@@ -260,6 +260,7 @@ const FoxRun = () => {
     setNewBest(false);
     begin();
   };
+  const holdR = useHoldToRestart(restart);
 
   const pressJump = () => {
     if (phase === "ready" || phase === "paused") begin();
@@ -274,6 +275,7 @@ const FoxRun = () => {
   };
 
   const onKeyDown = (event) => {
+    if (holdR.keyDown(event)) return;
     const key = event.key.toLowerCase();
     if (key === "p") {
       event.preventDefault();
@@ -292,6 +294,7 @@ const FoxRun = () => {
   };
 
   const onKeyUp = (event) => {
+    if (holdR.keyUp(event)) return;
     const key = event.key.toLowerCase();
     if (key === " " || key === "arrowup" || key === "w") releaseJump();
     if (key === "arrowdown" || key === "s") run.current.duck = false;
@@ -316,7 +319,7 @@ const FoxRun = () => {
       <ArcadeCanvas
         ref={canvasRef}
         tabIndex={0}
-        aria-label="Fox Run. Space or up jumps, down ducks, P pauses."
+        aria-label="Fox Run. Space or up jumps, down ducks, P pauses, holding R starts again."
         $ratio={WIDTH / HEIGHT}
         $most={720}
         $room={340}
@@ -332,13 +335,18 @@ const FoxRun = () => {
         onBlur={() => {
           run.current.jump = false;
           run.current.duck = false;
+          holdR.cancel();
         }}
       />
-      {phase !== "over" &&
+      {holdR.progress > 0 && <RestartBar progress={holdR.progress} />}
+      {holdR.progress === 0 &&
+        phase !== "over" &&
         (touch ? (
           <TouchPad buttons={buttons} />
         ) : (
-          <KeyHint>Space or ↑ jumps (hold it to go higher) · ↓ ducks · P pauses</KeyHint>
+          <KeyHint>
+            Space or ↑ jumps (hold it to go higher) · ↓ ducks · P pauses · Hold R to start again
+          </KeyHint>
         ))}
       {phase === "paused" && <EndBar label="Carry on" onPress={begin} />}
       {phase === "over" && (

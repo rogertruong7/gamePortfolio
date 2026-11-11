@@ -15,10 +15,10 @@ import {
   tick,
 } from "./blockDrop.js";
 import { useCanvas, useFocusOnStart } from "../../../BenchGames/shared/skillCanvas.js";
-import { ink, inkSoft, pixel } from "../../../UserInterface/Modal.jsx";
+import { body, ink, inkSoft } from "../../../UserInterface/Modal.jsx";
 import { readBest, saveBest } from "../../best.js";
-import { ArcadeCanvas, EndBar, KeyHint, TouchPad } from "../../arcadeParts.jsx";
-import { usePauseWhenHidden, useTouchScreen } from "../../arcadeHooks.js";
+import { ArcadeCanvas, EndBar, KeyHint, RestartBar, TouchPad } from "../../arcadeParts.jsx";
+import { useHoldToRestart, usePauseWhenHidden, useTouchScreen } from "../../arcadeHooks.js";
 
 const CELL = 24;
 const BOARD_WIDTH = WIDTH * CELL;
@@ -76,7 +76,7 @@ function drawMini(context, type, centreX, centreY, faded) {
 
 function drawLabel(context, text, y) {
   context.fillStyle = inkSoft;
-  context.font = `600 14px ${pixel}`;
+  context.font = `700 14px ${body}`;
   context.textAlign = "left";
   context.textBaseline = "top";
   context.fillText(text, PANEL_X, y);
@@ -84,7 +84,7 @@ function drawLabel(context, text, y) {
 
 function drawNumber(context, value, y) {
   context.fillStyle = ink;
-  context.font = `600 20px ${pixel}`;
+  context.font = `700 20px ${body}`;
   context.textAlign = "left";
   context.textBaseline = "top";
   context.fillText(String(value), PANEL_X, y);
@@ -212,6 +212,7 @@ const BlockDrop = () => {
     setNewBest(false);
     resume();
   };
+  const holdR = useHoldToRestart(restart);
 
   const startSideways = (dir) => {
     act((game) => shift(game, dir));
@@ -222,6 +223,7 @@ const BlockDrop = () => {
   };
 
   const onKeyDown = (event) => {
+    if (holdR.keyDown(event)) return;
     const key = event.key.toLowerCase();
     if (key === "p") {
       event.preventDefault();
@@ -258,6 +260,7 @@ const BlockDrop = () => {
   };
 
   const onKeyUp = (event) => {
+    if (holdR.keyUp(event)) return;
     const key = event.key.toLowerCase();
     if (key === "arrowleft" || key === "a") stopSideways(-1);
     if (key === "arrowright" || key === "d") stopSideways(1);
@@ -298,7 +301,7 @@ const BlockDrop = () => {
       <ArcadeCanvas
         ref={canvasRef}
         tabIndex={0}
-        aria-label="Block Drop. Arrow keys move, up turns, space drops, C holds, P pauses."
+        aria-label="Block Drop. Arrow keys move, up turns, space drops, C holds, P pauses, holding R starts again."
         $ratio={VIEW.width / VIEW.height}
         $most={364}
         $room={touch ? 340 : 440}
@@ -307,15 +310,18 @@ const BlockDrop = () => {
         onBlur={() => {
           run.current.down = false;
           run.current.sideways = null;
+          holdR.cancel();
         }}
       />
-      {phase === "playing" &&
+      {holdR.progress > 0 && <RestartBar progress={holdR.progress} />}
+      {holdR.progress === 0 &&
+        phase === "playing" &&
         (touch ? (
           <TouchPad buttons={buttons} />
         ) : (
           <KeyHint>
             ← → move · ↑ or X turns (Z the other way) · ↓ soft drop · Space drops · C holds · P
-            pauses
+            pauses · Hold R to start again
           </KeyHint>
         ))}
       {phase === "paused" && <EndBar note="Paused." label="Carry on" onPress={resume} />}

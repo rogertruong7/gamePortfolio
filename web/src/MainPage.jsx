@@ -27,6 +27,7 @@ import { prefetchSansFight } from "./Helpers/prefetchSansFight.js";
 import { loadLook, sanitizeLook, saveLook } from "./Game/look/lookOptions.js";
 import { useRoom } from "./Multiplayer/useRoom.js";
 import { useBenchGame } from "./BenchGames/useBenchGame.js";
+import Arcade from "./Arcade/Arcade.jsx";
 import { ROOM_PARAM, newRoomCode, readRoomCode, rememberRoom } from "./Multiplayer/roomCode.js";
 import { cleanName, loadChatName, saveChatName } from "./Multiplayer/chat.js";
 
@@ -82,6 +83,7 @@ const MainPage = () => {
   const [isFighting, setIsFighting] = useState(false);
   const [look, setLook] = useState(loadLook);
   const [showWardrobe, setShowWardrobe] = useState(false);
+  const [showArcade, setShowArcade] = useState(false);
   // The name picked for chatting, or "" to go by a made-up one
   const [chatName, setChatName] = useState(loadChatName);
   const hasMovedRef = useRef(false);
@@ -110,8 +112,11 @@ const MainPage = () => {
     room.roomRef,
     room.peers,
     room.status === "online",
-    !loading && currentScene === 0
+    // Someone playing a game on their own turns down invites until they're done
+    !loading && currentScene === 0 && !showArcade
   );
+  const inTown = !loading && currentScene === 0;
+  const openArcade = useCallback(() => setShowArcade(true), []);
 
   const renameChat = (next) => {
     const clean = cleanName(next);
@@ -180,6 +185,7 @@ const MainPage = () => {
       <Menu
         room={room}
         onPlay={games.openMenu}
+        onArcade={inTown ? openArcade : null}
         onCreateRoom={createRoom}
         onLeaveRoom={leaveRoom}
       />
@@ -213,6 +219,7 @@ const MainPage = () => {
             ></Popup>
           )}
           {showHelp && <HelpPopup setShowHelp={setShowHelp}></HelpPopup>}
+          {showArcade && inTown && <Arcade onClose={() => setShowArcade(false)} />}
         </>
       )}
 
@@ -249,6 +256,7 @@ const MainPage = () => {
           roomRef={room.roomRef}
           chatMessages={room.messages}
           games={games}
+          onArcade={openArcade}
         />
       </div>
       {enterPopupVisible && currentScene === 0 && enteringScene === null && (

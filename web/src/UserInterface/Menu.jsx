@@ -147,7 +147,8 @@ const Links = ({ onPick }) =>
     </a>
   ));
 
-const Menu = ({ room, onPlay, onCreateRoom, onLeaveRoom }) => {
+// onArcade opens the games to play on your own, and is left out where they can't be played
+const Menu = ({ room, onPlay, onArcade, onCreateRoom, onLeaveRoom }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const [lessThan1100, setLessThan1100] = useState(false);
@@ -197,6 +198,12 @@ const Menu = ({ room, onPlay, onCreateRoom, onLeaveRoom }) => {
       {!lessThan1100 && (
         <MenuContainer>
           <MenuRow>
+            {onArcade && (
+              <DefaultButton onClick={onArcade}>
+                arcade
+                <ChromeFrame spikes={false} />
+              </DefaultButton>
+            )}
             <Links />
             <DefaultButton onClick={() => setShowContact(true)}>
               contact
@@ -232,6 +239,17 @@ const Menu = ({ room, onPlay, onCreateRoom, onLeaveRoom }) => {
               new room
               <ChromeFrame spikes={false} />
             </NewRoomButton>
+          )}
+          {onArcade && (
+            <DefaultButton
+              onClick={() => {
+                setIsMenuOpen(false);
+                onArcade();
+              }}
+            >
+              arcade
+              <ChromeFrame spikes={false} />
+            </DefaultButton>
           )}
           <Links onPick={() => setIsMenuOpen(false)} />
           <DefaultButton

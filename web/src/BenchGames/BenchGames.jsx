@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import styled from "styled-components";
-import Modal, { ink, inkSoft, pixel } from "../UserInterface/Modal.jsx";
+import Modal from "../UserInterface/Modal.jsx";
 import ChromeFrame, { chromeButton } from "../UserInterface/ChromeFrame.jsx";
 import { isModalOpen } from "../Helpers/modal.js";
 import { GAMES, gameName } from "./protocol.js";
+import { GamePicker } from "./shared/gameParts.jsx";
 import ConnectFour from "./games/connectFour/ConnectFour.jsx";
 import RockPaperScissors from "./games/scissorsPaperRock/RockPaperScissors.jsx";
 import TypeRace from "./games/typeRace/TypeRace.jsx";
@@ -41,11 +42,14 @@ const SCREENS = {
 // Two people in the town can play a game together. One picks it, the other says yes, and it opens
 // for both of them. games is from useBenchGame. partner is whoever else is sat on this player's
 // bench, who gets a button to play with them, and asking anyone else starts from the player list.
-const BenchGames = ({ games, partner, seated }) => {
+// Sat alone, the same button opens the games to play on your own (onArcade).
+const BenchGames = ({ games, partner, seated, onArcade }) => {
   const { session } = games;
 
   if (!session) {
-    return seated && partner ? <PlayButton onPress={() => games.openMenu(partner)} /> : null;
+    if (!seated) return null;
+    if (partner) return <PlayButton onPress={() => games.openMenu(partner)} />;
+    return onArcade ? <PlayButton onPress={onArcade} /> : null;
   }
 
   const name = session.partner.name;
@@ -63,15 +67,7 @@ const BenchGames = ({ games, partner, seated }) => {
         wide
         fullscreenOnPhones
       >
-        <Options>
-          {GAMES.map((game) => (
-            <Option key={game.id} type="button" onClick={() => games.invite(game.id)}>
-              <OptionName>{game.name}</OptionName>
-              <OptionBlurb>{game.blurb}</OptionBlurb>
-              <ChromeFrame spikes={false} />
-            </Option>
-          ))}
-        </Options>
+        <GamePicker games={GAMES} onPick={games.invite} />
       </Modal>
     );
   }
@@ -172,37 +168,6 @@ const PlayGamesButton = styled.button`
   font-weight: bold;
   white-space: nowrap;
   cursor: pointer;
-`;
-
-// Two across where there's room, as there are a good few games to pick from
-const Options = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 14px;
-`;
-
-const Option = styled.button`
-  ${chromeButton}
-  position: relative;
-  display: block;
-  width: 100%;
-  padding: 12px 18px;
-  text-align: left;
-  color: ${ink};
-  cursor: pointer;
-`;
-
-const OptionName = styled.span`
-  display: block;
-  font: 600 21px / 1.2 ${pixel};
-`;
-
-const OptionBlurb = styled.span`
-  display: block;
-  margin-top: 4px;
-  color: ${inkSoft};
-  font-size: 14px;
-  font-family: "Zen Kaku Gothic New", system-ui, sans-serif;
 `;
 
 export default BenchGames;

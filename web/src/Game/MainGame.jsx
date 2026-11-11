@@ -104,6 +104,7 @@ function MainGame({
   roomRef,
   chatMessages,
   games,
+  onArcade,
 }) {
   const characterRef = useRef();
   const cameraRef = useRef();
@@ -467,6 +468,7 @@ function MainGame({
         games={games}
         partner={benchPartner}
         seated={sitPhase === "seated" && currentScene === 0}
+        onArcade={onArcade}
       />
     </>
   );

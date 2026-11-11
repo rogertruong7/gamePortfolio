@@ -55,3 +55,47 @@ export const AgainBar = ({ partnerName, again, onAgain }) => (
     </GameButton>
   </Bar>
 );
+
+// The list of games to pick from. games are { id, name, blurb }, and onPick hears the id.
+export const GamePicker = ({ games, onPick }) => (
+  <Options>
+    {games.map((game) => (
+      <Option key={game.id} type="button" onClick={() => onPick(game.id)}>
+        <OptionName>{game.name}</OptionName>
+        <OptionBlurb>{game.blurb}</OptionBlurb>
+        <ChromeFrame spikes={false} />
+      </Option>
+    ))}
+  </Options>
+);
+
+// Two across where there's room, as there are a good few games to pick from
+const Options = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+`;
+
+const Option = styled.button`
+  ${chromeButton}
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 12px 18px;
+  text-align: left;
+  color: ${ink};
+  cursor: pointer;
+`;
+
+const OptionName = styled.span`
+  display: block;
+  font: 600 21px / 1.2 ${pixel};
+`;
+
+const OptionBlurb = styled.span`
+  display: block;
+  margin-top: 4px;
+  color: ${inkSoft};
+  font-size: 14px;
+  font-family: "Zen Kaku Gothic New", system-ui, sans-serif;
+`;

@@ -38,6 +38,10 @@ BenchGames/          two-player games played in a Modal
   protocol.js        the list of games and the checks on every message
   shared/            parts the games share: buttons, seeded random, word lists, canvas helpers
   games/<game>/      one folder per game: its screen and its pure rules module
+Arcade/              games to play on your own, from the menu or a bench with nobody else on it
+  Arcade.jsx         the picker and the game's popup
+  best.js            each game's best score on this browser
+  games/<game>/      one folder per game: its screen and its pure rules module
 Multiplayer/         lobbies, presence, positions and chat (Supabase or BroadcastChannel)
 UserInterface/       HTML over the canvas: buttons, popups, chat, the player list
 Pages/, content/     the portfolio pages and the projects and experiences they're built from
@@ -271,6 +275,16 @@ Any two people in the same lobby can play a game. It starts from the player list
   2. Add it to `GAMES` in `protocol.js` and `SCREENS` in `BenchGames.jsx`.
   3. Show `AgainBar` when it's over.
   4. Keep to one message per move: each sender gets 30 messages per 10 seconds.
+
+## Arcade (`src/Arcade/`)
+
+Three games to play alone: Block Drop (falling blocks), Doubles (slide and join numbered tiles) and Fox Run (an endless runner through the town). The "arcade" button in the menu opens them, and so does "Play games" (or G) when sitting on a bench with nobody else on it. They only open in the town, and while one is open, invites to bench games are turned down.
+
+- **Rules:** each game's `.js` module takes a game and gives back a new one, with the random numbers passed in, so `tests/arcade.test.js` can play them without a screen.
+- **Screens:** Block Drop and Fox Run draw on a canvas with `useCanvas` from the bench games, and run their rules from its draw loop, which stops while paused or over. Fox Run steps its rules at a fixed 120 a second. Doubles is plain HTML, so the tiles slide with CSS.
+- **Controls:** the keys go to the focused game, not the window, because the popup stops them reaching the town. Touch screens get held buttons instead of the key hint (`arcadeParts.jsx`). Putting the tab away pauses Block Drop and Fox Run.
+- **Best scores:** `best.js` keeps one per game in local storage.
+- **Adding a game:** make `games/<name>/` with a screen and a pure rules module, and add it to `ARCADE_GAMES` and `SCREENS` in `Arcade.jsx`.
 
 ## Routing (`App.jsx`)
 

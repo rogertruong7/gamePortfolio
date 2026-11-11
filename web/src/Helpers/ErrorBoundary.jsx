@@ -2,6 +2,7 @@ import { Component } from "react";
 import styled from "styled-components";
 import { RESUME_NAME, RESUME_URL } from "./resume.js";
 import { allEntries } from "../Pages/catalog.js";
+import { townPath } from "../Multiplayer/roomCode.js";
 import { body, crimson, ink, inkSoft, pixel } from "../UserInterface/Modal.jsx";
 
 // Plain links rather than router links: a full load clears the failure, and the
@@ -18,7 +19,7 @@ const Fallback = () => (
         <a href={RESUME_URL} target="_blank" rel="noreferrer" download={RESUME_NAME}>
           Download CV
         </a>
-        <button type="button" onClick={() => window.location.assign("/")}>
+        <button type="button" onClick={() => window.location.assign(townPath())}>
           Try the town again
         </button>
       </Actions>

@@ -31,3 +31,30 @@ export function roomLink(code, location = window.location) {
   if (code) url.searchParams.set(ROOM_PARAM, code);
   return url.toString();
 }
+
+// The room this tab was last in, kept for the session so a way back to the town from a page
+// outside it (a project page, a wrong address, the error page) returns to the same room.
+// sessionStorage can throw when the browser blocks storage, which just means the main town.
+const LAST_ROOM_KEY = "lastRoom";
+
+export function rememberRoom(code) {
+  try {
+    if (code) sessionStorage.setItem(LAST_ROOM_KEY, code);
+    else sessionStorage.removeItem(LAST_ROOM_KEY);
+  } catch {
+    // Nothing to keep it in, so the way back goes to the main town
+  }
+}
+
+function lastRoom() {
+  try {
+    return readRoomCode(sessionStorage.getItem(LAST_ROOM_KEY));
+  } catch {
+    return null;
+  }
+}
+
+// Where "back to the town" goes: the room this tab was in, or the main town
+export function townPath(code = lastRoom()) {
+  return code ? `/?${ROOM_PARAM}=${code}` : "/";
+}

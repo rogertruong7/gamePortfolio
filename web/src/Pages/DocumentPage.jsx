@@ -5,6 +5,7 @@ import "@fontsource/zen-kaku-gothic-new/400.css";
 import "@fontsource/zen-kaku-gothic-new/500.css";
 import "@fontsource/zen-kaku-gothic-new/700.css";
 import { mdxComponents } from "./MdxComponents";
+import { townPath } from "../Multiplayer/roomCode.js";
 
 const ink = "#14235A";
 const inkSoft = "#46557F";
@@ -58,7 +59,7 @@ const DocumentPage = ({ entry, onBack }) => {
               {backLabel}
             </BackLink>
           ) : (
-            <BackLink as={Link} to="/">
+            <BackLink as={Link} to={townPath()}>
               Back to the town
             </BackLink>
           )}

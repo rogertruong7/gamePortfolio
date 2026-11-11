@@ -134,3 +134,26 @@ test("rooms with a code get their own channel and the main town keeps its names"
   assert.equal(roomLink("KQTZ", location), "https://example.com/?room=KQTZ");
   assert.equal(roomLink(null, location), "https://example.com/");
 });
+
+test("the way back to the town returns to the room this tab was in", async () => {
+  const { rememberRoom, townPath } = await import("../src/Multiplayer/roomCode.js");
+  const store = new Map();
+  globalThis.sessionStorage = {
+    getItem: (key) => store.get(key) ?? null,
+    setItem: (key, value) => store.set(key, String(value)),
+    removeItem: (key) => store.delete(key),
+  };
+  try {
+    assert.equal(townPath(), "/");
+    rememberRoom("KQTZ");
+    assert.equal(townPath(), "/?room=KQTZ");
+    rememberRoom(null);
+    assert.equal(townPath(), "/");
+    store.set("lastRoom", "<script>");
+    assert.equal(townPath(), "/");
+  } finally {
+    delete globalThis.sessionStorage;
+  }
+  // No storage at all just means the main town
+  assert.equal(townPath(), "/");
+});

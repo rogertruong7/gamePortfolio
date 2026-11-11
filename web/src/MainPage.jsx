@@ -27,7 +27,7 @@ import { prefetchSansFight } from "./Helpers/prefetchSansFight.js";
 import { loadLook, sanitizeLook, saveLook } from "./Game/look/lookOptions.js";
 import { useRoom } from "./Multiplayer/useRoom.js";
 import { useBenchGame } from "./BenchGames/useBenchGame.js";
-import { ROOM_PARAM, newRoomCode, readRoomCode } from "./Multiplayer/roomCode.js";
+import { ROOM_PARAM, newRoomCode, readRoomCode, rememberRoom } from "./Multiplayer/roomCode.js";
 import { cleanName, loadChatName, saveChatName } from "./Multiplayer/chat.js";
 
 const SCENE_NAMES = {
@@ -102,6 +102,7 @@ const MainPage = () => {
   );
   const createRoom = useCallback(() => goToRoom(newRoomCode()), [goToRoom]);
   const leaveRoom = useCallback(() => goToRoom(null), [goToRoom]);
+  useEffect(() => rememberRoom(roomCode), [roomCode]);
   // The town is joined once the game has loaded
   const room = useRoom(look, chatName, !loading, roomCode);
   // Games with anyone else in the town, started from a bench or the list of who's here

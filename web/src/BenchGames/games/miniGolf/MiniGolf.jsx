@@ -199,7 +199,9 @@ const MiniGolf = ({ host, partnerName, match, again, sendMove, listenMoves, onAg
           const colour = ballColour(player);
           const ghost = player === them;
           if (p.roll?.by === player) {
-            const at = Math.floor(((now - p.roll.start) / 1000) * FRAMES_PER_SECOND);
+            // A frame's time is when the frame began, which can be a touch before the roll started
+            // if it started during that frame, so it's held at the first frame until then
+            const at = Math.max(0, Math.floor(((now - p.roll.start) / 1000) * FRAMES_PER_SECOND));
             const [x, y] = p.roll.frames[Math.min(at, p.roll.frames.length - 1)];
             return { x, y, colour, ghost };
           }

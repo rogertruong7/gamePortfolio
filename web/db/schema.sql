@@ -60,3 +60,13 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS login_attempts_idx ON login_attempts (ip, attempted_at);
+
+-- Guests hidden from /admin by IP address or visitor ID. The admin API also
+-- creates this on first use (api/_lib/exclusions.js).
+CREATE TABLE IF NOT EXISTS excluded_guests (
+  kind        text NOT NULL CHECK (kind IN ('ip', 'visitor')),
+  value       text NOT NULL,
+  label       text,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (kind, value)
+);

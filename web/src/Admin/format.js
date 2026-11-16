@@ -6,6 +6,8 @@ export const RANGES = [
   { days: "all", label: "All time", phrase: "so far" },
 ];
 
+export const shortId = (id) => id.slice(0, 8);
+
 export const plural = (count, one, many = `${one}s`) =>
   `${count} ${count === 1 ? one : many}`;
 
@@ -63,3 +65,9 @@ export function describeDevice(session) {
   const device = [session.browser, session.os].filter(Boolean).join(" on ");
   return device || "Unknown device";
 }
+
+// Columns that read best biggest-first start descending on their first click.
+export const nextSort = (current, key, startsDescending = true) =>
+  current.key === key
+    ? { key, dir: current.dir === "asc" ? "desc" : "asc" }
+    : { key, dir: startsDescending ? "desc" : "asc" };

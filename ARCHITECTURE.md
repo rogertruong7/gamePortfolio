@@ -306,6 +306,10 @@ The site records visits in a Neon Postgres database, and `/admin` displays them.
 2. `api/game-events.js` validates each batch (`api/_lib/payload.js`) and adds what only the server knows: IP address, Vercel's location headers, the parsed user agent, the traffic source (`api/_lib/classify.js`) and the network owner from ipwho.is (`api/_lib/ipLookup.js`). `api/_lib/limits.js` caps how many new sessions one IP address can start in an hour and how many events one session can store.
 3. `src/Admin/` reads the data back through `api/admin/overview.js` and `api/admin/sessions.js`, which both require the login cookie.
 
+**Sorting and search:** the guest table sorts and searches on the server, because it pages through results. `api/admin/sessions.js` only accepts sort keys listed in its `SORTS` map, so no client text reaches the SQL. The smaller breakdown tables sort in the browser.
+
+**Hidden guests:** `api/admin/exclusions.js` hides an IP address or a guest ID from every number on `/admin`. Hiding applies when the data is read (the `NOT_EXCLUDED` condition in `api/_lib/exclusions.js`), so visits are still recorded and come back when un-hidden. The `excluded_guests` table creates itself on first use.
+
 To track something new, call `track(type, name)` from `tracker.js` and add the type to `EVENT_TYPES` in `api/_lib/payload.js`. The server drops any type that isn't listed there. Add wording for it in `describeEvent` in `src/Admin/format.js`.
 
 **Login:** `api/admin/login.js` compares the password against `ADMIN_PASSWORD` on the server and sets a signed, HttpOnly cookie that lasts 7 days. Ten wrong attempts from one IP address block it for 15 minutes. If `ADMIN_PASSWORD` is missing, nobody can log in. Logging in also marks that browser so its visits aren't counted.

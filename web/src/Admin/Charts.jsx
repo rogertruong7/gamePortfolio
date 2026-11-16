@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import styled from "styled-components";
+import SortHeader from "./SortHeader.jsx";
 import { color, focusRing, Quiet } from "./theme.js";
 import { formatDay, plural } from "./format.js";
 
@@ -29,7 +30,7 @@ export const DailyChart = ({ days }) => {
               $active={activeIndex === index}
               style={{
                 height: day.sessions
-                  ? `${Math.max(4, (day.sessions / highest) * 100)}%`
+                  ? `${Math.max(3, (day.sessions / highest) * 100)}%`
                   : 0,
               }}
             />
@@ -46,27 +47,58 @@ export const DailyChart = ({ days }) => {
   );
 };
 
-export const Breakdown = ({ rows, empty, showCv = false }) => {
+const compareRows = (key) =>
+  key === "label"
+    ? (a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" })
+    : (a, b) => (a[key] ?? 0) - (b[key] ?? 0);
+
+export const Breakdown = ({ rows, empty, showCv = false, nameLabel = "Name" }) => {
+  const [sort, setSort] = useState({ key: "visitors", dir: "desc" });
+
+  const sorted = useMemo(() => {
+    if (!rows?.length) return [];
+    const compare = compareRows(sort.key);
+    const direction = sort.dir === "asc" ? 1 : -1;
+    return [...rows].sort((a, b) => direction * compare(a, b));
+  }, [rows, sort]);
+
   if (!rows?.length) return <Quiet>{empty}</Quiet>;
   const highest = Math.max(...rows.map((row) => row.visitors));
 
   return (
-    <List>
-      {rows.map((row) => (
-        <Row key={row.label}>
-          <RowText>
-            <RowLabel title={row.label}>{row.label}</RowLabel>
-            <RowValue>
-              {plural(row.visitors, "visitor")}
-              {showCv && row.cv_sessions > 0 && `, ${row.cv_sessions} took your CV`}
-            </RowValue>
-          </RowText>
-          <Track aria-hidden="true">
-            <Fill style={{ width: `${(row.visitors / highest) * 100}%` }} />
-          </Track>
-        </Row>
-      ))}
-    </List>
+    <Table>
+      <thead>
+        <tr>
+          <SortHeader
+            label={nameLabel}
+            sortKey="label"
+            sort={sort}
+            onSort={setSort}
+            startsDescending={false}
+          />
+          <SortHeader label="Visitors" sortKey="visitors" sort={sort} onSort={setSort} align="right" />
+          <SortHeader label="Visits" sortKey="sessions" sort={sort} onSort={setSort} align="right" />
+          {showCv && (
+            <SortHeader label="Took CV" sortKey="cv_sessions" sort={sort} onSort={setSort} align="right" />
+          )}
+        </tr>
+      </thead>
+      <tbody>
+        {sorted.map((row) => (
+          <tr key={row.label}>
+            <NameCell title={row.label}>
+              <NameText>{row.label}</NameText>
+              <Track aria-hidden="true">
+                <Fill style={{ width: `${(row.visitors / highest) * 100}%` }} />
+              </Track>
+            </NameCell>
+            <NumberCell>{row.visitors}</NumberCell>
+            <NumberCell>{row.sessions}</NumberCell>
+            {showCv && <NumberCell>{row.cv_sessions || "–"}</NumberCell>}
+          </tr>
+        ))}
+      </tbody>
+    </Table>
   );
 };
 
@@ -74,7 +106,7 @@ const ReadOut = styled.p`
   margin: 0 0 8px;
   min-height: 1.4em;
   font-size: 0.875rem;
-  color: ${color.mist};
+  color: ${color.muted};
 `;
 
 const Plot = styled.div`
@@ -82,7 +114,7 @@ const Plot = styled.div`
   align-items: stretch;
   gap: 2px;
   height: 140px;
-  border-bottom: 2px solid ${color.duskLine};
+  border-bottom: 1px solid ${color.lineStrong};
 `;
 
 const Column = styled.div`
@@ -97,9 +129,8 @@ const Bar = styled.div`
   width: 100%;
   max-width: 28px;
   margin: 0 auto;
-  border-radius: 4px 4px 0 0;
-  background-color: ${color.lantern};
-  opacity: ${({ $active }) => ($active ? 1 : 0.8)};
+  border-radius: 2px 2px 0 0;
+  background-color: ${({ $active }) => ($active ? color.accent : color.bar)};
 `;
 
 const AxisLabels = styled.div`
@@ -107,48 +138,45 @@ const AxisLabels = styled.div`
   justify-content: space-between;
   margin-top: 6px;
   font-size: 0.8125rem;
-  color: ${color.mist};
+  color: ${color.muted};
 `;
 
-const List = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
+export const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid ${color.line};
+    vertical-align: top;
+  }
 `;
 
-const Row = styled.li`
-  min-width: 0;
+const NameCell = styled.td`
+  max-width: 0;
+  width: 100%;
 `;
 
-const RowText = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 0.875rem;
-  margin-bottom: 4px;
-`;
-
-const RowLabel = styled.span`
+const NameText = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: ${color.ink};
 `;
 
-const RowValue = styled.span`
-  flex-shrink: 0;
-  color: ${color.mist};
+const NumberCell = styled.td`
+  text-align: right;
+  white-space: nowrap;
 `;
 
 const Track = styled.div`
-  height: 6px;
-  background-color: ${color.dusk};
+  height: 3px;
+  margin-top: 4px;
+  background-color: ${color.barSoft};
 `;
 
 const Fill = styled.div`
   height: 100%;
-  border-radius: 0 3px 3px 0;
-  background-color: ${color.lantern};
+  background-color: ${color.bar};
 `;

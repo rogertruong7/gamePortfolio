@@ -1,5 +1,6 @@
 import { isAuthenticated } from "../_lib/auth.js";
 import { getSql } from "../_lib/db.js";
+import { ensureExclusionsTable, NOT_EXCLUDED } from "../_lib/exclusions.js";
 import { json } from "../_lib/http.js";
 import { parseDays } from "../_lib/range.js";
 
@@ -8,7 +9,8 @@ const DAY_ZONE = "Australia/Sydney";
 // Every query filters on these. $1 is the number of days, or null for all time.
 const IN_RANGE = `
   NOT s.is_bot
-  AND ($1::int IS NULL OR s.started_at > now() - ($1::int * interval '1 day'))`;
+  AND ($1::int IS NULL OR s.started_at > now() - ($1::int * interval '1 day'))
+  AND ${NOT_EXCLUDED}`;
 
 const breakdown = (expression, extraWhere = "") => `
   SELECT ${expression} AS label,
@@ -126,6 +128,7 @@ export async function GET(request) {
 
   const days = parseDays(request.url);
   try {
+    await ensureExclusionsTable(sql);
     const names = Object.keys(QUERIES);
     const results = await Promise.all(
       names.map((name) => sql.query(QUERIES[name], [days]))

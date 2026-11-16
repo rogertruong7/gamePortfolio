@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
-import { color, PixelButton, Quiet, TextField } from "./theme.js";
+import { color, Button, Quiet, TextField } from "./theme.js";
 
 const toTag = (value) =>
   value
@@ -38,9 +38,9 @@ const TaggedLinkMaker = () => {
             setCopied(false);
           }}
         />
-        <PixelButton type="button" disabled={!link} onClick={copy}>
+        <Button type="button" disabled={!link} onClick={copy}>
           {copied ? "Copied" : "Copy link"}
-        </PixelButton>
+        </Button>
       </Controls>
       {link && <LinkPreview>{link}</LinkPreview>}
     </div>
@@ -53,13 +53,14 @@ const Controls = styled.div`
   align-items: center;
   gap: 10px;
   margin-top: 12px;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
 `;
 
 const LinkPreview = styled.p`
   margin: 10px 0 0;
-  font-size: 0.875rem;
-  color: ${color.lantern};
+  font-size: 0.9375rem;
+  color: ${color.accent};
+  font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 `;
 

@@ -3,6 +3,7 @@ import { getSql } from "../_lib/db.js";
 import { ensureExclusionsTable, NOT_EXCLUDED } from "../_lib/exclusions.js";
 import { json } from "../_lib/http.js";
 import { parseDays } from "../_lib/range.js";
+import { nearestSuburb } from "../_lib/suburbs.js";
 
 const DAY_ZONE = "Australia/Sydney";
 
@@ -91,6 +92,18 @@ const QUERIES = {
   devices: breakdown("s.device_type"),
   browsers: breakdown("split_part(s.browser, ' ', 1)"),
 
+  // Grouped per guest and position; suburbsBreakdown turns these into suburbs.
+  suburbPoints: `
+    SELECT s.visitor_id, s.country, s.latitude, s.longitude, s.postal_code,
+           count(*)::int AS sessions,
+           count(*) FILTER (WHERE EXISTS (
+             SELECT 1 FROM events e
+             WHERE e.session_id = s.id AND e.type = 'cv_download'
+           ))::int AS cv_sessions
+    FROM sessions s
+    WHERE ${IN_RANGE} AND s.country = 'AU' AND s.latitude IS NOT NULL
+    GROUP BY 1, 2, 3, 4, 5`,
+
   places: `
     SELECT CASE e.type
              WHEN 'scene_enter' THEN 'Building: ' || e.name
@@ -120,6 +133,26 @@ const QUERIES = {
     LIMIT 12`,
 };
 
+const BREAKDOWN_ROWS = 12;
+
+export function suburbsBreakdown(points) {
+  const bySuburb = new Map();
+  for (const point of points) {
+    const suburb = nearestSuburb(point);
+    if (!suburb) continue;
+    const label = `${suburb.name}, ${suburb.state}`;
+    const row = bySuburb.get(label) ?? { label, sessions: 0, cv_sessions: 0, guests: new Set() };
+    row.sessions += point.sessions;
+    row.cv_sessions += point.cv_sessions;
+    row.guests.add(point.visitor_id);
+    bySuburb.set(label, row);
+  }
+  return [...bySuburb.values()]
+    .map(({ guests, ...row }) => ({ ...row, visitors: guests.size }))
+    .sort((a, b) => b.sessions - a.sessions || a.label.localeCompare(b.label))
+    .slice(0, BREAKDOWN_ROWS);
+}
+
 export async function GET(request) {
   if (!isAuthenticated(request)) return json(401, { error: "Not logged in" });
 
@@ -136,7 +169,13 @@ export async function GET(request) {
     const data = Object.fromEntries(
       names.map((name, index) => [name, results[index]])
     );
-    return json(200, { ...data, totals: data.totals[0], days });
+    const { suburbPoints, ...rest } = data;
+    return json(200, {
+      ...rest,
+      suburbs: suburbsBreakdown(suburbPoints),
+      totals: data.totals[0],
+      days,
+    });
   } catch (error) {
     console.error("Failed to load overview:", error.message);
     return json(500, { error: "Failed to load overview" });

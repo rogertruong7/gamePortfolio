@@ -338,6 +338,15 @@ const Dashboard = ({ onLoggedOut }) => {
               />
             </Panel>
             <Panel>
+              <PanelTitle>Suburbs</PanelTitle>
+              <Breakdown
+                rows={overview.suburbs}
+                nameLabel="Nearest suburb"
+                showCv
+                empty="No Australian suburbs identified in this period."
+              />
+            </Panel>
+            <Panel>
               <PanelTitle>Cities</PanelTitle>
               <Breakdown
                 rows={overview.cities}

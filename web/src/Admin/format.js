@@ -57,9 +57,14 @@ export function describeEvent({ type, name, path }) {
   }
 }
 
+// The nearest suburb, when known, is more specific than the IP's city.
 export const describePlace = (session) =>
-  [session.city, session.region, session.country].filter(Boolean).join(", ") ||
-  "Unknown location";
+  [session.suburb?.name ?? session.city, session.region, session.country]
+    .filter(Boolean)
+    .join(", ") || "Unknown location";
+
+export const describeSuburb = ({ suburb }) =>
+  suburb && `${suburb.name} ${suburb.state} ${suburb.postcode}`;
 
 export function describeDevice(session) {
   const device = [session.browser, session.os].filter(Boolean).join(" on ");

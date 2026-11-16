@@ -63,3 +63,28 @@ test("anything else is refused", () => {
   assert.equal(parseExclusion({ kind: "visitor", value: "1234" }), null);
   assert.equal(parseExclusion({ kind: "ip", value: 42 }), null);
 });
+
+test("an Australian IP position is named by its nearest suburb", async () => {
+  const { nearestSuburb } = await import("../api/_lib/suburbs.js");
+  const parramatta = { country: "AU", latitude: -33.815, longitude: 151.005, postal_code: "2150" };
+  assert.equal(nearestSuburb(parramatta).name, "Parramatta");
+  assert.equal(nearestSuburb({ ...parramatta, latitude: "-33.815", longitude: "151.005" }).name, "Parramatta");
+  assert.equal(nearestSuburb({ ...parramatta, country: "NZ" }), null);
+  assert.equal(nearestSuburb({ ...parramatta, latitude: null }), null);
+  // The middle of the desert is too far from any suburb to name one.
+  assert.equal(nearestSuburb({ country: "AU", latitude: -25, longitude: 131 }), null);
+});
+
+test("suburb counts merge positions and count each guest once", async () => {
+  const { suburbsBreakdown } = await import("../api/admin/overview.js");
+  const point = { country: "AU", latitude: -33.815, longitude: 151.005, postal_code: "2150" };
+  const rows = suburbsBreakdown([
+    { ...point, visitor_id: "a", sessions: 2, cv_sessions: 1 },
+    { ...point, latitude: -33.816, visitor_id: "a", sessions: 1, cv_sessions: 0 },
+    { ...point, visitor_id: "b", sessions: 1, cv_sessions: 0 },
+    { ...point, country: "US", visitor_id: "c", sessions: 5, cv_sessions: 0 },
+  ]);
+  assert.deepEqual(rows, [
+    { label: "Parramatta, NSW", sessions: 4, cv_sessions: 1, visitors: 2 },
+  ]);
+});

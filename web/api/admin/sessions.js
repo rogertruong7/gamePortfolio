@@ -3,6 +3,7 @@ import { getSql } from "../_lib/db.js";
 import { ensureExclusionsTable, NOT_EXCLUDED } from "../_lib/exclusions.js";
 import { json } from "../_lib/http.js";
 import { parseDays } from "../_lib/range.js";
+import { nearestSuburb } from "../_lib/suburbs.js";
 
 const PAGE_SIZE = 30;
 const MAX_OFFSET = 10000;
@@ -91,7 +92,7 @@ export async function GET(request) {
     );
     const total = rows[0]?.total ?? 0;
     return json(200, {
-      sessions: rows,
+      sessions: rows.map((row) => ({ ...row, suburb: nearestSuburb(row) })),
       total,
       hasMore: offset + rows.length < total,
     });

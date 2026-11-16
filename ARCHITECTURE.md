@@ -308,6 +308,8 @@ The site records visits in a Neon Postgres database, and `/admin` displays them.
 
 **Sorting and search:** the guest table sorts and searches on the server, because it pages through results. `api/admin/sessions.js` only accepts sort keys listed in its `SORTS` map, so no client text reaches the SQL. The smaller breakdown tables sort in the browser.
 
+**Nearest suburb:** for Australian visits, `api/_lib/suburbs.js` names the suburb closest to the latitude and longitude Vercel estimates from the IP address, preferring suburbs in the IP's postcode. It runs offline against `api/_lib/auSuburbs.js` (about 15,000 suburbs from GeoNames, CC BY 4.0), which `scripts/make-au-suburbs.mjs` generates. Nothing is stored, so it applies to past visits too. It is only as precise as the IP's position, which is often just the suburb's or city's centre.
+
 **Hidden guests:** `api/admin/exclusions.js` hides an IP address or a guest ID from every number on `/admin`. Hiding applies when the data is read (the `NOT_EXCLUDED` condition in `api/_lib/exclusions.js`), so visits are still recorded and come back when un-hidden. The `excluded_guests` table creates itself on first use.
 
 To track something new, call `track(type, name)` from `tracker.js` and add the type to `EVENT_TYPES` in `api/_lib/payload.js`. The server drops any type that isn't listed there. Add wording for it in `describeEvent` in `src/Admin/format.js`.

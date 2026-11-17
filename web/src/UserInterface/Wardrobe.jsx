@@ -329,7 +329,8 @@ const SmallButton = styled.button`
   padding: 9px 18px;
   color: ${ink};
   font-size: 16px;
-  font-weight: 700;
+  /* Above 500, Pixelify closes up its "C". */
+  font-weight: 500;
   cursor: pointer;
 `;
 

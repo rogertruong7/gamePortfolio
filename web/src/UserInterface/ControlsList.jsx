@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
 import ChromeFrame from "./ChromeFrame.jsx";
-import { PHONE, crimson, ink, inkSoft, pixel } from "./Modal.jsx";
+import { PHONE, body, crimson, ink, inkSoft, pixel } from "./Modal.jsx";
 
 // The pieces the tutorial and the help popup build their lists of controls from.
 
@@ -132,27 +132,34 @@ export const EssentialControls = () => {
   );
 };
 
+// Every row shares one column for its keys, as wide as the widest set, so the words line up and
+// never sit under the keys.
 export const List = styled.ul`
   display: grid;
-  gap: 18px;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 18px 20px;
   margin: 0;
   padding: 0;
   list-style: none;
 
+  @container (max-width: 460px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   @media ${PHONE} {
-    gap: 14px;
+    row-gap: 14px;
   }
 `;
 
 const RowItem = styled.li`
+  grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-columns: subgrid;
   align-items: center;
-  gap: 8px 20px;
+  row-gap: 8px;
 
   @container (max-width: 460px) {
     grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
   }
 `;
 
@@ -213,7 +220,8 @@ const KeyCap = styled.span`
   border-radius: 10px;
   background: linear-gradient(#fff, #e6eaf1);
   color: ${ink};
-  font: 700 17px / 1 ${pixel};
+  /* The body font: single letters in the pixel one, like E, Z, B and G, are hard to tell apart. */
+  font: 700 16px / 1 ${body};
   ${({ $wide }) => ($wide ? "width: 120px; height: 32px;" : "min-width: 32px; height: 32px; padding: 0 8px;")}
 
   @media ${PHONE} {

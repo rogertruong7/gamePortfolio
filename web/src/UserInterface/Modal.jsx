@@ -70,16 +70,18 @@ const Modal = ({
           <Content>{children}</Content>
           <Foot>
             <FootNote>{footer}</FootNote>
-            {secondaryAction && (
-              <ActionButton type="button" onClick={secondaryAction.onClick}>
-                {secondaryAction.label}
+            <Actions>
+              {secondaryAction && (
+                <ActionButton type="button" onClick={secondaryAction.onClick}>
+                  {secondaryAction.label}
+                  <ChromeFrame />
+                </ActionButton>
+              )}
+              <ActionButton ref={actionRef} type="button" onClick={onClose}>
+                {actionLabel}
                 <ChromeFrame />
               </ActionButton>
-            )}
-            <ActionButton ref={actionRef} type="button" onClick={onClose}>
-              {actionLabel}
-              <ChromeFrame />
-            </ActionButton>
+            </Actions>
           </Foot>
         </Inner>
         <ChromeFrame spikeScale={2} />
@@ -265,6 +267,20 @@ const FootNote = styled.div`
   }
 `;
 
+// The buttons stay side by side and wrap below the footnote together, never one at a time.
+const Actions = styled.div`
+  flex: none;
+  display: flex;
+  gap: 20px;
+  margin-left: auto;
+
+  @media ${PHONE} {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+`;
+
 const ActionButton = styled.button`
   ${chromeButton}
   position: relative;
@@ -278,7 +294,8 @@ const ActionButton = styled.button`
   padding: 13px 26px;
   color: ${ink};
   font-size: 18px;
-  font-weight: 700;
+  /* Above 500, Pixelify closes up its "C" and "Close" reads as "Olose". */
+  font-weight: 500;
   cursor: pointer;
 
   &:focus-visible {

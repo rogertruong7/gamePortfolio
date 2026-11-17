@@ -207,6 +207,11 @@ const SelectionContainer = styled.div`
     height: 62%;
     border-width: 6px;
   }
+
+  /* Short phones: the book needs the room more than the picture does */
+  @media (max-width: 650px) and (max-height: 700px) {
+    height: 68%;
+  }
 `;
 
 const ImageWrapper = styled.div`
@@ -223,6 +228,10 @@ const ImageWrapper = styled.div`
 
   @media (max-width: 650px) {
     height: 38%;
+  }
+
+  @media (max-width: 650px) and (max-height: 700px) {
+    height: 32%;
   }
 `;
 

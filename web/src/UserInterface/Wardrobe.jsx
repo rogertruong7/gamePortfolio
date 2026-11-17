@@ -283,15 +283,23 @@ const PreviewColumn = styled.div`
     }
   }
 
+  /* The popup's phone padding, from Content in Modal.jsx */
   @media (max-width: 520px) {
     gap: 10px;
-    top: -22px;
-    margin: -22px -22px 0;
-    padding: 22px 22px 10px;
+    top: -18px;
+    margin: -18px -18px 0;
+    padding: 18px 18px 10px;
 
     & > :first-child {
       height: 190px;
       min-height: 0;
+    }
+  }
+
+  /* Short phones: a smaller character leaves room to see the options */
+  @media (max-width: 520px) and (max-height: 720px) {
+    & > :first-child {
+      height: 140px;
     }
   }
 `;
@@ -371,8 +379,8 @@ const Tab = styled.button`
 
   /* All four fit on one line on a phone */
   @media (max-width: 520px) {
-    padding: 7px 12px;
-    font-size: 16px;
+    padding: 6px 11px;
+    font-size: 15px;
   }
 `;
 

@@ -27,6 +27,8 @@ const Modal = ({
   closeOnBackdrop = false,
   // An optional second choice beside the action button: { label, onClick }
   secondaryAction,
+  // true for a wider popup on big screens, or a number of pixels for one that's that wide wherever
+  // it fits, phones included
   wide = false,
   // Drops the tagline on phones, for a popup that needs the room more than the words
   taglineOnPhones = true,
@@ -88,7 +90,7 @@ const Modal = ({
 
 const MAX_HEIGHT = "calc(100dvh - 64px)";
 export const WIDE_FROM = 1060;
-const PHONE = "(max-width: 520px)";
+export const PHONE = "(max-width: 520px)";
 
 const Shell = styled.dialog`
   position: fixed;
@@ -111,6 +113,16 @@ const Shell = styled.dialog`
     width: ${({ $wide }) => ($wide ? "980px" : "700px")};
   }
 
+  ${({ $wide }) =>
+    typeof $wide === "number" &&
+    `
+      width: min(${$wide}px, calc(100vw - 56px));
+
+      @media (min-width: ${WIDE_FROM}px) {
+        width: min(${$wide}px, calc(100vw - 56px));
+      }
+    `}
+
   &::backdrop {
     background: rgba(11, 22, 64, 0.62);
   }
@@ -127,6 +139,9 @@ const Shell = styled.dialog`
   }
 
   @media ${PHONE} {
+    /* Narrower margins on phones, leaving just enough for the frame's spikes */
+    width: calc(100vw - 28px);
+
     ${({ $full }) =>
       $full &&
       `
@@ -182,7 +197,7 @@ const Head = styled.header`
   background: ${sky};
 
   @media (max-width: 520px) {
-    padding: 26px 22px 20px;
+    padding: 20px 18px 16px;
   }
 `;
 
@@ -190,6 +205,10 @@ const Title = styled.h2`
   margin: 0;
   font: 600 clamp(34px, 7vw, 46px) / 1.05 ${pixel};
   letter-spacing: -0.01em;
+
+  @media ${PHONE} {
+    font-size: 28px;
+  }
 `;
 
 const Tagline = styled.p`
@@ -198,6 +217,8 @@ const Tagline = styled.p`
 
   @media (max-width: 520px) {
     display: ${({ $onPhones }) => ($onPhones ? "block" : "none")};
+    margin-top: 6px;
+    font-size: 15px;
   }
 `;
 
@@ -212,7 +233,8 @@ const Content = styled.div`
   scrollbar-color: ${ink} ${paper};
 
   @media (max-width: 520px) {
-    padding: 22px 22px 24px;
+    padding: 18px 18px 20px;
+    font-size: 15px;
   }
 `;
 
@@ -227,7 +249,8 @@ const Foot = styled.footer`
   border-top: 2px solid rgba(20, 35, 90, 0.12);
 
   @media (max-width: 520px) {
-    padding: 18px 22px 22px;
+    gap: 12px;
+    padding: 14px 18px 18px;
   }
 `;
 
@@ -236,6 +259,10 @@ const FootNote = styled.div`
   min-width: 0;
   color: ${inkSoft};
   font: 500 15px / 1.4 ${body};
+
+  @media ${PHONE} {
+    font-size: 13px;
+  }
 `;
 
 const ActionButton = styled.button`
@@ -261,12 +288,20 @@ const ActionButton = styled.button`
 
   @media (max-width: 520px) {
     width: 100%;
+    min-width: 0;
+    padding: 10px 18px;
+    font-size: 16px;
   }
 `;
 
 export const SectionTitle = styled.h3`
   margin: 0 0 18px;
   font: 600 26px / 1.15 ${pixel};
+
+  @media ${PHONE} {
+    margin-bottom: 12px;
+    font-size: 20px;
+  }
 `;
 
 export default Modal;

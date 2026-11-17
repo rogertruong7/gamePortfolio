@@ -3,9 +3,9 @@ import styled from "styled-components";
 import { useAudio } from "../Audio/AudioContext.jsx";
 import { writeStore } from "../Helpers/storage.js";
 import ChromeFrame from "./ChromeFrame.jsx";
-import ControlsList from "./ControlsList.jsx";
+import { EssentialControls } from "./ControlsList.jsx";
 import { ShirtIcon } from "./HudIcons.jsx";
-import Modal, { crimson, focusBlue, ink, inkSoft } from "./Modal.jsx";
+import Modal, { PHONE, crimson, focusBlue, ink, inkSoft } from "./Modal.jsx";
 
 // onCustomise opens the wardrobe, for anyone who wants to make the character theirs first
 const Popup = ({ setShowPopup, onCustomise }) => {
@@ -29,7 +29,7 @@ const Popup = ({ setShowPopup, onCustomise }) => {
   return (
     <Modal
       title="Hi, I'm Roger"
-      tagline="Welcome to my portfolio. Walk around the town and go into any building you like. I made the original codebase before agents like Claude Code."
+      tagline="This town is my portfolio. Walk up to a building and go in to see my projects, experience and skills. The ? button has everything else."
       actionLabel="Start exploring"
       onClose={handleClose}
       secondaryAction={{
@@ -70,7 +70,7 @@ const Popup = ({ setShowPopup, onCustomise }) => {
         </MuteLabel>
       }
     >
-      <ControlsList />
+      <EssentialControls />
     </Modal>
   );
 };
@@ -93,6 +93,16 @@ const MuteLabel = styled.label`
     display: block;
     color: ${inkSoft};
     font-size: 14px;
+  }
+
+  @media ${PHONE} {
+    strong {
+      font-size: 15px;
+    }
+
+    small {
+      font-size: 13px;
+    }
   }
 `;
 

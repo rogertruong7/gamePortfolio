@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import styled, { css, keyframes } from "styled-components";
 import { track } from "../Analytics/tracker.js";
 import { isActionKey } from "../Helpers/confirmKeys.js";
@@ -26,6 +26,36 @@ function blurb(entry) {
   return entry.tagline;
 }
 
+// On one page, as many entries as fit the book's height, so a short phone shows three rather
+// than letting the fourth spill over the book's edge
+function useEntriesThatFit(pagesRef, singlePage, spread) {
+  const [fit, setFit] = useState(PER_PAGE);
+  useLayoutEffect(() => {
+    const pages = pagesRef.current;
+    if (!singlePage || !pages) {
+      setFit(PER_PAGE);
+      return;
+    }
+    const measure = () => {
+      const page = pages.firstElementChild;
+      const entries = page ? [...page.children] : [];
+      if (entries.length === 0) return;
+      const style = getComputedStyle(page);
+      const gap = parseFloat(style.rowGap) || 0;
+      const room =
+        pages.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      const tallest = Math.max(...entries.map((entry) => entry.offsetHeight));
+      const next = Math.max(1, Math.min(PER_PAGE, Math.floor((room + gap) / (tallest + gap))));
+      setFit((current) => (current === next ? current : next));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(pages);
+    return () => observer.disconnect();
+  }, [pagesRef, singlePage, spread]);
+  return fit;
+}
+
 function useSinglePage() {
   const [singlePage, setSinglePage] = useState(() => window.matchMedia(SINGLE_PAGE_QUERY).matches);
   useEffect(() => {
@@ -50,14 +80,25 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
   // rather than let the menu's box flash a scrollbar.
   const [turning, setTurning] = useState(false);
   const singlePage = useSinglePage();
+  const pagesRef = useRef(null);
+  const perPage = useEntriesThatFit(pagesRef, singlePage, spread);
 
-  const spreadCount = Math.ceil(entries.length / PER_PAGE);
-  const onSpread = entries.slice(spread * PER_PAGE, (spread + 1) * PER_PAGE);
+  // When the number per page changes, stay on the entry that was picked
+  const [shownPerPage, setShownPerPage] = useState(perPage);
+  if (shownPerPage !== perPage) {
+    const picked = spread * shownPerPage + selectedIndex;
+    setShownPerPage(perPage);
+    setSpread(Math.floor(picked / perPage));
+    setSelectedIndex(picked % perPage);
+  }
+
+  const spreadCount = Math.ceil(entries.length / perPage);
+  const onSpread = entries.slice(spread * perPage, (spread + 1) * perPage);
   const lastIndex = onSpread.length - 1;
 
   const turnTo = (next, index) => {
     if (next < 0 || next >= spreadCount) return;
-    const count = Math.min(PER_PAGE, entries.length - next * PER_PAGE);
+    const count = Math.min(perPage, entries.length - next * perPage);
     setTurn(next > spread ? "forward" : "back");
     if (!REDUCED_MOTION) setTurning(true);
     setSpread(next);
@@ -74,7 +115,7 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
     const entry = onSpread[index];
     if (!entry) return;
     track("open_item", `${section}: ${entry.option}`);
-    setPageToShow(spread * PER_PAGE + index + 1);
+    setPageToShow(spread * perPage + index + 1);
   };
 
   // On one page the entries run straight down. On two, up and down stay on a page, and left and
@@ -87,7 +128,7 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
       if (direction === "right") turnTo(spread + 1, 0);
       if (direction === "up") {
         if (selectedIndex > 0) setSelectedIndex(selectedIndex - 1);
-        else turnTo(spread - 1, PER_PAGE - 1);
+        else turnTo(spread - 1, perPage - 1);
       }
       if (direction === "down") {
         if (selectedIndex < lastIndex) setSelectedIndex(selectedIndex + 1);
@@ -145,7 +186,7 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
 
   return (
     <Book>
-      <Pages $singlePage={singlePage} $turning={turning}>
+      <Pages ref={pagesRef} $singlePage={singlePage} $turning={turning}>
         {sides.map((side, sideIndex) => (
           <Page
             key={`${spread}-${sideIndex}`}
@@ -259,14 +300,23 @@ const Pages = styled.div`
   min-height: 0;
   display: grid;
   grid-template-columns: ${({ $singlePage }) => ($singlePage ? "1fr" : "1fr 1fr")};
-  overflow: ${({ $turning }) => ($turning ? "hidden" : "visible")};
+  /* One page always clips, so nothing can spill over the book's edge while it measures */
+  overflow: ${({ $turning, $singlePage }) => ($turning || $singlePage ? "hidden" : "visible")};
 `;
 
 const Page = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: clamp(10px, 3.5vh, 36px);
+  gap: clamp(8px, 3vh, 36px);
+
+  /* Centred, but from the top when there's too little room, so nothing goes above the book */
+  & > :first-child {
+    margin-top: auto;
+  }
+
+  & > :last-child {
+    margin-bottom: auto;
+  }
   min-width: 0;
   padding: clamp(8px, 1.6vw, 24px) clamp(8px, 2vw, 32px);
   transform-origin: ${({ $side }) => ($side === "left" ? "right" : "left")} center;

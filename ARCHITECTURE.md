@@ -188,7 +188,7 @@ AboutMe, Experiences, and Skills pages use `typewriter-effect` to type out text 
 
 ### Projects and Experiences menus
 
-After the typewriter intro, `Projects.jsx` and `Experiences.jsx` display an `OptionSelector`: a paginated 2x2 grid (single column on mobile) navigable with arrow keys or click. Selecting an option renders its `DocumentPage`. The document slides in from the right (`documentSlide.js`) and slides back out when closed. On wide screens the game panel moves aside to make room. On narrow screens (< 1700px) the document slides over the selector, which hides once it's covered.
+After the typewriter intro, `Projects.jsx` and `Experiences.jsx` display an `OptionSelector`: a paginated 2x2 grid (single column on mobile) navigable with arrow keys or click. On one page it shows as many entries as fit the book's height, up to four, so short phones get three to a page rather than an overflowing fourth. Selecting an option renders its `DocumentPage`. The document slides in from the right (`documentSlide.js`) and slides back out when closed. On wide screens the game panel moves aside to make room. On narrow screens (< 1700px) the document slides over the selector, which hides once it's covered.
 
 ### Content catalog (`catalog.js`)
 
@@ -218,8 +218,8 @@ HTML elements positioned absolutely over the 3D canvas.
 | Component | z-index | Purpose |
 |-----------|---------|---------|
 | LoadingScreen | 100 | Shown while GLB models load. Progress bar segments from drei's `useProgress`. |
-| TutorialPopup | top layer | First-visit modal explaining controls, built on `Modal` (a native `<dialog>`) and `ControlsList`. Sets `localStorage.visited = true` on dismiss. Controls are locked until dismissed. |
-| HelpPopup | top layer | Re-openable version of the tutorial with additional info, on the same `Modal` and `ControlsList`. |
+| TutorialPopup | top layer | First-visit modal, kept short: one line on what to do, then walking and the camera (`EssentialControls`). Built on `Modal` (a native `<dialog>`). Sets `localStorage.visited = true` on dismiss. Controls are locked until dismissed. |
+| HelpPopup | top layer | The full guide, behind the ? button: tabs for Controls, Buildings, Town and About, built from the pieces in `ControlsList.jsx`. Touch screens get the tap and button version of each tab. |
 | EnterPopup | 102 | Doorway interaction prompt. Shows 1-2 buttons depending on which zones overlap. |
 | LakePrompt | 102 | Lake prompt, shown in open water. Built on `ChoicePopup`, like EnterPopup. |
 | ReflectionDialog | 102 | The typed "Despite everything, it's still you." box. |

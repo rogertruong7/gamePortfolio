@@ -5,7 +5,7 @@ import { isActionKey } from "../Helpers/confirmKeys.js";
 
 const PER_PAGE = 4;
 const PER_SIDE = 2;
-// Below this the book closes to a single page with all four entries on it
+// Below this the book closes to a single page, with up to four entries on it
 const SINGLE_PAGE_QUERY = "(max-width: 650px)";
 const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 // A turning page swings for TURN_MS, and the second page of a spread starts TURN_STAGGER_MS late
@@ -26,34 +26,33 @@ function blurb(entry) {
   return entry.tagline;
 }
 
-// On one page, as many entries as fit the book's height, so a short phone shows three rather
-// than letting the fourth spill over the book's edge
+// As many entries as fit the book's height: up to four on one page, or up to two a side on a
+// spread. A short phone gets three, and a short, wide window gets one a side, rather than the last
+// spilling over the book's edge. Returns how many go on each page.
 function useEntriesThatFit(pagesRef, singlePage, spread) {
-  const [fit, setFit] = useState(PER_PAGE);
+  const most = singlePage ? PER_PAGE : PER_SIDE;
+  const [fit, setFit] = useState(most);
   useLayoutEffect(() => {
     const pages = pagesRef.current;
-    if (!singlePage || !pages) {
-      setFit(PER_PAGE);
-      return;
-    }
+    if (!pages) return;
     const measure = () => {
       const page = pages.firstElementChild;
-      const entries = page ? [...page.children] : [];
-      if (entries.length === 0) return;
+      const entries = [...pages.children].flatMap((side) => [...side.children]);
+      if (!page || entries.length === 0) return;
       const style = getComputedStyle(page);
       const gap = parseFloat(style.rowGap) || 0;
       const room =
         pages.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
       const tallest = Math.max(...entries.map((entry) => entry.offsetHeight));
-      const next = Math.max(1, Math.min(PER_PAGE, Math.floor((room + gap) / (tallest + gap))));
+      const next = Math.max(1, Math.min(most, Math.floor((room + gap) / (tallest + gap))));
       setFit((current) => (current === next ? current : next));
     };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(pages);
     return () => observer.disconnect();
-  }, [pagesRef, singlePage, spread]);
-  return fit;
+  }, [pagesRef, most, spread]);
+  return Math.min(fit, most);
 }
 
 function useSinglePage() {
@@ -68,7 +67,7 @@ function useSinglePage() {
 }
 
 // The menu reads like the contents of an open book: two entries on the left page, two on the
-// right, and the arrows turn to the next spread. Entries are the catalog's, four to a spread.
+// right (one a side when the window is too short), and the arrows turn to the next spread.
 // `active` is false while an open page covers the menu, so its keys stay with that page. When the
 // page sits beside the book instead, the book keeps its keys.
 const OptionSelector = ({ setPageToShow, entries, section, active }) => {
@@ -81,7 +80,8 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
   const [turning, setTurning] = useState(false);
   const singlePage = useSinglePage();
   const pagesRef = useRef(null);
-  const perPage = useEntriesThatFit(pagesRef, singlePage, spread);
+  const perSide = useEntriesThatFit(pagesRef, singlePage, spread);
+  const perPage = singlePage ? perSide : perSide * 2;
 
   // When the number per page changes, stay on the entry that was picked
   const [shownPerPage, setShownPerPage] = useState(perPage);
@@ -121,8 +121,8 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
   // On one page the entries run straight down. On two, up and down stay on a page, and left and
   // right cross the spine, turning the page at either edge.
   const move = (direction) => {
-    const column = Math.floor(selectedIndex / PER_SIDE);
-    const row = selectedIndex % PER_SIDE;
+    const column = Math.floor(selectedIndex / perSide);
+    const row = selectedIndex % perSide;
     if (singlePage) {
       if (direction === "left") turnTo(spread - 1, 0);
       if (direction === "right") turnTo(spread + 1, 0);
@@ -137,16 +137,16 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
       return;
     }
     if (direction === "up" && row > 0) setSelectedIndex(selectedIndex - 1);
-    if (direction === "down" && row < PER_SIDE - 1 && selectedIndex < lastIndex) {
+    if (direction === "down" && row < perSide - 1 && selectedIndex < lastIndex) {
       setSelectedIndex(selectedIndex + 1);
     }
     if (direction === "left") {
       if (column === 1) setSelectedIndex(row);
-      else turnTo(spread - 1, PER_SIDE + row);
+      else turnTo(spread - 1, perSide + row);
     }
     if (direction === "right") {
-      if (column === 0 && lastIndex >= PER_SIDE) setSelectedIndex(Math.min(PER_SIDE + row, lastIndex));
-      else if (column === 1 || lastIndex < PER_SIDE) turnTo(spread + 1, row);
+      if (column === 0 && lastIndex >= perSide) setSelectedIndex(Math.min(perSide + row, lastIndex));
+      else if (column === 1 || lastIndex < perSide) turnTo(spread + 1, row);
     }
   };
 
@@ -181,7 +181,7 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
     return () => window.removeEventListener("keydown", onKeyDown);
   });
 
-  const sides = singlePage ? [onSpread] : [onSpread.slice(0, PER_SIDE), onSpread.slice(PER_SIDE)];
+  const sides = singlePage ? [onSpread] : [onSpread.slice(0, perSide), onSpread.slice(perSide)];
   const firstPageNumber = spread * (singlePage ? 1 : 2) + 1;
 
   return (
@@ -194,7 +194,7 @@ const OptionSelector = ({ setPageToShow, entries, section, active }) => {
             $turn={REDUCED_MOTION ? null : turn}
           >
             {side.map((entry, i) => {
-              const index = sideIndex * PER_SIDE + i;
+              const index = sideIndex * perSide + i;
               const selected = selectedIndex === index;
               return (
                 <Entry
@@ -307,18 +307,12 @@ const Pages = styled.div`
 const Page = styled.div`
   display: flex;
   flex-direction: column;
-  gap: clamp(8px, 3vh, 36px);
-
-  /* Centred, but from the top when there's too little room, so nothing goes above the book */
-  & > :first-child {
-    margin-top: auto;
-  }
-
-  & > :last-child {
-    margin-bottom: auto;
-  }
+  /* The space left over goes evenly above, between and below the entries. Only this small gap
+     and padding are fixed, which is all the fitting counts on. */
+  justify-content: space-evenly;
+  gap: 8px;
   min-width: 0;
-  padding: clamp(8px, 1.6vw, 24px) clamp(8px, 2vw, 32px);
+  padding: 8px clamp(8px, 2vw, 32px);
   transform-origin: ${({ $side }) => ($side === "left" ? "right" : "left")} center;
 
   /* The spine: a double line down the middle */
